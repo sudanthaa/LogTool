@@ -19,6 +19,8 @@ class LTDlg : public CDialog, public LTFieldListener
 // Construction
 public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
+	void	AddEnv(const char* zUser, const char* zIP);
+	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
 
 // Dialog Data
 	enum { IDD = IDD_LOGTOOL_DIALOG };
@@ -26,8 +28,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
-	void	AddEnv(const char* zUser, const char* zIP);
-	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
+
 	void	OnChangeCombo(LTComboBox* pComboBox, const char* zValue);
 
 // Implementation
@@ -75,4 +76,7 @@ public:
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnBnClickedButtonLogmacNew();
+	afx_msg void OnBnClickedButtonLogmacEdit();
+	CStatic o_StaticLogEnv;
 };

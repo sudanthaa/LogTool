@@ -7,6 +7,7 @@
 #include "LTUtils.h"
 #include "LTEnv.h"
 #include "LTAddEnvDlg.h"
+#include "LTAddLogEnvDlg.h"
 #include "LTConfig.h"
 
 #include <libssh2.h>
@@ -67,6 +68,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_JIRA_USER_ID, o_EditJiraUser);
 	DDX_Control(pDX, IDC_COMBO_LOG_MACHINES, o_ComboLogMachines);
 	DDX_Control(pDX, IDC_COMBO_JIRA_PROJECT, o_ComboJiraProject);
+	DDX_Control(pDX, IDC_STATIC_LOGMAC_IP_VALUE, o_StaticLogEnv);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -92,6 +94,8 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_CHECK_FILTER_SELECT_ALL, &LTDlg::OnBnClickedCheckFilterSelectAll)
 	ON_WM_KEYUP()
 	ON_WM_KEYDOWN()
+	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_NEW, &LTDlg::OnBnClickedButtonLogmacNew)
+	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
 END_MESSAGE_MAP()
 
 
@@ -546,7 +550,11 @@ void LTDlg::AddEnv( const char* zUser, const char* zIP )
 
 void LTDlg::AddLogEnv( const char* zUser, const char* zIP, const char* zBaseLocation /*= ""*/ )
 {
+	CString sNew;
+	sNew.Format("%s@%s:%s", zUser, zIP, zBaseLocation);
 
+	o_ComboLogMachines.SetWindowText(sNew);
+	o_StaticLogEnv.SetWindowText(sNew);
 }
 
 void LTDlg::OnOK()
@@ -661,4 +669,17 @@ BOOL LTDlg::PreTranslateMessage(MSG* pMsg)
 void LTDlg::OnPressEnterKey()
 {
 	
+}
+
+void LTDlg::OnBnClickedButtonLogmacNew()
+{
+	// TODO: Add your control notification handler code here
+	LTAddLogEnvDlg oDlg;
+	oDlg.SetDlg(this);
+	oDlg.DoModal();
+}
+
+void LTDlg::OnBnClickedButtonLogmacEdit()
+{
+	// TODO: Add your control notification handler code here
 }
