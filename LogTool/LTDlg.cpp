@@ -555,6 +555,8 @@ void LTDlg::AddLogEnv( const char* zUser, const char* zIP, const char* zBaseLoca
 
 	o_ComboLogMachines.SetWindowText(sNew);
 	o_StaticLogEnv.SetWindowText(sNew);
+
+	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
 
 void LTDlg::OnOK()

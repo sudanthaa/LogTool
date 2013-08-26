@@ -40,7 +40,7 @@ void LTConfig::OnPostLoad()
 
 void LTConfig::StringSet::Set( const char* zValue )
 {
-
+	
 }
 
 CString LTConfig::StringSet::Get()
