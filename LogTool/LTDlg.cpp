@@ -96,6 +96,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_KEYDOWN()
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_NEW, &LTDlg::OnBnClickedButtonLogmacNew)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -553,6 +554,18 @@ void LTDlg::AddLogEnv( const char* zUser, const char* zIP, const char* zBaseLoca
 	CString sNew;
 	sNew.Format("%s@%s:%s", zUser, zIP, zBaseLocation);
 
+	o_ComboLogMachines.AddString(sNew);
+	o_StaticLogEnv.SetWindowText(sNew);
+
+
+	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
+}
+
+void LTDlg::EditLogEnv( const char* zUser, const char* zIP, const char* zBaseLocation /*= ""*/ )
+{
+	CString sNew;
+	sNew.Format("%s@%s:%s", zUser, zIP, zBaseLocation);
+
 	o_ComboLogMachines.SetWindowText(sNew);
 	o_StaticLogEnv.SetWindowText(sNew);
 
@@ -684,4 +697,21 @@ void LTDlg::OnBnClickedButtonLogmacNew()
 void LTDlg::OnBnClickedButtonLogmacEdit()
 {
 	// TODO: Add your control notification handler code here
+	CString sLogEnv = "";
+	o_StaticLogEnv.GetWindowText(sLogEnv);
+
+	LTAddLogEnvDlg oDlg;
+	oDlg.SetEditMode(sLogEnv);
+	oDlg.SetDlg(this);
+	oDlg.DoModal();
+}
+
+
+
+void LTDlg::OnClose()
+{
+	// TODO: Add your message handler code here and/or call default
+	LTConfig::o_Inst.Save();
+
+	__super::OnClose();
 }

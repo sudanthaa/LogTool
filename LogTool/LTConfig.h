@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <deque>
 
 
 class LTConfig
@@ -11,7 +11,7 @@ public:
 
 	class StringSet{
 	public:
-		StringSet(int iMaxCount);
+		StringSet(const char* zCfgName, int iMaxCount);
 
 		void	Set(const char* zValue);
 		CString	Get();
@@ -22,8 +22,9 @@ public:
 		CString	GetAt(int iIndex);
 
 	private:
-		std::vector<CString>	a_Strings;
+		std::deque<CString>	dq_Strings;
 		int		i_MaxCount;
+		CString s_CfgName;
 	};
 
 	void	Save();

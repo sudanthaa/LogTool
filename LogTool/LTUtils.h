@@ -9,4 +9,6 @@ public:
 	static CString GetAppPath();
 	static CString GetUserLocal();
 	static bool GetXShellSeesionFolder(CString& sFolder);
+	static bool GetUserAppFolder(CString& sFolder);
+	static CString GetAppIniFile();
 };

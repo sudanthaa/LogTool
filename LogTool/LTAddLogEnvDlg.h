@@ -17,7 +17,11 @@ public:
 	virtual ~LTAddLogEnvDlg();
 
 	void	SetDlg(LTDlg* pDlg) { p_Dlg = pDlg; };
+	void	SetEditMode(const char* zEnvString);
+
 	LTDlg* p_Dlg;
+	CString s_EnvString;
+	bool	b_EditMode;
 
 // Dialog Data
 	enum { IDD = IDD_ADD_LOG_ENV };
@@ -31,4 +35,6 @@ public:
 	CEdit o_EditUser;
 	CIPAddressCtrl o_IPIP;
 	CEdit o_EditBaseLocation;
+
+	virtual BOOL OnInitDialog();
 };

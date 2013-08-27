@@ -1,6 +1,8 @@
 #include "LTPch.h"
 #include "LTUtils.h"
 
+#define  LT_INI_FILE_NAME "LogTool.ini"
+
 LTUtils::LTUtils(void)
 {
 }
@@ -38,4 +40,25 @@ bool LTUtils::GetXShellSeesionFolder(CString& sFolder)
 
 	sFolder = sGlobalIniFile;
 	return true;
+}
+
+bool LTUtils::GetUserAppFolder( CString& sFolder )
+{
+	char szAppData[MAX_PATH];
+	if (! SUCCEEDED( SHGetFolderPath( NULL, CSIDL_APPDATA, NULL, 0, szAppData ) ) )
+		return false;
+
+	sFolder.Format("%s\\MillenniumIT\\LogTool", szAppData);
+
+	return true;
+}
+
+CString LTUtils::GetAppIniFile()
+{
+	CString sUserAppFolder;
+	GetUserAppFolder(sUserAppFolder);
+
+	sUserAppFolder += "\\"LT_INI_FILE_NAME;
+
+	return sUserAppFolder;
 }

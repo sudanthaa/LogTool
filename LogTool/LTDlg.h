@@ -21,6 +21,7 @@ public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
 	void	AddEnv(const char* zUser, const char* zIP);
 	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
+	void	EditLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
 
 // Dialog Data
 	enum { IDD = IDD_LOGTOOL_DIALOG };
@@ -79,4 +80,5 @@ public:
 	afx_msg void OnBnClickedButtonLogmacNew();
 	afx_msg void OnBnClickedButtonLogmacEdit();
 	CStatic o_StaticLogEnv;
+	afx_msg void OnClose();
 };
