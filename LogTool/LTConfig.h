@@ -45,10 +45,17 @@ public:
 
 	CString	 s_JiraURL;
 	CString	 s_JiraUser;
+	CString	 s_JiraTicket;
 	CString	 s_JiraPassword;
+
+	bool	b_JiraDoComment;
+	bool	b_JiraCreateNew;
+	bool	b_SelectionSame;
 
 protected:
 	void	OnPostLoad();
+	void	_LoadBool(const char* zGroup, const char* zParam, bool& bVar, const char* zIni);
+	void	_SaveBool(const char* zGroup, const char* zParam, bool bVar, const char* zIni);
 
 	StringSet	o_JiraProjects;
 	StringSet	o_DisplayFilterIncludes;

@@ -12,6 +12,9 @@ LTConfig::LTConfig(void)
 ,o_LogMacs("LOG-MACHINE",10)
 {
 	s_JiraURL = "https://jira.millenniumit.com";
+	b_JiraDoComment = false;
+	b_JiraCreateNew = false;
+	b_SelectionSame = false;
 
 	char zUserName[UNLEN + 1];
 	DWORD dwUserLen = UNLEN + 1;
@@ -42,6 +45,8 @@ void LTConfig::Save()
 
 	WritePrivateProfileString("MAIN","JIRA-USER", s_JiraUser, sIniFile);
 	WritePrivateProfileString("MAIN","JIRA-URL", s_JiraURL, sIniFile);
+	_SaveBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew , sIniFile);
+	_SaveBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 }
 
 void LTConfig::Load()
@@ -51,6 +56,8 @@ void LTConfig::Load()
 	char zBuff[100];
 	GetPrivateProfileString("MAIN","JIRA-USER", s_JiraUser, zBuff, 100, sIniFile); s_JiraUser = zBuff;
 	GetPrivateProfileString("MAIN","JIRA-URL", s_JiraURL, zBuff, 100, sIniFile); s_JiraURL = zBuff;
+	_LoadBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew, sIniFile);
+	_LoadBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 	
 	o_JiraProjects.Load(sIniFile);
 	o_DisplayFilterIncludes.Load(sIniFile);
@@ -63,6 +70,20 @@ void LTConfig::OnPostLoad()
 {
 
 }
+
+void LTConfig::_SaveBool( const char* zGroup, const char* zParam, bool bVar, const char* zIni )
+{
+	WritePrivateProfileString(zGroup, zParam, bVar ? "TRUE":"FALSE", zIni);
+}
+
+void LTConfig::_LoadBool( const char* zGroup, const char* zParam, bool& bVar, const char* zIni )
+{
+	char zBuff[100];
+	GetPrivateProfileString(zGroup, zParam, bVar ? "TRUE":"FALSE", zBuff, 100, zIni); 
+	bVar = (strcmp(zBuff, "TRUE") == 0);
+}
+
+
 
 void LTConfig::StringSet::Set( const char* zValue )
 {

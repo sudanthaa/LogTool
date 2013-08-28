@@ -81,4 +81,6 @@ public:
 	afx_msg void OnBnClickedButtonLogmacEdit();
 	CStatic o_StaticLogEnv;
 	afx_msg void OnClose();
+	CButton o_CheckJiraCreateNew;
+	CButton o_CheckJiraComment;
 };

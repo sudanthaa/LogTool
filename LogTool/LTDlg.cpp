@@ -69,6 +69,8 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_LOG_MACHINES, o_ComboLogMachines);
 	DDX_Control(pDX, IDC_COMBO_JIRA_PROJECT, o_ComboJiraProject);
 	DDX_Control(pDX, IDC_STATIC_LOGMAC_IP_VALUE, o_StaticLogEnv);
+	DDX_Control(pDX, IDC_CHECK_JIRA_CREATE_TICKET, o_CheckJiraCreateNew);
+	DDX_Control(pDX, IDC_CHECK_COMMENT_ON_JIRA, o_CheckJiraComment);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -162,6 +164,20 @@ BOOL LTDlg::OnInitDialog()
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
 	o_EditJiraUser.SetWindowText(LTConfig::o_Inst.s_JiraUser);
 
+	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
+	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
+
+	LTConfig::StringSet* pLogEnvSet = LTConfig::o_Inst.GetLogMacSet();
+	for (int i = 0; i < pLogEnvSet->GetCount(); i++)
+	{
+		CString sVal = pLogEnvSet->GetAt(i);
+		o_ComboLogMachines.AddString(sVal);
+		if (i == 0)
+		{
+			o_ComboLogMachines.SetCurSel(0);
+			o_StaticLogEnv.SetWindowText(sVal);
+		}
+	}
 	
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
@@ -607,6 +623,8 @@ void LTDlg::OnEnKillfocusEditTicketId()
 void LTDlg::OnBnClickedCheckJiraCreateTicket()
 {
 	// TODO: Add your control notification handler code here
+	int iCheck = o_CheckJiraCreateNew.GetCheck();
+	LTConfig::o_Inst.b_JiraCreateNew = (iCheck != 0);
 }
 
 void LTDlg::OnEnChangeEditJiraUserId()
@@ -617,6 +635,7 @@ void LTDlg::OnEnChangeEditJiraUserId()
 	// with the ENM_CHANGE flag ORed into the mask.
 
 	// TODO:  Add your control notification handler code here
+	o_EditJiraUser.GetWindowText(LTConfig::o_Inst.s_JiraUser);
 }
 
 void LTDlg::OnEnChangeEditJiraPassword()
@@ -632,6 +651,8 @@ void LTDlg::OnEnChangeEditJiraPassword()
 void LTDlg::OnBnClickedCheckCommentOnJira()
 {
 	// TODO: Add your control notification handler code here
+	int iCheck = o_CheckJiraComment.GetCheck();
+	LTConfig::o_Inst.b_JiraDoComment = (iCheck != 0);
 }
 
 void LTDlg::OnCbnKillfocusComboSelection()
