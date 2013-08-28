@@ -83,4 +83,7 @@ public:
 	afx_msg void OnClose();
 	CButton o_CheckJiraCreateNew;
 	CButton o_CheckJiraComment;
+	CEdit o_EditJiraTicket;
+	CComboBox o_ComboIncludeFilters;
+	CComboBox o_ComboExcludeFilters;
 };

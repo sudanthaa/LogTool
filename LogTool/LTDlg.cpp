@@ -71,6 +71,9 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_LOGMAC_IP_VALUE, o_StaticLogEnv);
 	DDX_Control(pDX, IDC_CHECK_JIRA_CREATE_TICKET, o_CheckJiraCreateNew);
 	DDX_Control(pDX, IDC_CHECK_COMMENT_ON_JIRA, o_CheckJiraComment);
+	DDX_Control(pDX, IDC_EDIT_TICKET_ID, o_EditJiraTicket);
+	DDX_Control(pDX, IDC_COMBO_INCLUDE_FILTER, o_ComboIncludeFilters);
+	DDX_Control(pDX, IDC_COMBO_EXCLUDE_FILTER, o_ComboExcludeFilters);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -167,6 +170,8 @@ BOOL LTDlg::OnInitDialog()
 	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
 	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
 
+	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
+
 	LTConfig::StringSet* pLogEnvSet = LTConfig::o_Inst.GetLogMacSet();
 	for (int i = 0; i < pLogEnvSet->GetCount(); i++)
 	{
@@ -177,6 +182,24 @@ BOOL LTDlg::OnInitDialog()
 			o_ComboLogMachines.SetCurSel(0);
 			o_StaticLogEnv.SetWindowText(sVal);
 		}
+	}
+
+	LTConfig::StringSet* pIncFilterSet = LTConfig::o_Inst.GetIncludeFilterSet();
+	for (int i = 0; i < pIncFilterSet->GetCount(); i++)
+	{
+		CString sVal = pIncFilterSet->GetAt(i);
+		o_ComboIncludeFilters.AddString(sVal);
+		if (i == 0)
+			o_ComboIncludeFilters.SetCurSel(0);
+	}
+
+	LTConfig::StringSet* pExcFilterSet = LTConfig::o_Inst.GetExcludeFilterSet();
+	for (int i = 0; i < pExcFilterSet->GetCount(); i++)
+	{
+		CString sVal = pExcFilterSet->GetAt(i);
+		o_ComboExcludeFilters.AddString(sVal);
+		if (i == 0)
+			o_ComboExcludeFilters.SetCurSel(0);
 	}
 	
 	//o_ListSelection.SetItemText(0, 0, "Selection");
@@ -625,6 +648,8 @@ void LTDlg::OnBnClickedCheckJiraCreateTicket()
 	// TODO: Add your control notification handler code here
 	int iCheck = o_CheckJiraCreateNew.GetCheck();
 	LTConfig::o_Inst.b_JiraCreateNew = (iCheck != 0);
+
+	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
 }
 
 void LTDlg::OnEnChangeEditJiraUserId()

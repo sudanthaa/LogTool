@@ -27,6 +27,7 @@ LTConfig::LTConfig(void)
 
 	SHCreateDirectoryEx(NULL, sUserAppFolder, NULL);
 	Load();
+	OnPostLoad();
 }
 
 LTConfig::~LTConfig(void)
@@ -68,7 +69,11 @@ void LTConfig::Load()
 
 void LTConfig::OnPostLoad()
 {
+	if (o_DisplayFilterIncludes.GetCount() == 0)
+		o_DisplayFilterIncludes.Set("logs/*;corefiles/*");
 
+	if (o_DisplayFilterExcludes.GetCount() == 0)
+		o_DisplayFilterExcludes.Set("logs/SSM*");
 }
 
 void LTConfig::_SaveBool( const char* zGroup, const char* zParam, bool bVar, const char* zIni )
