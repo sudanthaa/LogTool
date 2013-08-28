@@ -7,6 +7,7 @@
 #include "afxwin.h"
 #include "LTFieldListener.h"
 #include "LTComboBox.h"
+#include "LTConfig.h"
 
 class LTEnv;
 
@@ -49,6 +50,7 @@ public:
 	void OnPressEnterKey();
 
 	void GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
+	void PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 
 	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);

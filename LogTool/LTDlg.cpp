@@ -143,7 +143,7 @@ BOOL LTDlg::OnInitDialog()
 	
 
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
-	o_ListSelection.InsertColumn(0,CString("Selection"), LVCFMT_LEFT,75);
+	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
 	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, "logs/Reporting:1:1:ReportingEngine:1", 0, LVIS_SELECTED, 0, 0);
 	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 1, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
 	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 2, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
@@ -172,40 +172,28 @@ BOOL LTDlg::OnInitDialog()
 
 	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
 
-	LTConfig::StringSet* pLogEnvSet = LTConfig::o_Inst.GetLogMacSet();
-	for (int i = 0; i < pLogEnvSet->GetCount(); i++)
-	{
-		CString sVal = pLogEnvSet->GetAt(i);
-		o_ComboLogMachines.AddString(sVal);
-		if (i == 0)
-		{
-			o_ComboLogMachines.SetCurSel(0);
-			o_StaticLogEnv.SetWindowText(sVal);
-		}
-	}
+	PopulateComboFromCfg(&o_ComboLogMachines, LTConfig::o_Inst.GetLogMacSet());
+	PopulateComboFromCfg(&o_ComboIncludeFilters, LTConfig::o_Inst.GetIncludeFilterSet());
+	PopulateComboFromCfg(&o_ComboExcludeFilters, LTConfig::o_Inst.GetExcludeFilterSet());
+	CString sDefaultLogMac = LTConfig::o_Inst.GetLogMacSet()->Get();
+	o_StaticLogEnv.SetWindowText(sDefaultLogMac);
 
-	LTConfig::StringSet* pIncFilterSet = LTConfig::o_Inst.GetIncludeFilterSet();
-	for (int i = 0; i < pIncFilterSet->GetCount(); i++)
-	{
-		CString sVal = pIncFilterSet->GetAt(i);
-		o_ComboIncludeFilters.AddString(sVal);
-		if (i == 0)
-			o_ComboIncludeFilters.SetCurSel(0);
-	}
-
-	LTConfig::StringSet* pExcFilterSet = LTConfig::o_Inst.GetExcludeFilterSet();
-	for (int i = 0; i < pExcFilterSet->GetCount(); i++)
-	{
-		CString sVal = pExcFilterSet->GetAt(i);
-		o_ComboExcludeFilters.AddString(sVal);
-		if (i == 0)
-			o_ComboExcludeFilters.SetCurSel(0);
-	}
-	
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
+
+void LTDlg::PopulateComboFromCfg( CComboBox* pCombo, LTConfig::StringSet* pStrSet )
+{
+	for (int i = 0; i < pStrSet->GetCount(); i++)
+	{
+		CString sVal = pStrSet->GetAt(i);
+		pCombo->AddString(sVal);
+		if (i == 0)
+			pCombo->SetCurSel(0);
+	}
+}
+
 
 void LTDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -761,3 +749,4 @@ void LTDlg::OnClose()
 
 	__super::OnClose();
 }
+
