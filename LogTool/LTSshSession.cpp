@@ -2,6 +2,7 @@
 #include "LTSshSession.h"
 #include "LTEnv.h"
 
+#define  DEFAULT_SSH_PORT   22
 
 static void*	lt_alloc(size_t count, void **abstract)		{	return malloc(count);}
 static void		lt_free(void *ptr, void **abstract)			{	free(ptr);}
@@ -60,7 +61,7 @@ bool LTSshSession::Connect( LTEnv* pEnv )
     sock = socket(AF_INET, SOCK_STREAM, 0);
  
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(22);
+    sin.sin_port = htons(DEFAULT_SSH_PORT);
     sin.sin_addr.s_addr = hostaddr;
     if (connect(sock, (struct sockaddr*)(&sin),
                 sizeof(struct sockaddr_in)) != 0) {
