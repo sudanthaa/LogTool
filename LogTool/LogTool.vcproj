@@ -242,6 +242,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\LTSshSession.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTUtils.cpp"
 				>
 			</File>
@@ -285,6 +289,10 @@
 			</File>
 			<File
 				RelativePath=".\LTPch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTSshSession.h"
 				>
 			</File>
 			<File

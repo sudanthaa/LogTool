@@ -5,6 +5,8 @@
 #include "LTApp.h"
 #include "LTDlg.h"
 
+#include <libssh2.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -64,6 +66,13 @@ BOOL LTApp::InitInstance()
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
 
+	int rc = libssh2_init (0);
+	if (rc != 0) 
+	{
+		AfxMessageBox("libssh2 initialization failed (%d)\n", rc);
+		return FALSE;
+	}
+
 	LTDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -77,6 +86,8 @@ BOOL LTApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
+
+	libssh2_exit();
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.

@@ -100,9 +100,9 @@ void LTConfig::StringSet::Set( const char* zValue )
 CString LTConfig::StringSet::Get()
 {
 	if (dq_Strings.size() == 0)
-		return "";
+		"";
 
-	return "";
+	return dq_Strings.front();
 }
 
 void LTConfig::StringSet::Save( const char* zIniFile )

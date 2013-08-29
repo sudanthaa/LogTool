@@ -48,9 +48,6 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 END_MESSAGE_MAP()
 
 
-// LTDlg dialog
-
-
 
 
 LTDlg::LTDlg(CWnd* pParent /*=NULL*/)
@@ -83,8 +80,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ENV, &LTDlg::OnLvnItemchangedListEnv)
 	ON_NOTIFY(HDN_ITEMCLICK, 0, &LTDlg::OnHdnItemclickListEnv)
-	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)
-	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
+	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
 	ON_CBN_KILLFOCUS(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnKillfocusComboJiraProject)
 	ON_CBN_KILLFOCUS(IDC_COMBO_INCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboIncludeFilter)
 	ON_CBN_KILLFOCUS(IDC_COMBO_EXCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboExcludeFilter)
@@ -358,209 +354,208 @@ static void kbd_callback(const char *name, int name_len,
 
 int LTDlg::TestCall()
 {
-	unsigned long hostaddr;
-    int rc, sock, i, auth_pw = 0;
-    struct sockaddr_in sin;
-    const char *fingerprint;
-    char *userauthlist;
-    LIBSSH2_SESSION *session;
-    LIBSSH2_CHANNEL *channel;
-
-
-
-#ifdef WIN32
-//     WSADATA wsadata;
-//     WSAStartup(MAKEWORD(2,0), &wsadata);
-#endif
- 
-//     if (argc > 1) {
-//         hostaddr = inet_addr(argv[1]);
-//     } else {
-//         hostaddr = htonl(0x7F000001);
-//     }
-//  
-//     if(argc > 2) {
-//         username = argv[2];
-//     }
-//     if(argc > 3) {
-//         password = argv[3];
-//     }
-
-	hostaddr = inet_addr("172.25.70.91");
- 
-    rc = libssh2_init (0);
-
-    if (rc != 0) {
-        fprintf (stderr, "libssh2 initialization failed (%d)\n", rc);
-        return 1;
-    }
- 
-    /* Ultra basic "connect to port 22 on localhost".  Your code is
-     * responsible for creating the socket establishing the connection
-     */ 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
- 
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(22);
-    sin.sin_addr.s_addr = hostaddr;
-    if (connect(sock, (struct sockaddr*)(&sin),
-                sizeof(struct sockaddr_in)) != 0) {
-        fprintf(stderr, "failed to connect!\n");
-        return -1;
-    }
- 
-    /* Create a session instance and start it up. This will trade welcome
-     * banners, exchange keys, and setup crypto, compression, and MAC layers
-     */ 
-    session = libssh2_session_init();
-
-    if (libssh2_session_handshake(session, sock)) {
-
-        fprintf(stderr, "Failure establishing SSH session\n");
-        return -1;
-    }
- 
-    /* At this point we havn't authenticated. The first thing to do is check
-     * the hostkey's fingerprint against our known hosts Your app may have it
-     * hard coded, may go to a file, may present it to the user, that's your
-     * call
-     */ 
-    fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
-
-    fprintf(stderr, "Fingerprint: ");
-    for(i = 0; i < 20; i++) {
-        fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
-    }
-    fprintf(stderr, "\n");
- 
-    /* check what authentication methods are available */ 
-    userauthlist = libssh2_userauth_list(session, username, strlen(username));
-
-    fprintf(stderr, "Authentication methods: %s\n", userauthlist);
-    if (strstr(userauthlist, "password") != NULL) {
-        auth_pw |= 1;
-    }
-    if (strstr(userauthlist, "keyboard-interactive") != NULL) {
-       // auth_pw |= 2;
-    }
-    if (strstr(userauthlist, "publickey") != NULL) {
-        auth_pw |= 4;
-    }
- 
-    if (auth_pw & 1) {
-        /* We could authenticate via password */ 
-        if (libssh2_userauth_password(session, username, password)) {
-
-            fprintf(stderr, "\tAuthentication by password failed!\n");
-            goto shutdown;
-        } else {
-            fprintf(stderr, "\tAuthentication by password succeeded.\n");
-        }
-    } else if (auth_pw & 2) {
-        /* Or via keyboard-interactive */ 
-        if (libssh2_userauth_keyboard_interactive(session, username,
-
-                                                  &kbd_callback) ) {
-            fprintf(stderr,
-                "\tAuthentication by keyboard-interactive failed!\n");
-            goto shutdown;
-        } else {
-            fprintf(stderr,
-                "\tAuthentication by keyboard-interactive succeeded.\n");
-        }
-    } else if (auth_pw & 4) {
-        /* Or by public key */ 
-        if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
-
-                                                keyfile2, "")) {
-            fprintf(stderr, "\tAuthentication by public key failed!\n");
-            goto shutdown;
-        } else {
-            fprintf(stderr, "\tAuthentication by public key succeeded.\n");
-        }
-    } else {
-        fprintf(stderr, "No supported authentication methods found!\n");
-        goto shutdown;
-    }
- 
-    /* Request a shell */ 
-    if (!(channel = libssh2_channel_open_session(session))) {
-
-        fprintf(stderr, "Unable to open a session\n");
-        goto shutdown;
-    }
- 
-    /* Some environment variables may be set,
-     * It's up to the server which ones it'll allow though
-     */ 
-    libssh2_channel_setenv(channel, "FOO", "bar");
-
- 
-    /* Request a terminal with 'vanilla' terminal emulation
-     * See /etc/termcap for more options
-     */ 
-    if (libssh2_channel_request_pty(channel, "vanilla")) {
-
-        fprintf(stderr, "Failed requesting pty\n");
-        goto skip_shell;
-    }
- 
-    /* Open a SHELL on that pty */ 
-    if (libssh2_channel_shell(channel)) {
-
-        fprintf(stderr, "Unable to request shell on allocated pty\n");
-        goto shutdown;
-    }
-
-
-	//libssh2_channel_exec(channel, "ls -la");
-
- 
-    /* At this point the shell can be interacted with using
-     * libssh2_channel_read()
-     * libssh2_channel_read_stderr()
-     * libssh2_channel_write()
-     * libssh2_channel_write_stderr()
-     *
-     * Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
-     * If the server send EOF, libssh2_channel_eof() will return non-0
-     * To send EOF to the server use: libssh2_channel_send_eof()
-     * A channel can be closed with: libssh2_channel_close()
-     * A channel can be freed with: libssh2_channel_free()
-     */ 
- 
-  skip_shell:
-    if (channel) {
-        libssh2_channel_free(channel);
-
-        channel = NULL;
-    }
- 
-    /* Other channel types are supported via:
-     * libssh2_scp_send()
-     * libssh2_scp_recv()
-     * libssh2_channel_direct_tcpip()
-     */ 
- 
-  shutdown:
- 
-    libssh2_session_disconnect(session,
-
-                               "Normal Shutdown, Thank you for playing");
-    libssh2_session_free(session);
-
- 
-#ifdef WIN32
-    closesocket(sock);
-#else
-    close(sock);
-#endif
-    fprintf(stderr, "all done!\n");
- 
-    libssh2_exit();
-
- 
-    return 0;
+//	unsigned long hostaddr;
+//    int rc, sock, i, auth_pw = 0;
+//    struct sockaddr_in sin;
+//    const char *fingerprint;
+//    char *userauthlist;
+//    LIBSSH2_SESSION *session;
+//    LIBSSH2_CHANNEL *channel;
+//
+//
+//
+//#ifdef WIN32
+////     WSADATA wsadata;
+////     WSAStartup(MAKEWORD(2,0), &wsadata);
+//#endif
+// 
+////     if (argc > 1) {
+////         hostaddr = inet_addr(argv[1]);
+////     } else {
+////         hostaddr = htonl(0x7F000001);
+////     }
+////  
+////     if(argc > 2) {
+////         username = argv[2];
+////     }
+////     if(argc > 3) {
+////         password = argv[3];
+////     }
+//
+//	hostaddr = inet_addr("172.25.70.91");
+// 
+//    rc = libssh2_init (0);
+//
+//    if (rc != 0) {
+//        fprintf (stderr, "libssh2 initialization failed (%d)\n", rc);
+//        return 1;
+//    }
+// 
+//    /* Ultra basic "connect to port 22 on localhost".  Your code is
+//     * responsible for creating the socket establishing the connection
+//     */ 
+//    sock = socket(AF_INET, SOCK_STREAM, 0);
+// 
+//    sin.sin_family = AF_INET;
+//    sin.sin_port = htons(22);
+//    sin.sin_addr.s_addr = hostaddr;
+//    if (connect(sock, (struct sockaddr*)(&sin),
+//                sizeof(struct sockaddr_in)) != 0) {
+//        fprintf(stderr, "failed to connect!\n");
+//        return -1;
+//    }
+// 
+//    /* Create a session instance and start it up. This will trade welcome
+//     * banners, exchange keys, and setup crypto, compression, and MAC layers
+//     */ 
+//    session = libssh2_session_init_ex(lt_default_alloc, lt_default_free, lt_default_realloc, NULL);
+//
+//    if (libssh2_session_handshake(session, sock)) {
+//
+//        fprintf(stderr, "Failure establishing SSH session\n");
+//        return -1;
+//    }
+// 
+//    /* At this point we havn't authenticated. The first thing to do is check
+//     * the hostkey's fingerprint against our known hosts Your app may have it
+//     * hard coded, may go to a file, may present it to the user, that's your
+//     * call
+//     */ 
+//    fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
+//
+//    fprintf(stderr, "Fingerprint: ");
+//    for(i = 0; i < 20; i++) {
+//        fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
+//    }
+//    fprintf(stderr, "\n");
+// 
+//    /* check what authentication methods are available */ 
+//    userauthlist = libssh2_userauth_list(session, username, strlen(username));
+//
+//    fprintf(stderr, "Authentication methods: %s\n", userauthlist);
+//    if (strstr(userauthlist, "password") != NULL) {
+//        auth_pw |= 1;
+//    }
+//    if (strstr(userauthlist, "keyboard-interactive") != NULL) {
+//        auth_pw |= 2;
+//    }
+//    if (strstr(userauthlist, "publickey") != NULL) {
+//        auth_pw |= 4;
+//    }
+// 
+//    if (auth_pw & 1) {
+//        /* We could authenticate via password */ 
+//        if (libssh2_userauth_password(session, username, password)) {
+//
+//            fprintf(stderr, "\tAuthentication by password failed!\n");
+//            goto shutdown;
+//        } else {
+//            fprintf(stderr, "\tAuthentication by password succeeded.\n");
+//        }
+//    } else if (auth_pw & 2) {
+//        /* Or via keyboard-interactive */ 
+//        if (libssh2_userauth_keyboard_interactive(session, username, &kbd_callback) ) {
+//            fprintf(stderr,
+//                "\tAuthentication by keyboard-interactive failed!\n");
+//            goto shutdown;
+//        } else {
+//            fprintf(stderr,
+//                "\tAuthentication by keyboard-interactive succeeded.\n");
+//        }
+//    } else if (auth_pw & 4) {
+//        /* Or by public key */ 
+//        if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
+//
+//                                                keyfile2, "")) {
+//            fprintf(stderr, "\tAuthentication by public key failed!\n");
+//            goto shutdown;
+//        } else {
+//            fprintf(stderr, "\tAuthentication by public key succeeded.\n");
+//        }
+//    } else {
+//        fprintf(stderr, "No supported authentication methods found!\n");
+//        goto shutdown;
+//    }
+// 
+//    /* Request a shell */ 
+//    if (!(channel = libssh2_channel_open_session(session))) {
+//
+//        fprintf(stderr, "Unable to open a session\n");
+//        goto shutdown;
+//    }
+// 
+//    /* Some environment variables may be set,
+//     * It's up to the server which ones it'll allow though
+//     */ 
+//    libssh2_channel_setenv(channel, "FOO", "bar");
+//
+// 
+//    /* Request a terminal with 'vanilla' terminal emulation
+//     * See /etc/termcap for more options
+//     */ 
+//    if (libssh2_channel_request_pty(channel, "vanilla")) {
+//
+//        fprintf(stderr, "Failed requesting pty\n");
+//        goto skip_shell;
+//    }
+// 
+//    /* Open a SHELL on that pty */ 
+//    if (libssh2_channel_shell(channel)) {
+//
+//        fprintf(stderr, "Unable to request shell on allocated pty\n");
+//        goto shutdown;
+//    }
+//
+//
+//	//libssh2_channel_exec(channel, "ls -la");
+//
+// 
+//    /* At this point the shell can be interacted with using
+//     * libssh2_channel_read()
+//     * libssh2_channel_read_stderr()
+//     * libssh2_channel_write()
+//     * libssh2_channel_write_stderr()
+//     *
+//     * Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
+//     * If the server send EOF, libssh2_channel_eof() will return non-0
+//     * To send EOF to the server use: libssh2_channel_send_eof()
+//     * A channel can be closed with: libssh2_channel_close()
+//     * A channel can be freed with: libssh2_channel_free()
+//     */ 
+// 
+//  skip_shell:
+//    if (channel) {
+//        libssh2_channel_free(channel);
+//
+//        channel = NULL;
+//    }
+// 
+//    /* Other channel types are supported via:
+//     * libssh2_scp_send()
+//     * libssh2_scp_recv()
+//     * libssh2_channel_direct_tcpip()
+//     */ 
+// 
+//  shutdown:
+// 
+//    libssh2_session_disconnect(session,
+//
+//                               "Normal Shutdown, Thank you for playing");
+//    libssh2_session_free(session);
+//
+// 
+//#ifdef WIN32
+//    closesocket(sock);
+//#else
+//    close(sock);
+//#endif
+//    fprintf(stderr, "all done!\n");
+// 
+//    libssh2_exit();
+//
+// 
+//    return 0;
+return 0;
 }
 
 
