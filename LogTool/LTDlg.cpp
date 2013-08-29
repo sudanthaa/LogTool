@@ -9,6 +9,7 @@
 #include "LTAddEnvDlg.h"
 #include "LTAddLogEnvDlg.h"
 #include "LTConfig.h"
+#include "LTSshSession.h"
 
 #include <libssh2.h>
 
@@ -253,12 +254,8 @@ bool LTDlg::LoadEnvFromXShellConfig(void)
 	for (UINT ui = 0 ; ui < aEnvs.size(); ui++)
 	{
 		LTEnv* pEnv = aEnvs[ui];
-
-		o_ListEnv.InsertItem(LVIF_TEXT | LVIF_STATE, ui, pEnv->s_Name, 0, LVIS_SELECTED, 0, 0);
-		
-		o_ListEnv.SetItemText(ui, 0, pEnv->s_Name);
-		o_ListEnv.SetItemText(ui, 1, pEnv->s_IP);
-		o_ListEnv.SetItemText(ui, 2, pEnv->s_Folder);
+		LTEnv::vec_Env.push_back(pEnv);
+		InsertEnvToList(pEnv);
 	}
 
 	return false;
@@ -332,28 +329,17 @@ const char *username="survdev11";
 const char *password="mit123";
 
 
-static void kbd_callback(const char *name, int name_len,
-						 const char *instruction, int instruction_len,
-						 int num_prompts,
-						 const LIBSSH2_USERAUTH_KBDINT_PROMPT *prompts,
-						 LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
-						 void **abstract)
-{
-	(void)name;
-	(void)name_len;
-	(void)instruction;
-	(void)instruction_len;
-	if (num_prompts == 1) {
-		responses[0].text = strdup(password);
-		responses[0].length = strlen(password);
-	}
-	(void)prompts;
-	(void)abstract;
-} /* kbd_callback */ 
-
-
 int LTDlg::TestCall()
 {
+	LTSshSession* pSession = new LTSshSession;
+	LTEnv* pEnv = LTEnv::FindEnv("survdev11");
+
+	if (!pEnv)
+		return 0;
+
+	CString sErr = "";
+	pSession->Connect(pEnv, sErr);
+
 //	unsigned long hostaddr;
 //    int rc, sock, i, auth_pw = 0;
 //    struct sockaddr_in sin;
@@ -566,10 +552,6 @@ void LTDlg::OnBnClickedButtonEnvAdd()
 	oDlg.DoModal();
 }
 
-void LTDlg::AddEnv( const char* zUser, const char* zIP )
-{
-
-}
 
 void LTDlg::AddLogEnv( const char* zUser, const char* zIP, const char* zBaseLocation /*= ""*/ )
 {
@@ -741,7 +723,50 @@ void LTDlg::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
 	LTConfig::o_Inst.Save();
-
 	__super::OnClose();
+}
+
+void LTDlg::AddEnv( const char* zUser, const char* zIP, const char* zPassword )
+{
+	LTEnv* pEnvCur = LTEnv::FindEnv(zUser);
+	if (pEnvCur)
+	{
+		CString sMsg;
+		sMsg.Format("Environment for \"%s\" is already found", zUser);
+		AfxMessageBox(sMsg);
+		return;
+	}
+
+	CString sXShellSessionFolder("");
+	if (!LTUtils::GetXShellSeesionFolder(sXShellSessionFolder))
+		return;
+
+	LTEnv* pNew = new LTEnv;
+	pNew->s_EnvUser = zUser;
+	pNew->s_IP = zIP;
+	pNew->s_Password = zPassword;
+	pNew->s_Folder = "";
+	pNew->s_FullFile = sXShellSessionFolder + "\\" + pNew->s_EnvUser  + ".xsh";
+
+	pNew->Save();
+	LTEnv::vec_Env.push_back(pNew);
+
+	InsertEnvToList(pNew);
+}
+
+void LTDlg::EditEnv( LTEnv* pEnv )
+{
+
+}
+
+void LTDlg::InsertEnvToList( LTEnv* pEnv )
+{
+	int iCurCount = o_ListEnv.GetItemCount();
+	o_ListEnv.InsertItem(LVIF_TEXT | LVIF_STATE, iCurCount, pEnv->s_Name, 0, LVIS_SELECTED, 0, 0);
+
+	o_ListEnv.SetItemText(iCurCount, 0, pEnv->s_Name);
+	o_ListEnv.SetItemText(iCurCount, 1, pEnv->s_IP);
+	o_ListEnv.SetItemText(iCurCount, 2, pEnv->s_Folder);
+	o_ListEnv.SetItemData(iCurCount, (DWORD_PTR)pEnv);
 }
 

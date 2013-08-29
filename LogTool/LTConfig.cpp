@@ -100,7 +100,7 @@ void LTConfig::StringSet::Set( const char* zValue )
 CString LTConfig::StringSet::Get()
 {
 	if (dq_Strings.size() == 0)
-		"";
+		return "";
 
 	return dq_Strings.front();
 }

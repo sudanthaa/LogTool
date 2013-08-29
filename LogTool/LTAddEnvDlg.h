@@ -5,6 +5,7 @@
 #include "afxcmn.h"
 
 class LTDlg;
+class LTEnv;
 
 // LTAddEnvDlg dialog
 
@@ -17,7 +18,9 @@ public:
 	virtual ~LTAddEnvDlg();
 
 	void	SetDlg(LTDlg* pDlg)	{ p_Dlg = pDlg; };
+	void	SetEditMode(LTEnv* pEnv) { p_Env = pEnv; };
 
+	LTEnv* p_Env;
 	LTDlg* p_Dlg;
 
 // Dialog Data
@@ -31,4 +34,6 @@ protected:
 public:
 	CEdit o_EditUser;
 	CIPAddressCtrl o_IP;
+	virtual BOOL OnInitDialog();
+	CEdit o_EditPassword;
 };
