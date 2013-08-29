@@ -549,6 +549,7 @@ void LTDlg::OnBnClickedButtonEnvAdd()
 {
 	// TODO: Add your control notification handler code here
 	LTAddEnvDlg oDlg;
+	oDlg.SetDlg(this);
 	oDlg.DoModal();
 }
 
@@ -742,6 +743,7 @@ void LTDlg::AddEnv( const char* zUser, const char* zIP, const char* zPassword )
 		return;
 
 	LTEnv* pNew = new LTEnv;
+	pNew->s_Name = zUser;
 	pNew->s_EnvUser = zUser;
 	pNew->s_IP = zIP;
 	pNew->s_Password = zPassword;
