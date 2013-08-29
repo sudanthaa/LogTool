@@ -1,6 +1,5 @@
 #pragma once
 
-#include <afxsock.h>
 #include <libssh2.h>
 
 class LTEnv;
@@ -11,7 +10,7 @@ public:
 	LTSshSession(void);
 	~LTSshSession(void);
 
-	bool	Connect(LTEnv* pEnv);
+	bool	Connect(LTEnv* pEnv, CString& sErr);
 	LTEnv*	GetEnv(){ return p_Env; };
 
 	static  void KeyboadCallback(const char *name, int name_len,

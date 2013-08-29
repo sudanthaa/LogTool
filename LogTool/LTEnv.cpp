@@ -1,6 +1,8 @@
 #include "LTPch.h"
 #include "LTEnv.h"
 
+VEC_ENV LTEnv::vec_Env;
+
 LTEnv::LTEnv(void)
 {
 }
@@ -36,16 +38,35 @@ bool LTEnv::Load( const char* zFile /*= NULL*/ )
 
 	char zUserName[100];
 	char zIP[100];
+	char zPassword[100];
 	GetPrivateProfileString("CONNECTION:AUTHENTICATION","UserName", "", zUserName, 100, sFile);
 	GetPrivateProfileString("CONNECTION","Host", "", zIP, 100, sFile);
+	GetPrivateProfileString("MIT","Password", "", zPassword, 100, sFile);
 
 	s_EnvUser = zUserName;
 	s_IP = zIP;
+	s_Password = zPassword;
 
 	return true;
 }
 
 bool LTEnv::Save()
 {
+	WritePrivateProfileString("CONNECTION:AUTHENTICATION", "UserName", s_EnvUser, s_FullFile);
+	WritePrivateProfileString("CONNECTION", "Host", s_IP, s_FullFile);
+	WritePrivateProfileString("MIT", "Password", s_Password, s_FullFile);
+
 	return true;
+}
+
+LTEnv* LTEnv::FindEnv( const char* zUser )
+{
+	for (unsigned int ui = 0; ui < vec_Env.size(); ui++)
+	{
+		LTEnv* pEnv = vec_Env[ui];
+		if (pEnv->s_EnvUser == zUser)
+			return pEnv;
+	}
+
+	return NULL;
 }

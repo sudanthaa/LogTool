@@ -8,11 +8,7 @@
 #include "LTFieldListener.h"
 #include "LTComboBox.h"
 #include "LTConfig.h"
-
-class LTEnv;
-
-typedef std::vector<LTEnv*>  VEC_ENV;
-typedef VEC_ENV::iterator	  VEC_ENV_ITR;
+#include "LTEnv.h"
 
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener
@@ -20,7 +16,8 @@ class LTDlg : public CDialog, public LTFieldListener
 // Construction
 public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
-	void	AddEnv(const char* zUser, const char* zIP);
+	void	AddEnv(const char* zUser, const char* zIP, const char* zPassword);
+	void	EditEnv(LTEnv* pEnv);
 	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
 	void	EditLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
 
@@ -46,6 +43,7 @@ protected:
 public:
 	CListCtrl o_ListEnv;
 	bool LoadEnvFromXShellConfig(void);
+	void InsertEnvToList( LTEnv* pEnv );
 	int	 TestCall();
 	void OnPressEnterKey();
 

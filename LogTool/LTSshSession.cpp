@@ -42,7 +42,7 @@ void LTSshSession::KeyboadCallback( const char *name, int name_len, const char *
 	}
 }
 
-bool LTSshSession::Connect( LTEnv* pEnv )
+bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 {
 	p_Env = pEnv;
 
@@ -106,6 +106,7 @@ bool LTSshSession::Connect( LTEnv* pEnv )
         auth_pw |= 4;
     }
  
+
     if (auth_pw & 1) {
         /* We could authenticate via password */ 
         if (libssh2_userauth_password(p_Session, p_Env->s_EnvUser, p_Env->s_Password)) {
@@ -126,10 +127,23 @@ bool LTSshSession::Connect( LTEnv* pEnv )
                 "\tAuthentication by keyboard-interactive succeeded.\n");
         }
     } else if (auth_pw & 4) {
-        /* Or by public key */ 
-        if (libssh2_userauth_publickey_fromfile(p_Session, p_Env->s_EnvUser, ".ssh",
+        /* Or by public key */
+		char zHomeDrive[100];
+		size_t iret = 0;
+		getenv_s(&iret, zHomeDrive, 100,  "HOMEDRIVE");
 
-                                                ".ssh", "")) {
+		char zHomePath[100];
+		getenv_s(&iret, zHomePath, 100, "HOMEPATH");
+
+		CString sPrivFile;
+		CString sPubFile;
+
+		sPrivFile.Format("%s%s.ssh\\id_rsa", zHomeDrive, zHomePath);
+		sPubFile.Format("%s%s.ssh\\id_rsa.pub", zHomeDrive, zHomePath);
+
+        if (libssh2_userauth_publickey_fromfile(p_Session, 
+				p_Env->s_EnvUser, sPubFile, sPrivFile, "")) 
+		{
             TRACE( "\tAuthentication by public key failed!\n");
             goto shutdown;
         } else {
