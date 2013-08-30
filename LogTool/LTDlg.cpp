@@ -72,6 +72,17 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_TICKET_ID, o_EditJiraTicket);
 	DDX_Control(pDX, IDC_COMBO_INCLUDE_FILTER, o_ComboIncludeFilters);
 	DDX_Control(pDX, IDC_COMBO_EXCLUDE_FILTER, o_ComboExcludeFilters);
+	DDX_Control(pDX, IDC_STATIC_FRAME_FILE_LIST, o_StaticFrmFiles);
+	DDX_Control(pDX, IDC_STATIC_FRM_JIRA, o_StatiFrmJira);
+	DDX_Control(pDX, IDC_STATIC_FRAME_ENVIRONMENT, o_StatiFrmEnvionment);
+	DDX_Control(pDX, IDC_STATIC_FRAME_LOG_MACHINE, o_StatiFrmLogMac);
+	DDX_Control(pDX, IDC_BUTTON_LOGMAC_NEW, o_ButtonLogMacNew);
+	DDX_Control(pDX, IDC_BUTTON_LOGMAC_EDIT, o_ButtonLogMacEdit);
+	DDX_Control(pDX, IDC_BUTTON_LOGMAC_DELETE, o_ButtonLogMacDelete);
+	DDX_Control(pDX, IDC_BUTTON_ENV_ADD, o_ButtonEnvNew);
+	DDX_Control(pDX, IDC_BUTTON_ENV_EDIT, o_ButtonEnvEdit);
+	DDX_Control(pDX, IDC_BUTTON_ENV_DELETE, o_ButtonEnvDelete);
+	DDX_Control(pDX, IDCANCEL, o_ButtonCancel);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -99,6 +110,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_NEW, &LTDlg::OnBnClickedButtonLogmacNew)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
 	ON_WM_CLOSE()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -176,6 +188,11 @@ BOOL LTDlg::OnInitDialog()
 	o_StaticLogEnv.SetWindowText(sDefaultLogMac);
 
 	//o_ListSelection.SetItemText(0, 0, "Selection");
+
+	o_Resizer.AttachForResize(&o_ListSelection, LT_RM_BOTTMRIGHT);
+	o_Resizer.AttachForResize(&o_StaticFrmFiles, LT_RM_BOTTMRIGHT);
+	o_Resizer.AttachForResize(&o_ButtonCancel, LT_RM_ALL);
+	o_Resizer.Originate(this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -772,3 +789,11 @@ void LTDlg::InsertEnvToList( LTEnv* pEnv )
 	o_ListEnv.SetItemData(iCurCount, (DWORD_PTR)pEnv);
 }
 
+
+void LTDlg::OnSize(UINT nType, int cx, int cy)
+{
+	__super::OnSize(nType, cx, cy);
+
+	o_Resizer.Resize(cx, cy);
+	// TODO: Add your message handler code here
+}

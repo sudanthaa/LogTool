@@ -9,6 +9,7 @@
 #include "LTComboBox.h"
 #include "LTConfig.h"
 #include "LTEnv.h"
+#include "LTResizeMan.h"
 
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener
@@ -41,27 +42,24 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
-	CListCtrl o_ListEnv;
-	bool LoadEnvFromXShellConfig(void);
-	void InsertEnvToList( LTEnv* pEnv );
-	int	 TestCall();
-	void OnPressEnterKey();
+	bool	LoadEnvFromXShellConfig(void);
+	void	InsertEnvToList( LTEnv* pEnv );
+	int		TestCall();
+	void	OnPressEnterKey();
+	void	InitResizes();
+	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
+	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 
-	void GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
-	void PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
+	LTResizeMan o_Resizer;
 
-	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedButtonTest();
-	CListCtrl o_ListSelection;
-	afx_msg void OnBnClickedButtonEnvAdd();
-	CEdit o_EditJiraURL;
-	CEdit o_EditJiraUser;
-	CComboBox o_ComboLogMachines;
 protected:
 	virtual void OnOK();
 public:
 	CComboBox o_ComboJiraProject;
+	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonEnvAdd();
+	afx_msg void OnBnClickedButtonTest();
 	afx_msg void OnCbnKillfocusComboJiraProject();
 	afx_msg void OnCbnKillfocusComboIncludeFilter();
 	afx_msg void OnCbnKillfocusComboExcludeFilter();
@@ -79,11 +77,29 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedButtonLogmacNew();
 	afx_msg void OnBnClickedButtonLogmacEdit();
-	CStatic o_StaticLogEnv;
 	afx_msg void OnClose();
+
+	CListCtrl o_ListEnv;
+	CStatic o_StaticLogEnv;
+	CListCtrl o_ListSelection;
+	CEdit o_EditJiraURL;
+	CEdit o_EditJiraUser;
 	CButton o_CheckJiraCreateNew;
 	CButton o_CheckJiraComment;
 	CEdit o_EditJiraTicket;
+	CComboBox o_ComboLogMachines;
 	CComboBox o_ComboIncludeFilters;
 	CComboBox o_ComboExcludeFilters;
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	CStatic o_StaticFrmFiles;
+	CStatic o_StatiFrmJira;
+	CStatic o_StatiFrmEnvionment;
+	CStatic o_StatiFrmLogMac;
+	CButton o_ButtonLogMacNew;
+	CButton o_ButtonLogMacEdit;
+	CButton o_ButtonLogMacDelete;
+	CButton o_ButtonEnvNew;
+	CButton o_ButtonEnvEdit;
+	CButton o_ButtonEnvDelete;
+	CButton o_ButtonCancel;
 };

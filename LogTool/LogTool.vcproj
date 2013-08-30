@@ -242,6 +242,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\LTResizeMan.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTSshSession.cpp"
 				>
 			</File>
@@ -289,6 +293,10 @@
 			</File>
 			<File
 				RelativePath=".\LTPch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTResizeMan.h"
 				>
 			</File>
 			<File
