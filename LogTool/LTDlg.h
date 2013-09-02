@@ -92,7 +92,7 @@ public:
 	CComboBox o_ComboExcludeFilters;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CStatic o_StaticFrmFiles;
-	CStatic o_StatiFrmJira;
+	CStatic o_StaticFrmJira;
 	CStatic o_StatiFrmEnvionment;
 	CStatic o_StatiFrmLogMac;
 	CButton o_ButtonLogMacNew;
@@ -102,4 +102,9 @@ public:
 	CButton o_ButtonEnvEdit;
 	CButton o_ButtonEnvDelete;
 	CButton o_ButtonCancel;
+	CEdit o_EditJiraPassword;
+	CStatic o_StaticJiraURL;
+	CStatic o_StaticJiraTicket;
+	CStatic o_StaticJiraUserID;
+	CStatic o_StaticJiraPassword;
 };

@@ -16,8 +16,8 @@ public:
 	LTResizeMan(void);
 	~LTResizeMan(void);
 
-	void	AttachForResize(CWnd* pWnd, bool bLeft, bool bTop, bool bRight, bool bBottom);
-	void	AttachForResize(CWnd* pWnd, DWORD dwSpec);
+	void	Attach(CWnd* pWnd, bool bLeft, bool bTop, bool bRight, bool bBottom);
+	void	Attach(CWnd* pWnd, DWORD dwSpec);
 	void	Originate(CWnd* pParent);
 	void	Resize(int iCX, int iCY);
 

@@ -73,7 +73,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_INCLUDE_FILTER, o_ComboIncludeFilters);
 	DDX_Control(pDX, IDC_COMBO_EXCLUDE_FILTER, o_ComboExcludeFilters);
 	DDX_Control(pDX, IDC_STATIC_FRAME_FILE_LIST, o_StaticFrmFiles);
-	DDX_Control(pDX, IDC_STATIC_FRM_JIRA, o_StatiFrmJira);
+	DDX_Control(pDX, IDC_STATIC_FRM_JIRA, o_StaticFrmJira);
 	DDX_Control(pDX, IDC_STATIC_FRAME_ENVIRONMENT, o_StatiFrmEnvionment);
 	DDX_Control(pDX, IDC_STATIC_FRAME_LOG_MACHINE, o_StatiFrmLogMac);
 	DDX_Control(pDX, IDC_BUTTON_LOGMAC_NEW, o_ButtonLogMacNew);
@@ -83,6 +83,11 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_ENV_EDIT, o_ButtonEnvEdit);
 	DDX_Control(pDX, IDC_BUTTON_ENV_DELETE, o_ButtonEnvDelete);
 	DDX_Control(pDX, IDCANCEL, o_ButtonCancel);
+	DDX_Control(pDX, IDC_EDIT_JIRA_PASSWORD, o_EditJiraPassword);
+	DDX_Control(pDX, IDC_STATIC_JIRA_URL, o_StaticJiraURL);
+	DDX_Control(pDX, IDC_STATIC_JIRA_PROJECT, o_StaticJiraTicket);
+	DDX_Control(pDX, IDC_STATIC_JIRA_USER_ID, o_StaticJiraUserID);
+	DDX_Control(pDX, IDC_STATIC_JIRA_PASSWORD, o_StaticJiraPassword);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -189,9 +194,23 @@ BOOL LTDlg::OnInitDialog()
 
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
-	o_Resizer.AttachForResize(&o_ListSelection, LT_RM_BOTTMRIGHT);
-	o_Resizer.AttachForResize(&o_StaticFrmFiles, LT_RM_BOTTMRIGHT);
-	o_Resizer.AttachForResize(&o_ButtonCancel, LT_RM_ALL);
+	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
+	o_Resizer.Attach(&o_StaticFrmFiles, LT_RM_BOTTMRIGHT);
+	o_Resizer.Attach(&o_ButtonCancel, LT_RM_ALL);
+	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_CheckJiraCreateNew, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_EditJiraURL, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_EditJiraUser, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_EditJiraTicket, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_EditJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_ComboJiraProject, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_StaticJiraTicket, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_StaticJiraUserID, LT_RM_TOP | LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
+
 	o_Resizer.Originate(this);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
