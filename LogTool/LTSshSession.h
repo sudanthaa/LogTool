@@ -22,6 +22,7 @@ public:
 
 protected:
 	LTEnv* p_Env;
+	int		i_Socket;
 	LIBSSH2_SESSION*	p_Session;
 	LIBSSH2_CHANNEL*	p_Channel;
 };

@@ -48,7 +48,7 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 	p_Env = pEnv;
 
 	unsigned long hostaddr;
-    int sock, i, auth_pw = 0;
+    int  i, auth_pw = 0;
     struct sockaddr_in sin;
     const char *fingerprint;
     char *userauthlist;
@@ -58,12 +58,12 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
     /* Ultra basic "connect to port 22 on localhost".  Your code is
      * responsible for creating the socket establishing the connection
      */ 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    i_Socket = socket(AF_INET, SOCK_STREAM, 0);
  
     sin.sin_family = AF_INET;
     sin.sin_port = htons(DEFAULT_SSH_PORT);
     sin.sin_addr.s_addr = hostaddr;
-    if (connect(sock, (struct sockaddr*)(&sin),
+    if (connect(i_Socket, (struct sockaddr*)(&sin),
                 sizeof(struct sockaddr_in)) != 0) {
         TRACE( "failed to connect!\n");
         return false;
@@ -74,7 +74,7 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
      */ 
     p_Session = libssh2_session_init_ex(lt_alloc, lt_free, lt_realloc, this);
 
-    if (libssh2_session_handshake(p_Session, sock)) 
+    if (libssh2_session_handshake(p_Session, i_Socket)) 
 	{
         TRACE( "Failure establishing SSH session\n");
         return false;
@@ -224,9 +224,9 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 
  
 #ifdef WIN32
-    closesocket(sock);
+    closesocket(i_Socket);
 #else
-    close(sock);
+    close(i_Socket);
 #endif
     TRACE( "all done!\n");
     return 0;
