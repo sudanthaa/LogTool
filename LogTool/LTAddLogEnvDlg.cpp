@@ -80,6 +80,10 @@ BOOL LTAddLogEnvDlg::OnInitDialog()
 		o_EditUser.SetWindowText(sEnvUser);
 		o_IPIP.SetWindowText(sIP);
 		o_EditBaseLocation.SetWindowText(sBase);
+
+		CString sTitle;
+		sTitle.Format("Edit Log Environment - (%s)", s_EnvString);
+		SetWindowText(sTitle);
 	}
 
 	// TODO:  Add extra initialization here

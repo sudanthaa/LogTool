@@ -119,6 +119,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_SIZE()
 	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_EDIT, &LTDlg::OnBnClickedButtonEnvEdit)
+	ON_BN_CLICKED(IDC_BUTTON_ENV_DELETE, &LTDlg::OnBnClickedButtonEnvDelete)
 END_MESSAGE_MAP()
 
 
@@ -155,8 +156,9 @@ BOOL LTDlg::OnInitDialog()
 
 	o_ListEnv.SetExtendedStyle(o_ListEnv.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	o_ListEnv.InsertColumn(0,CString("Env"), LVCFMT_LEFT,75);
-	o_ListEnv.InsertColumn(1,CString("IP"),LVCFMT_LEFT, 90);
-	o_ListEnv.InsertColumn(2,CString("Folder"),LVCFMT_LEFT, 50);
+	o_ListEnv.InsertColumn(1,CString("User"), LVCFMT_LEFT,75);
+	o_ListEnv.InsertColumn(2,CString("IP"),LVCFMT_LEFT, 90);
+	o_ListEnv.InsertColumn(3,CString("Folder"),LVCFMT_LEFT, 50);
 	LoadEnvFromXShellConfig();
 	
 
@@ -196,6 +198,10 @@ BOOL LTDlg::OnInitDialog()
 	CString sDefaultLogMac = LTConfig::o_Inst.GetLogMacSet()->Get();
 	o_StaticLogEnv.SetWindowText(sDefaultLogMac);
 
+
+	//o_ButtonEnvNew.SetIcon(::LoadIcon(NULL, IDI_ERROR));
+	o_ButtonEnvDelete.EnableWindow(FALSE);
+	o_ButtonEnvEdit.EnableWindow(FALSE);
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
 	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
@@ -369,6 +375,9 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 		&& (pNMLV->uNewState & LVNI_SELECTED))
 	{
 		LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(pNMLV->iItem);
+
+		o_ButtonEnvDelete.EnableWindow(TRUE);
+		o_ButtonEnvEdit.EnableWindow(TRUE);
 	}
 }
 
@@ -396,208 +405,7 @@ int LTDlg::TestCall()
 	pSession->Connect(pEnv, sErr);
 	pSession->Execute("ls");
 
-//	unsigned long hostaddr;
-//    int rc, sock, i, auth_pw = 0;
-//    struct sockaddr_in sin;
-//    const char *fingerprint;
-//    char *userauthlist;
-//    LIBSSH2_SESSION *session;
-//    LIBSSH2_CHANNEL *channel;
-//
-//
-//
-//#ifdef WIN32
-////     WSADATA wsadata;
-////     WSAStartup(MAKEWORD(2,0), &wsadata);
-//#endif
-// 
-////     if (argc > 1) {
-////         hostaddr = inet_addr(argv[1]);
-////     } else {
-////         hostaddr = htonl(0x7F000001);
-////     }
-////  
-////     if(argc > 2) {
-////         username = argv[2];
-////     }
-////     if(argc > 3) {
-////         password = argv[3];
-////     }
-//
-//	hostaddr = inet_addr("172.25.70.91");
-// 
-//    rc = libssh2_init (0);
-//
-//    if (rc != 0) {
-//        fprintf (stderr, "libssh2 initialization failed (%d)\n", rc);
-//        return 1;
-//    }
-// 
-//    /* Ultra basic "connect to port 22 on localhost".  Your code is
-//     * responsible for creating the socket establishing the connection
-//     */ 
-//    sock = socket(AF_INET, SOCK_STREAM, 0);
-// 
-//    sin.sin_family = AF_INET;
-//    sin.sin_port = htons(22);
-//    sin.sin_addr.s_addr = hostaddr;
-//    if (connect(sock, (struct sockaddr*)(&sin),
-//                sizeof(struct sockaddr_in)) != 0) {
-//        fprintf(stderr, "failed to connect!\n");
-//        return -1;
-//    }
-// 
-//    /* Create a session instance and start it up. This will trade welcome
-//     * banners, exchange keys, and setup crypto, compression, and MAC layers
-//     */ 
-//    session = libssh2_session_init_ex(lt_default_alloc, lt_default_free, lt_default_realloc, NULL);
-//
-//    if (libssh2_session_handshake(session, sock)) {
-//
-//        fprintf(stderr, "Failure establishing SSH session\n");
-//        return -1;
-//    }
-// 
-//    /* At this point we havn't authenticated. The first thing to do is check
-//     * the hostkey's fingerprint against our known hosts Your app may have it
-//     * hard coded, may go to a file, may present it to the user, that's your
-//     * call
-//     */ 
-//    fingerprint = libssh2_hostkey_hash(session, LIBSSH2_HOSTKEY_HASH_SHA1);
-//
-//    fprintf(stderr, "Fingerprint: ");
-//    for(i = 0; i < 20; i++) {
-//        fprintf(stderr, "%02X ", (unsigned char)fingerprint[i]);
-//    }
-//    fprintf(stderr, "\n");
-// 
-//    /* check what authentication methods are available */ 
-//    userauthlist = libssh2_userauth_list(session, username, strlen(username));
-//
-//    fprintf(stderr, "Authentication methods: %s\n", userauthlist);
-//    if (strstr(userauthlist, "password") != NULL) {
-//        auth_pw |= 1;
-//    }
-//    if (strstr(userauthlist, "keyboard-interactive") != NULL) {
-//        auth_pw |= 2;
-//    }
-//    if (strstr(userauthlist, "publickey") != NULL) {
-//        auth_pw |= 4;
-//    }
-// 
-//    if (auth_pw & 1) {
-//        /* We could authenticate via password */ 
-//        if (libssh2_userauth_password(session, username, password)) {
-//
-//            fprintf(stderr, "\tAuthentication by password failed!\n");
-//            goto shutdown;
-//        } else {
-//            fprintf(stderr, "\tAuthentication by password succeeded.\n");
-//        }
-//    } else if (auth_pw & 2) {
-//        /* Or via keyboard-interactive */ 
-//        if (libssh2_userauth_keyboard_interactive(session, username, &kbd_callback) ) {
-//            fprintf(stderr,
-//                "\tAuthentication by keyboard-interactive failed!\n");
-//            goto shutdown;
-//        } else {
-//            fprintf(stderr,
-//                "\tAuthentication by keyboard-interactive succeeded.\n");
-//        }
-//    } else if (auth_pw & 4) {
-//        /* Or by public key */ 
-//        if (libssh2_userauth_publickey_fromfile(session, username, keyfile1,
-//
-//                                                keyfile2, "")) {
-//            fprintf(stderr, "\tAuthentication by public key failed!\n");
-//            goto shutdown;
-//        } else {
-//            fprintf(stderr, "\tAuthentication by public key succeeded.\n");
-//        }
-//    } else {
-//        fprintf(stderr, "No supported authentication methods found!\n");
-//        goto shutdown;
-//    }
-// 
-//    /* Request a shell */ 
-//    if (!(channel = libssh2_channel_open_session(session))) {
-//
-//        fprintf(stderr, "Unable to open a session\n");
-//        goto shutdown;
-//    }
-// 
-//    /* Some environment variables may be set,
-//     * It's up to the server which ones it'll allow though
-//     */ 
-//    libssh2_channel_setenv(channel, "FOO", "bar");
-//
-// 
-//    /* Request a terminal with 'vanilla' terminal emulation
-//     * See /etc/termcap for more options
-//     */ 
-//    if (libssh2_channel_request_pty(channel, "vanilla")) {
-//
-//        fprintf(stderr, "Failed requesting pty\n");
-//        goto skip_shell;
-//    }
-// 
-//    /* Open a SHELL on that pty */ 
-//    if (libssh2_channel_shell(channel)) {
-//
-//        fprintf(stderr, "Unable to request shell on allocated pty\n");
-//        goto shutdown;
-//    }
-//
-//
-//	//libssh2_channel_exec(channel, "ls -la");
-//
-// 
-//    /* At this point the shell can be interacted with using
-//     * libssh2_channel_read()
-//     * libssh2_channel_read_stderr()
-//     * libssh2_channel_write()
-//     * libssh2_channel_write_stderr()
-//     *
-//     * Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
-//     * If the server send EOF, libssh2_channel_eof() will return non-0
-//     * To send EOF to the server use: libssh2_channel_send_eof()
-//     * A channel can be closed with: libssh2_channel_close()
-//     * A channel can be freed with: libssh2_channel_free()
-//     */ 
-// 
-//  skip_shell:
-//    if (channel) {
-//        libssh2_channel_free(channel);
-//
-//        channel = NULL;
-//    }
-// 
-//    /* Other channel types are supported via:
-//     * libssh2_scp_send()
-//     * libssh2_scp_recv()
-//     * libssh2_channel_direct_tcpip()
-//     */ 
-// 
-//  shutdown:
-// 
-//    libssh2_session_disconnect(session,
-//
-//                               "Normal Shutdown, Thank you for playing");
-//    libssh2_session_free(session);
-//
-// 
-//#ifdef WIN32
-//    closesocket(sock);
-//#else
-//    close(sock);
-//#endif
-//    fprintf(stderr, "all done!\n");
-// 
-//    libssh2_exit();
-//
-// 
-//    return 0;
-return 0;
+	return 0;
 }
 
 
@@ -783,7 +591,7 @@ void LTDlg::OnClose()
 	__super::OnClose();
 }
 
-void LTDlg::AddEnv( const char* zUser, const char* zIP, const char* zPassword )
+void LTDlg::AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword )
 {
 	LTEnv* pEnvCur = LTEnv::FindEnv(zUser);
 	if (pEnvCur)
@@ -799,7 +607,7 @@ void LTDlg::AddEnv( const char* zUser, const char* zIP, const char* zPassword )
 		return;
 
 	LTEnv* pNew = new LTEnv;
-	pNew->s_Name = zUser;
+	pNew->s_Name = zName;
 	pNew->s_EnvUser = zUser;
 	pNew->s_IP = zIP;
 	pNew->s_Password = zPassword;
@@ -812,9 +620,27 @@ void LTDlg::AddEnv( const char* zUser, const char* zIP, const char* zPassword )
 	InsertEnvToList(pNew);
 }
 
-void LTDlg::EditEnv( LTEnv* pEnv )
+void LTDlg::EditEnv( LTEnv* pEnvEdited )
 {
+	int i = -1;
 
+	do
+	{
+		i = o_ListEnv.GetNextItem(i, LVNI_ALL);
+		if  (i == -1)
+			break;
+
+		LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(i);
+
+		if (pEnvEdited == pEnv)
+		{
+			o_ListEnv.SetItemText(i, 0, pEnv->s_Name);
+			o_ListEnv.SetItemText(i, 1, pEnv->s_IP);
+			o_ListEnv.SetItemText(i, 2, pEnv->s_EnvUser);
+			o_ListEnv.SetItemText(i, 3, pEnv->s_Folder);
+		}
+	}
+	while(true);
 }
 
 void LTDlg::InsertEnvToList( LTEnv* pEnv )
@@ -823,8 +649,9 @@ void LTDlg::InsertEnvToList( LTEnv* pEnv )
 	o_ListEnv.InsertItem(LVIF_TEXT | LVIF_STATE, iCurCount, pEnv->s_Name, 0, LVIS_SELECTED, 0, 0);
 
 	o_ListEnv.SetItemText(iCurCount, 0, pEnv->s_Name);
-	o_ListEnv.SetItemText(iCurCount, 1, pEnv->s_IP);
-	o_ListEnv.SetItemText(iCurCount, 2, pEnv->s_Folder);
+	o_ListEnv.SetItemText(iCurCount, 1, pEnv->s_EnvUser);
+	o_ListEnv.SetItemText(iCurCount, 2, pEnv->s_IP);
+	o_ListEnv.SetItemText(iCurCount, 3, pEnv->s_Folder);
 	o_ListEnv.SetItemData(iCurCount, (DWORD_PTR)pEnv);
 }
 
@@ -848,20 +675,43 @@ void LTDlg::OnBnClickedButtonEnvEdit()
 {
 	// TODO: Add your control notification handler code here
 
-	POSITION pos = o_ListEnv->GetFirstSelectedItemPosition();
+	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
 	if (pos)
 	{
-		int nItem = o_ListEnv->GetNextSelectedItem(pos);
+		int nItem = o_ListEnv.GetNextSelectedItem(pos);
 		if (nItem > -1)
 		{
-			LTEnv* pEnv = o_ListEnv.GetItemData(nItem);
+			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
 			if (pEnv)
 			{
 				LTAddEnvDlg oDlg;
 				oDlg.SetDlg(this);
 				oDlg.SetEditMode(pEnv);
+				oDlg.DoModal();
 			}
 		}
 	}
 	//returns -1 if not selected;
+}
+
+void LTDlg::OnBnClickedButtonEnvDelete()
+{
+	// TODO: Add your control notification handler code here
+	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListEnv.GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
+			if (pEnv)
+			{
+				LTEnv::Remove(pEnv);
+				o_ListEnv.DeleteItem(nItem);
+				
+				o_ButtonEnvDelete.EnableWindow(FALSE);
+				o_ButtonEnvEdit.EnableWindow(FALSE);
+			}
+		}
+	}
 }

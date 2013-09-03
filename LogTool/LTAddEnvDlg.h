@@ -36,4 +36,5 @@ public:
 	CIPAddressCtrl o_IP;
 	virtual BOOL OnInitDialog();
 	CEdit o_EditPassword;
+	CEdit o_EditName;
 };

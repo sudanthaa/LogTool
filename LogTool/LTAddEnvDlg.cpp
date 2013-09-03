@@ -26,6 +26,7 @@ void LTAddEnvDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_ADD_ENV_USER, o_EditUser);
 	DDX_Control(pDX, IDC_IPADDRESS_ADD_ENV_IP, o_IP);
 	DDX_Control(pDX, IDC_EDIT_ADD_ENV_PASSWORD, o_EditPassword);
+	DDX_Control(pDX, IDC_EDIT_ADD_ENV_NAME, o_EditName);
 }
 
 
@@ -41,7 +42,8 @@ void LTAddEnvDlg::OnOK()
 	if (p_Env) // Edit Mode;
 	{
 		o_EditPassword.GetWindowText(p_Env->s_Password);
-		o_EditPassword.GetWindowText(p_Env->s_IP);
+		o_IP.GetWindowText(p_Env->s_IP);
+		o_EditUser.GetWindowText(p_Env->s_EnvUser);
 
 		p_Env->Save();
 		p_Dlg->EditEnv(p_Env);
@@ -51,11 +53,13 @@ void LTAddEnvDlg::OnOK()
 		CString sUser;
 		CString sPassword;
 		CString sIP;
+		CString sName;
 		o_EditPassword.GetWindowText(sPassword);
 		o_EditUser.GetWindowText(sUser);
 		o_IP.GetWindowText(sIP);
+		o_EditName.GetWindowText(sName);
 
-		p_Dlg->AddEnv(sUser, sIP, sPassword);
+		p_Dlg->AddEnv(sName, sUser, sIP, sPassword);
 	}
 
 	CDialog::OnOK();
@@ -67,11 +71,16 @@ BOOL LTAddEnvDlg::OnInitDialog()
 
 	if (p_Env) // Edit Mode;
 	{
+		o_EditName.SetWindowText(p_Env->s_Name);
 		o_EditUser.SetWindowText(p_Env->s_EnvUser);
-		o_EditUser.EnableWindow(FALSE);
+		o_EditName.EnableWindow(FALSE);
 
 		o_EditPassword.SetWindowText(p_Env->s_Password);
 		o_IP.SetWindowText(p_Env->s_IP);
+
+		CString sTitle;
+		sTitle.Format("Edit Environment (%s)", p_Env->s_Name);
+		SetWindowText(sTitle);
 	}
 	// TODO:  Add extra initialization here
 

@@ -17,7 +17,7 @@ class LTDlg : public CDialog, public LTFieldListener
 // Construction
 public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
-	void	AddEnv(const char* zUser, const char* zIP, const char* zPassword);
+	void	AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword);
 	void	EditEnv(LTEnv* pEnv);
 	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
 	void	EditLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
@@ -110,4 +110,5 @@ public:
 	CStatic o_StaticJiraTicketSep;
 	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvEdit();
+	afx_msg void OnBnClickedButtonEnvDelete();
 };

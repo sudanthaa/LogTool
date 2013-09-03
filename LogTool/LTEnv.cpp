@@ -59,14 +59,29 @@ bool LTEnv::Save()
 	return true;
 }
 
-LTEnv* LTEnv::FindEnv( const char* zUser )
+LTEnv* LTEnv::FindEnv( const char* zName )
 {
 	for (unsigned int ui = 0; ui < vec_Env.size(); ui++)
 	{
 		LTEnv* pEnv = vec_Env[ui];
-		if (pEnv->s_EnvUser == zUser)
+		if (pEnv->s_Name == zName)
 			return pEnv;
 	}
 
 	return NULL;
+}
+
+void LTEnv::Remove( LTEnv* pEnv )
+{
+	VEC_ENV_ITR itr = vec_Env.begin();
+	for (;itr != vec_Env.end(); itr++)
+	{
+		if (*itr == pEnv)
+		{
+			vec_Env.erase(itr);
+			break;
+		}
+	}
+	
+	remove(pEnv->s_FullFile);
 }
