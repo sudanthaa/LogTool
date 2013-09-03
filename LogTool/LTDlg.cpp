@@ -117,6 +117,8 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
 	ON_WM_CLOSE()
 	ON_WM_SIZE()
+	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
+	ON_BN_CLICKED(IDC_BUTTON_ENV_EDIT, &LTDlg::OnBnClickedButtonEnvEdit)
 END_MESSAGE_MAP()
 
 
@@ -151,6 +153,7 @@ BOOL LTDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 
+	o_ListEnv.SetExtendedStyle(o_ListEnv.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	o_ListEnv.InsertColumn(0,CString("Env"), LVCFMT_LEFT,75);
 	o_ListEnv.InsertColumn(1,CString("IP"),LVCFMT_LEFT, 90);
 	o_ListEnv.InsertColumn(2,CString("Folder"),LVCFMT_LEFT, 50);
@@ -361,6 +364,12 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
+
+	if ((pNMLV->uChanged & LVIF_STATE) 
+		&& (pNMLV->uNewState & LVNI_SELECTED))
+	{
+		LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(pNMLV->iItem);
+	}
 }
 
 void LTDlg::OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
@@ -375,12 +384,6 @@ void LTDlg::OnBnClickedButtonTest()
 	TestCall();
 }
 
-const char *keyfile1="H:\\.ssh\\id_rsa.pub";
-const char *keyfile2="H:\\.ssh\\id_rsa";
-const char *username="survdev11";
-const char *password="mit123";
-
-
 int LTDlg::TestCall()
 {
 	LTSshSession* pSession = new LTSshSession;
@@ -391,6 +394,7 @@ int LTDlg::TestCall()
 
 	CString sErr = "";
 	pSession->Connect(pEnv, sErr);
+	pSession->Execute("ls");
 
 //	unsigned long hostaddr;
 //    int rc, sock, i, auth_pw = 0;
@@ -831,4 +835,33 @@ void LTDlg::OnSize(UINT nType, int cx, int cy)
 
 	o_Resizer.Resize(cx, cy);
 	// TODO: Add your message handler code here
+}
+
+void LTDlg::OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+}
+
+void LTDlg::OnBnClickedButtonEnvEdit()
+{
+	// TODO: Add your control notification handler code here
+
+	POSITION pos = o_ListEnv->GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListEnv->GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTEnv* pEnv = o_ListEnv.GetItemData(nItem);
+			if (pEnv)
+			{
+				LTAddEnvDlg oDlg;
+				oDlg.SetDlg(this);
+				oDlg.SetEditMode(pEnv);
+			}
+		}
+	}
+	//returns -1 if not selected;
 }

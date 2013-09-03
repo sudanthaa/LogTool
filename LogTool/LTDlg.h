@@ -108,4 +108,6 @@ public:
 	CStatic o_StaticJiraUserID;
 	CStatic o_StaticJiraPassword;
 	CStatic o_StaticJiraTicketSep;
+	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonEnvEdit();
 };

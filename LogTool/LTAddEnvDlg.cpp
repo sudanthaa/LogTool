@@ -43,6 +43,7 @@ void LTAddEnvDlg::OnOK()
 		o_EditPassword.GetWindowText(p_Env->s_Password);
 		o_EditPassword.GetWindowText(p_Env->s_IP);
 
+		p_Env->Save();
 		p_Dlg->EditEnv(p_Env);
 	}
 	else

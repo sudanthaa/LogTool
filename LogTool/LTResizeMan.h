@@ -22,7 +22,7 @@ public:
 
 	void	Attach(CWnd* pWnd, bool bLeft, bool bTop, bool bRight, bool bBottom, 
 					int iWidth = LT_RM_LEN_EXPAND,  int iHeight = LT_RM_LEN_EXPAND);
-	void	Attach(CWnd* pWnd, DWORD dwSpec, int iWidth = LT_RM_LEN_EXPAND,  int iHeight = LT_RM_LEN_EXPAND);
+	void	Attach(CWnd* pWnd, DWORD dwSpec, int iMinWidth = LT_RM_LEN_EXPAND,  int iMinHeight = LT_RM_LEN_EXPAND);
 	void	Originate(CWnd* pParent);
 	void	Resize(int iCX, int iCY);
 
@@ -32,8 +32,8 @@ public:
 		CWnd*	p_Wnd;
 		DWORD	dw_Spec;
 		CRect	r_Original;
-		int		i_Width;
-		int		i_Height;
+		int		i_MinWidth;
+		int		i_MinHeight;
 	};
 
 	CRect	r_Original;

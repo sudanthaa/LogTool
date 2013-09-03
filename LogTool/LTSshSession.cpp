@@ -231,3 +231,105 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
     TRACE( "all done!\n");
     return 0;
 }
+
+static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
+{
+	struct timeval timeout;
+	int rc;
+	fd_set fd;
+	fd_set *writefd = NULL;
+	fd_set *readfd = NULL;
+	int dir;
+
+	timeout.tv_sec = 10;
+	timeout.tv_usec = 0;
+
+	FD_ZERO(&fd);
+
+	FD_SET(socket_fd, &fd);
+
+	/* now make sure we wait in the correct direction */ 
+	dir = libssh2_session_block_directions(session);
+
+
+	if (dir & LIBSSH2_SESSION_BLOCK_INBOUND)
+		readfd = &fd;
+
+	if (dir & LIBSSH2_SESSION_BLOCK_OUTBOUND)
+		writefd = &fd;
+
+	rc = select(socket_fd + 1, readfd, writefd, NULL, &timeout);
+
+	return rc;
+}
+
+void LTSshSession::Execute(const char* zCommand)
+{
+	int rc = 0;
+	int bytecount = 0;
+
+	while ( (rc = libssh2_channel_exec(p_Channel, zCommand)) == LIBSSH2_ERROR_EAGAIN )
+    {
+        waitsocket(i_Socket, p_Session);
+    }
+    
+	if ( rc != 0 )
+    {
+        TRACE("Error\n");
+        exit( 1 );
+    }
+
+    for ( ;; )
+    {
+        /* loop until we block */ 
+        int rc;
+        do
+        {
+            char buffer[0x4000];
+            rc = libssh2_channel_read( p_Channel, buffer, sizeof(buffer) );
+
+            if( rc > 0 )
+            {
+                int i;
+                bytecount += rc;
+                TRACE( "We read:\n");
+                for( i=0; i < rc; ++i )
+                    fputc( buffer[i], stderr);
+                TRACE( "\n");
+            }
+            else {
+                if( rc != LIBSSH2_ERROR_EAGAIN )
+                    /* no need to output this for the EAGAIN case */ 
+                    TRACE( "libssh2_channel_read returned %d\n", rc);
+            }
+        }
+        while( rc > 0 );
+ 
+        /* this is due to blocking that would occur otherwise so we loop on
+           this condition */ 
+        if ( rc == LIBSSH2_ERROR_EAGAIN )
+        {
+            waitsocket(i_Socket, p_Session);
+        }
+        else
+            break;
+    }
+	
+	int exitcode = 127;
+	char *exitsignal=(char *)"none";
+
+	while( (rc = libssh2_channel_close(p_Channel)) == LIBSSH2_ERROR_EAGAIN )
+        waitsocket(i_Socket, p_Session);
+ 
+    if( rc == 0 )
+    {
+        exitcode = libssh2_channel_get_exit_status( p_Channel );
+        libssh2_channel_get_exit_signal(p_Channel, &exitsignal,
+                                        NULL, NULL, NULL, NULL, NULL);
+    }
+ 
+    if (exitsignal)
+        TRACE( "\nGot signal: %s\n", exitsignal);
+    else
+        TRACE( "\nEXIT: %d bytecount: %d\n", exitcode, bytecount);
+}

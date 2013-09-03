@@ -23,8 +23,8 @@ void LTResizeMan::Attach( CWnd* pWnd, DWORD dwSpec, int iMinWidth,  int iMinHeig
 	ResizeEntry* pEntry = new ResizeEntry;
 	pEntry->dw_Spec = dwSpec;
 	pEntry->p_Wnd  = pWnd;
-	pEntry->i_Height = iMinHeight;
-	pEntry->i_Width = iMinWidth;
+	pEntry->i_MinHeight = iMinHeight;
+	pEntry->i_MinWidth = iMinWidth;
 	a_Resizes.push_back(pEntry);
 }
 
@@ -58,29 +58,22 @@ void LTResizeMan::Resize( int iCX, int iCY )
 		if (pEntry->dw_Spec & LT_RM_RIGHT)
 		{
 			rNew.right = iCX - (r_Original.Width() - pEntry->r_Original.right);
-			if (pEntry->i_Width == LT_RM_LEN_EXPAND)
-			{
-				// Do nothing
-			}
-			else if (pEntry->i_Width == LT_RM_LEN_RESOURCE)
+
+			if (pEntry->i_MinWidth == LT_RM_LEN_RESOURCE)
 				rNew.right = rNew.left + pEntry->r_Original.Width();
-			else
-				rNew.right = rNew.left + pEntry->i_Width;
+			else if  (pEntry->i_MinWidth != LT_RM_LEN_EXPAND) 
+				rNew.right = rNew.left + pEntry->i_MinWidth;
 		}
 
 		if (pEntry->dw_Spec & LT_RM_BOTTOM)
 		{
 			rNew.bottom = iCY - (r_Original.Height() - pEntry->r_Original.bottom);
-			if (pEntry->i_Height == LT_RM_LEN_EXPAND)
-			{
-				// Do nothing
-			}
-			else if (pEntry->i_Width == LT_RM_LEN_RESOURCE)
-				rNew.right = rNew.left + pEntry->r_Original.Width();
-			else
-				rNew.right = rNew.left + pEntry->i_Width;
-		}
 
+			if (pEntry->i_MinHeight == LT_RM_LEN_RESOURCE)
+				rNew.right = rNew.left + pEntry->r_Original.Width();
+			else if  (pEntry->i_MinWidth != LT_RM_LEN_EXPAND) 
+				rNew.right = rNew.left + pEntry->i_MinWidth;
+		}
 
 		pEntry->p_Wnd->MoveWindow(rNew, TRUE);
 	}

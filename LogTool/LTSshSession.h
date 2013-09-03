@@ -20,6 +20,8 @@ public:
 					LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
 					void **abstract);
 
+	void	Execute(const char* zCommand);
+
 protected:
 	LTEnv* p_Env;
 	int		i_Socket;
