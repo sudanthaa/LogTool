@@ -93,8 +93,8 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CStatic o_StaticFrmFiles;
 	CStatic o_StaticFrmJira;
-	CStatic o_StatiFrmEnvionment;
-	CStatic o_StatiFrmLogMac;
+	CStatic o_StaticFrmEnvionment;
+	CStatic o_StaticFrmLogMac;
 	CButton o_ButtonLogMacNew;
 	CButton o_ButtonLogMacEdit;
 	CButton o_ButtonLogMacDelete;
@@ -107,4 +107,5 @@ public:
 	CStatic o_StaticJiraTicket;
 	CStatic o_StaticJiraUserID;
 	CStatic o_StaticJiraPassword;
+	CStatic o_StaticJiraTicketSep;
 };

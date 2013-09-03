@@ -9,19 +9,22 @@ LTResizeMan::~LTResizeMan(void)
 {
 }
 
-void LTResizeMan::Attach( CWnd* pWnd, bool bLeft, bool bTop, bool bRight, bool bBottom )
+void LTResizeMan::Attach( CWnd* pWnd, bool bLeft, bool bTop, bool bRight, bool bBottom 
+						 , int iMinWidth,  int iMinHeight)
 {
 	DWORD dwSpec = 
 		(bLeft ? LT_RM_LEFT : 0) | (bRight ? LT_RM_RIGHT : 0) | (bTop ? LT_RM_TOP : 0)| (bBottom ? LT_RM_BOTTOM : 0);
 	
-	Attach(pWnd, dwSpec);
+	Attach(pWnd, dwSpec, iMinWidth, iMinHeight);
 }
 
-void LTResizeMan::Attach( CWnd* pWnd, DWORD dwSpec )
+void LTResizeMan::Attach( CWnd* pWnd, DWORD dwSpec, int iMinWidth,  int iMinHeight)
 {
 	ResizeEntry* pEntry = new ResizeEntry;
 	pEntry->dw_Spec = dwSpec;
 	pEntry->p_Wnd  = pWnd;
+	pEntry->i_Height = iMinHeight;
+	pEntry->i_Width = iMinWidth;
 	a_Resizes.push_back(pEntry);
 }
 
@@ -46,17 +49,38 @@ void LTResizeMan::Resize( int iCX, int iCY )
 		ResizeEntry* pEntry = a_Resizes[ui];
 		CRect rNew = pEntry->r_Original;
 
-		if (pEntry->dw_Spec & LT_RM_RIGHT)
-			rNew.right = iCX - (r_Original.Width() - pEntry->r_Original.right);
-
-		if (pEntry->dw_Spec & LT_RM_BOTTOM)
-			rNew.bottom = iCY - (r_Original.Height() - pEntry->r_Original.bottom);
-
 		if (pEntry->dw_Spec & LT_RM_LEFT)
 			rNew.left = iCX - (r_Original.Width() - pEntry->r_Original.left);
 
 		if (pEntry->dw_Spec & LT_RM_TOP)
 			rNew.top = iCY - (r_Original.Height() - pEntry->r_Original.top);
+
+		if (pEntry->dw_Spec & LT_RM_RIGHT)
+		{
+			rNew.right = iCX - (r_Original.Width() - pEntry->r_Original.right);
+			if (pEntry->i_Width == LT_RM_LEN_EXPAND)
+			{
+				// Do nothing
+			}
+			else if (pEntry->i_Width == LT_RM_LEN_RESOURCE)
+				rNew.right = rNew.left + pEntry->r_Original.Width();
+			else
+				rNew.right = rNew.left + pEntry->i_Width;
+		}
+
+		if (pEntry->dw_Spec & LT_RM_BOTTOM)
+		{
+			rNew.bottom = iCY - (r_Original.Height() - pEntry->r_Original.bottom);
+			if (pEntry->i_Height == LT_RM_LEN_EXPAND)
+			{
+				// Do nothing
+			}
+			else if (pEntry->i_Width == LT_RM_LEN_RESOURCE)
+				rNew.right = rNew.left + pEntry->r_Original.Width();
+			else
+				rNew.right = rNew.left + pEntry->i_Width;
+		}
+
 
 		pEntry->p_Wnd->MoveWindow(rNew, TRUE);
 	}

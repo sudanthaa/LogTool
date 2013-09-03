@@ -74,8 +74,8 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COMBO_EXCLUDE_FILTER, o_ComboExcludeFilters);
 	DDX_Control(pDX, IDC_STATIC_FRAME_FILE_LIST, o_StaticFrmFiles);
 	DDX_Control(pDX, IDC_STATIC_FRM_JIRA, o_StaticFrmJira);
-	DDX_Control(pDX, IDC_STATIC_FRAME_ENVIRONMENT, o_StatiFrmEnvionment);
-	DDX_Control(pDX, IDC_STATIC_FRAME_LOG_MACHINE, o_StatiFrmLogMac);
+	DDX_Control(pDX, IDC_STATIC_FRAME_ENVIRONMENT, o_StaticFrmEnvionment);
+	DDX_Control(pDX, IDC_STATIC_FRAME_LOG_MACHINE, o_StaticFrmLogMac);
 	DDX_Control(pDX, IDC_BUTTON_LOGMAC_NEW, o_ButtonLogMacNew);
 	DDX_Control(pDX, IDC_BUTTON_LOGMAC_EDIT, o_ButtonLogMacEdit);
 	DDX_Control(pDX, IDC_BUTTON_LOGMAC_DELETE, o_ButtonLogMacDelete);
@@ -88,6 +88,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_JIRA_PROJECT, o_StaticJiraTicket);
 	DDX_Control(pDX, IDC_STATIC_JIRA_USER_ID, o_StaticJiraUserID);
 	DDX_Control(pDX, IDC_STATIC_JIRA_PASSWORD, o_StaticJiraPassword);
+	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -197,19 +198,34 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_StaticFrmFiles, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_ButtonCancel, LT_RM_ALL);
-	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_CheckJiraCreateNew, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_EditJiraURL, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_EditJiraUser, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_EditJiraTicket, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_EditJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_ComboJiraProject, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_StaticJiraTicket, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_StaticJiraUserID, LT_RM_TOP | LT_RM_BOTTOM);
-	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_TOP | LT_RM_BOTTOM);
+
+	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_CheckJiraCreateNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_EditJiraURL, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_EditJiraUser, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_EditJiraTicket, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_EditJiraPassword, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ComboJiraProject, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraTicket, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraTicketSep, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraUserID, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_ComboLogMachines, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonLogMacDelete, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonLogMacNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonLogMacEdit, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticFrmLogMac, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_ListEnv, LT_RM_BOTTOM);
+	o_Resizer.Attach(&o_ButtonEnvDelete, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonEnvEdit, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonEnvNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticFrmEnvionment, LT_RM_BOTTOM);
+
 
 	o_Resizer.Originate(this);
 
