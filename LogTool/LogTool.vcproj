@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTScreenshotCtrl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTSshSession.cpp"
 				>
 			</File>
@@ -297,6 +301,10 @@
 			</File>
 			<File
 				RelativePath=".\LTResizeMan.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTScreenshotCtrl.h"
 				>
 			</File>
 			<File

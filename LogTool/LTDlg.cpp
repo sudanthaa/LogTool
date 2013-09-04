@@ -89,6 +89,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_JIRA_USER_ID, o_StaticJiraUserID);
 	DDX_Control(pDX, IDC_STATIC_JIRA_PASSWORD, o_StaticJiraPassword);
 	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
+	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -120,6 +121,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_EDIT, &LTDlg::OnBnClickedButtonEnvEdit)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_DELETE, &LTDlg::OnBnClickedButtonEnvDelete)
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 
@@ -161,6 +163,10 @@ BOOL LTDlg::OnInitDialog()
 	o_ListEnv.InsertColumn(3,CString("Folder"),LVCFMT_LEFT, 50);
 	LoadEnvFromXShellConfig();
 	
+	CRect rScreenShot;
+	o_StaticScreenshotBoundary.GetWindowRect(rScreenShot);
+	ScreenToClient(rScreenShot);
+	o_Screenshot.MoveWindow(rScreenShot);
 
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
@@ -714,4 +720,16 @@ void LTDlg::OnBnClickedButtonEnvDelete()
 			}
 		}
 	}
+}
+
+int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (__super::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	o_Screenshot.CreateScreenshotCtrl(this, CRect(0,0,0,0), 300300);
+
+	// TODO:  Add your specialized creation code here
+
+	return 0;
 }

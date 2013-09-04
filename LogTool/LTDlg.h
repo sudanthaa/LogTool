@@ -10,6 +10,7 @@
 #include "LTConfig.h"
 #include "LTEnv.h"
 #include "LTResizeMan.h"
+#include "LTScreenshotCtrl.h"
 
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener
@@ -51,6 +52,7 @@ public:
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 
 	LTResizeMan o_Resizer;
+	LTScreenshotCtrl o_Screenshot;
 
 protected:
 	virtual void OnOK();
@@ -111,4 +113,6 @@ public:
 	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvEdit();
 	afx_msg void OnBnClickedButtonEnvDelete();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	CStatic o_StaticScreenshotBoundary;
 };
