@@ -90,6 +90,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_JIRA_PASSWORD, o_StaticJiraPassword);
 	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
 	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
+	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -99,7 +100,8 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ENV, &LTDlg::OnLvnItemchangedListEnv)
 	ON_NOTIFY(HDN_ITEMCLICK, 0, &LTDlg::OnHdnItemclickListEnv)
-	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
+	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	
+	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
 	ON_CBN_KILLFOCUS(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnKillfocusComboJiraProject)
 	ON_CBN_KILLFOCUS(IDC_COMBO_INCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboIncludeFilter)
 	ON_CBN_KILLFOCUS(IDC_COMBO_EXCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboExcludeFilter)
@@ -241,6 +243,8 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonEnvNew, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticFrmEnvionment, LT_RM_BOTTOM);
 
+	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_Screenshot, LT_RM_VIRTICAL);
 
 	o_Resizer.Originate(this);
 
@@ -409,7 +413,8 @@ int LTDlg::TestCall()
 
 	CString sErr = "";
 	pSession->Connect(pEnv, sErr);
-	pSession->Execute("ls");
+	pSession->Execute("ls -1 logs/Surv* logs/CCC*");
+	TRACE("===========================\n");
 
 	return 0;
 }

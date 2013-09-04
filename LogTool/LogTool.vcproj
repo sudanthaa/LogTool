@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=".;D:\tplibs\libssh2-1.4.3\src"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -153,9 +153,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libssh2.lib"
+				AdditionalDependencies="libssh2.lib uxtheme.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="D:\tplibs\libssh2-1.4.3\win32\Release_dll"
+				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"

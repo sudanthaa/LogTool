@@ -19,7 +19,6 @@ static char*	lt_strdup(const char* str, void **abstract)
 LTSshSession::LTSshSession(void)
 {
 	p_Session = NULL;
-	p_Channel = NULL;
 	p_Env = NULL;
 }
 
@@ -33,13 +32,13 @@ void LTSshSession::KeyboadCallback( const char *name, int name_len, const char *
 								   LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses, 
 								   void **abstract )
 {
-	LTSshSession* pSession = (LTSshSession*) abstract;
+	LTSshSession* pSession = (LTSshSession*) (*abstract);
 	LTEnv* pEnv = pSession->GetEnv();
 
 	if (num_prompts == 1)
 	{
 		responses[0].text = lt_strdup(pEnv->s_Password.GetBuffer(), abstract);
-		responses[1].length = pEnv->s_Password.GetLength();
+		responses[0].length = pEnv->s_Password.GetLength();
 	}
 }
 
@@ -154,74 +153,14 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
         TRACE( "No supported authentication methods found!\n");
         goto shutdown;
     }
- 
-    /* Request a shell */ 
-    if (!(p_Channel = libssh2_channel_open_session(p_Session))) {
-
-        TRACE( "Unable to open a session\n");
-        goto shutdown;
-    }
- 
-    /* Some environment variables may be set,
-     * It's up to the server which ones it'll allow though
-     */ 
-    libssh2_channel_setenv(p_Channel, "FOO", "bar");
-
- 
-    /* Request a terminal with 'vanilla' terminal emulation
-     * See /etc/termcap for more options
-     */ 
-    if (libssh2_channel_request_pty(p_Channel, "vanilla")) {
-
-        TRACE( "Failed requesting pty\n");
-        goto skip_shell;
-    }
- 
-    /* Open a SHELL on that pty */ 
-    if (libssh2_channel_shell(p_Channel)) {
-
-        TRACE( "Unable to request shell on allocated pty\n");
-        goto shutdown;
-    }
 
 	return true;
-
-
-	//libssh2_channel_exec(p_Channel, "ls -la");
-
  
-    /* At this point the shell can be interacted with using
-     * libssh2_channel_read()
-     * libssh2_channel_read_stderr()
-     * libssh2_channel_write()
-     * libssh2_channel_write_stderr()
-     *
-     * Blocking mode may be (en|dis)abled with: libssh2_channel_set_blocking()
-     * If the server send EOF, libssh2_channel_eof() will return non-0
-     * To send EOF to the server use: libssh2_channel_send_eof()
-     * A p_Channel can be closed with: libssh2_channel_close()
-     * A p_Channel can be freed with: libssh2_channel_free()
-     */ 
  
-  skip_shell:
-    if (p_Channel) {
-        libssh2_channel_free(p_Channel);
-        p_Channel = NULL;
-    }
- 
-    /* Other p_Channel types are supported via:
-     * libssh2_scp_send()
-     * libssh2_scp_recv()
-     * libssh2_channel_direct_tcpip()
-     */ 
- 
-  shutdown:
- 
-    libssh2_session_disconnect(p_Session,
-
-                               "Normal Shutdown, Thank you for playing");
+ shutdown:
+    libssh2_session_disconnect(p_Session, "Normal Shutdown, Thank you for playing");
     libssh2_session_free(p_Session);
-
+	p_Session = NULL;
  
 #ifdef WIN32
     closesocket(i_Socket);
@@ -268,7 +207,16 @@ void LTSshSession::Execute(const char* zCommand)
 	int rc = 0;
 	int bytecount = 0;
 
-	while ( (rc = libssh2_channel_exec(p_Channel, zCommand)) == LIBSSH2_ERROR_EAGAIN )
+	LIBSSH2_CHANNEL*	pChannel;
+
+	/* Request a shell */ 
+	if (!(pChannel = libssh2_channel_open_session(p_Session))) {
+
+		TRACE( "Unable to open a session\n");
+		return;
+	}
+
+	while ( (rc = libssh2_channel_exec(pChannel, zCommand)) == LIBSSH2_ERROR_EAGAIN )
     {
         waitsocket(i_Socket, p_Session);
     }
@@ -276,7 +224,7 @@ void LTSshSession::Execute(const char* zCommand)
 	if ( rc != 0 )
     {
         TRACE("Error\n");
-        exit( 1 );
+        return;
     }
 
     for ( ;; )
@@ -286,7 +234,7 @@ void LTSshSession::Execute(const char* zCommand)
         do
         {
             char buffer[0x4000];
-            rc = libssh2_channel_read( p_Channel, buffer, sizeof(buffer) );
+            rc = libssh2_channel_read( pChannel, buffer, sizeof(buffer) );
 
             if( rc > 0 )
             {
@@ -294,7 +242,7 @@ void LTSshSession::Execute(const char* zCommand)
                 bytecount += rc;
                 TRACE( "We read:\n");
                 for( i=0; i < rc; ++i )
-                    fputc( buffer[i], stderr);
+                    TRACE( "%c" ,buffer[i]);
                 TRACE( "\n");
             }
             else {
@@ -315,16 +263,17 @@ void LTSshSession::Execute(const char* zCommand)
             break;
     }
 	
+
 	int exitcode = 127;
 	char *exitsignal=(char *)"none";
 
-	while( (rc = libssh2_channel_close(p_Channel)) == LIBSSH2_ERROR_EAGAIN )
+	while( (rc = libssh2_channel_close(pChannel)) == LIBSSH2_ERROR_EAGAIN )
         waitsocket(i_Socket, p_Session);
  
     if( rc == 0 )
     {
-        exitcode = libssh2_channel_get_exit_status( p_Channel );
-        libssh2_channel_get_exit_signal(p_Channel, &exitsignal,
+        exitcode = libssh2_channel_get_exit_status( pChannel );
+        libssh2_channel_get_exit_signal(pChannel, &exitsignal,
                                         NULL, NULL, NULL, NULL, NULL);
     }
  
@@ -332,4 +281,7 @@ void LTSshSession::Execute(const char* zCommand)
         TRACE( "\nGot signal: %s\n", exitsignal);
     else
         TRACE( "\nEXIT: %d bytecount: %d\n", exitcode, bytecount);
+
+	libssh2_channel_free(pChannel);
+	pChannel = NULL;
 }

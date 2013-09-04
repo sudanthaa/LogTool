@@ -115,4 +115,5 @@ public:
 	afx_msg void OnBnClickedButtonEnvDelete();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CStatic o_StaticScreenshotBoundary;
+	CStatic o_StaticFrmScreenshots;
 };
