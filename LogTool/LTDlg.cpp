@@ -641,8 +641,8 @@ void LTDlg::EditEnv( LTEnv* pEnvEdited )
 		if (pEnvEdited == pEnv)
 		{
 			o_ListEnv.SetItemText(i, 0, pEnv->s_Name);
-			o_ListEnv.SetItemText(i, 1, pEnv->s_IP);
-			o_ListEnv.SetItemText(i, 2, pEnv->s_EnvUser);
+			o_ListEnv.SetItemText(i, 1, pEnv->s_EnvUser);
+			o_ListEnv.SetItemText(i, 2, pEnv->s_IP);
 			o_ListEnv.SetItemText(i, 3, pEnv->s_Folder);
 		}
 	}
