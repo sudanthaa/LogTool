@@ -70,7 +70,7 @@ void LTConfig::Load()
 void LTConfig::OnPostLoad()
 {
 	if (o_DisplayFilterIncludes.GetCount() == 0)
-		o_DisplayFilterIncludes.Set("logs/*;corefiles/*");
+		o_DisplayFilterIncludes.Set("logs/*.log;corefiles/*");
 
 	if (o_DisplayFilterExcludes.GetCount() == 0)
 		o_DisplayFilterExcludes.Set("logs/SSM*");

@@ -413,7 +413,7 @@ int LTDlg::TestCall()
 
 	CString sErr = "";
 	pSession->Connect(pEnv, sErr);
-	pSession->Execute("ls -1 logs/Surv* logs/CCC*");
+	pSession->Execute("ls -1 logs/Surv* corefiles/*");
 	TRACE("===========================\n");
 
 	return 0;
