@@ -44,10 +44,10 @@ END_MESSAGE_MAP()
 
 BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
 {
-	p_PrevButton = new ArrowButton(this, &h_thmArrow, SPNP_DOWNHORZ);
-	p_NextButton = new ArrowButton(this, &h_thmArrow, SPNP_UPHORZ);
-	//p_PrevButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
-	//p_NextButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
+	//p_PrevButton = new ArrowButton(this, &h_thmArrow, SPNP_DOWNHORZ);
+	//p_NextButton = new ArrowButton(this, &h_thmArrow, SPNP_UPHORZ);
+	p_PrevButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
+	p_NextButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
 
 	Layout(rArea);
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
@@ -108,8 +108,8 @@ int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	h_thmEdit = OpenThemeData(m_hWnd, L"EDIT");
-	h_thmArrow = OpenThemeData(m_hWnd, L"SPIN");
-	//h_thmArrow = OpenThemeData(m_hWnd, L"SCROLLBAR");
+	//h_thmArrow = OpenThemeData(m_hWnd, L"SPIN");
+	h_thmArrow = OpenThemeData(m_hWnd, L"SCROLLBAR");
 
 	p_NextButton->SetTheme(&h_thmArrow);
 	p_PrevButton->SetTheme(&h_thmArrow);
