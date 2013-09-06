@@ -41,11 +41,27 @@ public:
 	class Screenshot
 	{
 	public:
+		Screenshot(LTScreenshotCtrl* pCtrl);
+		~Screenshot();
 
+		void	OnMouseMove(CPoint point, CDC* pDC);
+		void	OnMouseDown(CPoint point, CDC* pDC);
+		void	OnMouseUp(CPoint point, CDC* pDC);
+		void	OnMouseLeave(CDC* pDC);
+		void	OnPaint(CDC* pDC);
+		void	Layout(CRect rContainer);
+
+		LTScreenshotCtrl* p_Ctrl;
+		ArrowButton* p_CloseButton;
+		ArrowButton* p_EditButton;
+		CRect	r_Rect;
+
+		HTHEME* ph_Theme;
 	};
 
 	HTHEME h_thmEdit;
 	HTHEME h_thmArrow;
+	HTHEME h_thmWindow;
 
 	CRect r_Main;
 	bool  b_LeaveTracking;

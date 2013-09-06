@@ -99,7 +99,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ENV, &LTDlg::OnLvnItemchangedListEnv)
-	ON_NOTIFY(HDN_ITEMCLICK, 0, &LTDlg::OnHdnItemclickListEnv)
+//	ON_NOTIFY(HDN_ITEMCLICK, 0, &LTDlg::OnHdnItemclickListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	
 	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
 	ON_CBN_KILLFOCUS(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnKillfocusComboJiraProject)
@@ -120,10 +120,11 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
 	ON_WM_CLOSE()
 	ON_WM_SIZE()
-	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
+//	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_EDIT, &LTDlg::OnBnClickedButtonEnvEdit)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_DELETE, &LTDlg::OnBnClickedButtonEnvDelete)
 	ON_WM_CREATE()
+//	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &LTDlg::OnHdnItemdblclickListEnv)
 END_MESSAGE_MAP()
 
 
@@ -391,12 +392,12 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-void LTDlg::OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
-	// TODO: Add your control notification handler code here
-	*pResult = 0;
-}
+//void LTDlg::OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+//	// TODO: Add your control notification handler code here
+//	*pResult = 0;
+//}
 
 void LTDlg::OnBnClickedButtonTest()
 {
@@ -675,12 +676,12 @@ void LTDlg::OnSize(UINT nType, int cx, int cy)
 	// TODO: Add your message handler code here
 }
 
-void LTDlg::OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
-	// TODO: Add your control notification handler code here
-	*pResult = 0;
-}
+//void LTDlg::OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+//	// TODO: Add your control notification handler code here
+//	*pResult = 0;
+//}
 
 void LTDlg::OnBnClickedButtonEnvEdit()
 {
@@ -738,3 +739,13 @@ int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
+
+//void LTDlg::OnHdnItemdblclickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+//	// TODO: Add your control notification handler code here
+//	*pResult = 0;
+//
+//	int i = 0;
+//	i++;
+//}

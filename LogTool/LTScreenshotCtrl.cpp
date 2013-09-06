@@ -29,6 +29,7 @@ LTScreenshotCtrl::~LTScreenshotCtrl()
 	delete p_NextButton;
 	CloseThemeData(h_thmEdit);
 	CloseThemeData(h_thmArrow);
+	CloseThemeData(h_thmWindow);
 }
 
 
@@ -110,6 +111,7 @@ int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	h_thmEdit = OpenThemeData(m_hWnd, L"EDIT");
 	//h_thmArrow = OpenThemeData(m_hWnd, L"SPIN");
 	h_thmArrow = OpenThemeData(m_hWnd, L"SCROLLBAR");
+	h_thmWindow = OpenThemeData(m_hWnd, L"WINDOW");
 
 	p_NextButton->SetTheme(&h_thmArrow);
 	p_PrevButton->SetTheme(&h_thmArrow);
@@ -288,5 +290,48 @@ bool LTScreenshotCtrl::TrackMouseLeave()
 	b_LeaveTracking = true;
 
 	return false;
+}
+
+LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl )
+{
+	p_Ctrl = pCtrl;
+	p_CloseButton = new ArrowButton(pCtrl, pTheme, iPart, iStateOffset);
+	p_EditButton = new ArrowButton(pCtrl, pTheme, iPart, iStateOffset);
+}
+
+LTScreenshotCtrl::Screenshot::~Screenshot()
+{
+	delete p_CloseButton;
+	delete p_EditButton;
+}
+
+void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer )
+{
+
+}
+
+void LTScreenshotCtrl::Screenshot::OnMouseMove( CPoint point, CDC* pDC )
+{
+
+}
+
+void LTScreenshotCtrl::Screenshot::OnMouseDown( CPoint point, CDC* pDC )
+{
+
+}
+
+void LTScreenshotCtrl::Screenshot::OnMouseUp( CPoint point, CDC* pDC )
+{
+
+}
+
+void LTScreenshotCtrl::Screenshot::OnMouseLeave( CDC* pDC )
+{
+
+}
+
+void LTScreenshotCtrl::Screenshot::OnPaint( CDC* pDC )
+{
+
 }
 

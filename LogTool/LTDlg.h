@@ -59,7 +59,7 @@ protected:
 public:
 	CComboBox o_ComboJiraProject;
 	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+//	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvAdd();
 	afx_msg void OnBnClickedButtonTest();
 	afx_msg void OnCbnKillfocusComboJiraProject();
@@ -110,10 +110,11 @@ public:
 	CStatic o_StaticJiraUserID;
 	CStatic o_StaticJiraPassword;
 	CStatic o_StaticJiraTicketSep;
-	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+//	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvEdit();
 	afx_msg void OnBnClickedButtonEnvDelete();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CStatic o_StaticScreenshotBoundary;
 	CStatic o_StaticFrmScreenshots;
+//	afx_msg void OnHdnItemdblclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 };
