@@ -257,6 +257,10 @@
 				RelativePath=".\LTUtils.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\LTVirtualButton.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -313,6 +317,10 @@
 			</File>
 			<File
 				RelativePath=".\LTUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTVirtualButton.h"
 				>
 			</File>
 			<File

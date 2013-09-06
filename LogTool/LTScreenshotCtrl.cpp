@@ -12,6 +12,13 @@
 #define  BTN_STATE_PRESSED	3
 #define  BTN_STATE_DISABLED	4
 
+#define  CLOSE_BTN_WIDTH	13
+#define  CLOSE_BTN_HEIGHT	13
+#define  BUTTON_PADDING		2
+#define  THUMBNAIL_GAP		2
+#define  THUMBNAIL_CONTAINER_PADDING	3
+#define  THUMBNAIL_TILE_HEIGHT_TO_WIDTH_RATIO	1.5
+
 // LTScreenshotCtrl
 
 IMPLEMENT_DYNAMIC(LTScreenshotCtrl, CWnd)
@@ -45,8 +52,6 @@ END_MESSAGE_MAP()
 
 BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
 {
-	//p_PrevButton = new ArrowButton(this, &h_thmArrow, SPNP_DOWNHORZ);
-	//p_NextButton = new ArrowButton(this, &h_thmArrow, SPNP_UPHORZ);
 	p_PrevButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
 	p_NextButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
 
@@ -57,8 +62,6 @@ BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID
 	Layout(rArea);
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
 }
-
-
 
 // LTScreenshotCtrl message handlers
 
@@ -137,30 +140,6 @@ int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	return 0;
 }
-
-
-
-//void LTScreenshotCtrl::OnNcPaint()
-//{
-//	// TODO: Add your message handler code here
-//	// Do not call CWnd::OnNcPaint() for painting messages
-//}
-
-//void LTScreenshotCtrl::OnNcPaint()
-//{
-//	// TODO: Add your message handler code here
-//	// Do not call CWnd::OnNcPaint() for painting messages
-//
-//	Default();
-//	CWindowDC dc(this);
-//	CRect invRect;
-//	dc.GetClipBox (&invRect);
-//	//dc.FillSolidRect (&invRect,RGB (248,2,25));
-//
-//	if (IsThemeBackgroundPartiallyTransparent(h_thmEdit, EP_EDITBORDER_NOSCROLL, EPSN_NORMAL))
-//		DrawThemeParentBackground(m_hWnd, dc.m_hDC, invRect);
-//	DrawThemeBackground(h_thmEdit, dc.m_hDC, EP_EDITBORDER_NOSCROLL, EPSN_NORMAL, invRect, NULL);
-//}
 
 void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
@@ -350,21 +329,15 @@ LTScreenshotCtrl::Screenshot::~Screenshot()
 	delete p_EditButton;
 }
 
-
-#define  CLOSE_BTN_WIDTH  13
-#define  CLOSE_BTN_HEIGHT 13
-#define  BUTTON_PADDING  2
-#define  THUMBNAIL_GAP  2
-
 void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
 {
 	r_Rect = rContainer;
-	r_Rect.top += 3;
-	r_Rect.left += 3;
-	r_Rect.bottom -= 3;
-	r_Rect.right -= 3;
+	r_Rect.top += THUMBNAIL_CONTAINER_PADDING;
+	r_Rect.left += THUMBNAIL_CONTAINER_PADDING;
+	r_Rect.bottom -= THUMBNAIL_CONTAINER_PADDING;
+	r_Rect.right -= THUMBNAIL_CONTAINER_PADDING;
 
-	int iWidth = (r_Rect.Height() * 1.5);
+	int iWidth = (r_Rect.Height() * THUMBNAIL_TILE_HEIGHT_TO_WIDTH_RATIO);
 	
 	r_Rect.left += iIndex * (iWidth + THUMBNAIL_GAP);
 	r_Rect.right = r_Rect.left + iWidth;
