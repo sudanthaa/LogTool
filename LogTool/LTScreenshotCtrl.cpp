@@ -50,6 +50,10 @@ BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID
 	p_PrevButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
 	p_NextButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
 
+	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
+	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
+	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
+
 	Layout(rArea);
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
 }
@@ -69,11 +73,19 @@ void LTScreenshotCtrl::OnPaint()
 	CRect rClient;
 	GetClientRect(rClient);
 
+
 	DrawThemeParentBackground(m_hWnd, dc.m_hDC, rClient);
 	DrawThemeBackground(h_thmEdit, dc.m_hDC, EP_EDITBORDER_NOSCROLL, EPSN_NORMAL, r_Main, NULL);
 
 	p_NextButton->OnPaint(&dc);
 	p_PrevButton->OnPaint(&dc);
+
+	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	{
+		Screenshot* pScreenShot = a_ScreenShots[i];
+		pScreenShot->OnPaint(&dc);
+	}
+
 }
 
 void LTScreenshotCtrl::Layout( CRect rClient )
@@ -92,6 +104,12 @@ void LTScreenshotCtrl::Layout( CRect rClient )
 
 	p_NextButton->SetRect(rNextButton);
 	p_PrevButton->SetRect(rPrevButton);
+
+	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	{
+		Screenshot* pScreenShot = a_ScreenShots[i];
+		pScreenShot->Layout(r_Main, i);
+	}
 }
 
 void LTScreenshotCtrl::OnSize(UINT nType, int cx, int cy)
@@ -153,6 +171,12 @@ void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	p_NextButton->OnMouseMove(point, &dc);
 	p_PrevButton->OnMouseMove(point, &dc);
 
+	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	{
+		Screenshot* pScreenShot = a_ScreenShots[i];
+		pScreenShot->OnMouseMove(point, &dc);
+	}
+
 	CWnd::OnMouseMove(nFlags, point);
 }
 
@@ -164,6 +188,12 @@ void LTScreenshotCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	p_NextButton->OnMouseDown(point, &dc);
 	p_PrevButton->OnMouseDown(point, &dc);
 
+	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	{
+		Screenshot* pScreenShot = a_ScreenShots[i];
+		pScreenShot->OnMouseDown(point, &dc);
+	}
+
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
@@ -173,6 +203,12 @@ void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	CClientDC dc(this);
 	p_NextButton->OnMouseUp(point, &dc);
 	p_PrevButton->OnMouseUp(point, &dc);
+
+	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	{
+		Screenshot* pScreenShot = a_ScreenShots[i];
+		pScreenShot->OnMouseUp(point, &dc);
+	}
 
 	CWnd::OnLButtonUp(nFlags, point);
 }
@@ -292,11 +328,11 @@ bool LTScreenshotCtrl::TrackMouseLeave()
 	return false;
 }
 
-LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl )
+LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl, HTHEME* pTheme)
 {
 	p_Ctrl = pCtrl;
-	p_CloseButton = new ArrowButton(pCtrl, pTheme, iPart, iStateOffset);
-	p_EditButton = new ArrowButton(pCtrl, pTheme, iPart, iStateOffset);
+	p_CloseButton = new ArrowButton(pCtrl, pTheme, WP_SMALLCLOSEBUTTON, 0);
+	p_EditButton = new ArrowButton(pCtrl, pTheme, WP_MAXBUTTON, 0);
 }
 
 LTScreenshotCtrl::Screenshot::~Screenshot()
@@ -305,33 +341,70 @@ LTScreenshotCtrl::Screenshot::~Screenshot()
 	delete p_EditButton;
 }
 
-void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer )
-{
 
+#define  CLOSE_BTN_WIDTH  13
+#define  CLOSE_BTN_HEIGHT 13
+#define  BUTTON_PADDING  2
+#define  THUMBNAIL_GAP  2
+
+void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
+{
+	r_Rect = rContainer;
+	r_Rect.top += 3;
+	r_Rect.left += 3;
+	r_Rect.bottom -= 3;
+	r_Rect.right -= 3;
+
+	int iWidth = (r_Rect.Height() * 1.5);
+	
+	r_Rect.left += iIndex * (iWidth + THUMBNAIL_GAP);
+	r_Rect.right = r_Rect.left + iWidth;
+
+	CRect rClose;
+	CRect rEdit;
+
+	rClose.right = r_Rect.right - BUTTON_PADDING;
+	rClose.top = r_Rect.top + BUTTON_PADDING;
+	rClose.left = rClose.right - CLOSE_BTN_WIDTH;
+	rClose.bottom = rClose.top + CLOSE_BTN_HEIGHT;
+
+	rEdit = rClose;
+	rEdit.top += CLOSE_BTN_HEIGHT + BUTTON_PADDING;
+	rEdit.bottom += CLOSE_BTN_HEIGHT + BUTTON_PADDING;
+
+	p_EditButton->SetRect(rEdit);
+	p_CloseButton->SetRect(rClose);
 }
 
 void LTScreenshotCtrl::Screenshot::OnMouseMove( CPoint point, CDC* pDC )
 {
-
+	p_EditButton->OnMouseMove(point, pDC);
+	p_CloseButton->OnMouseMove(point, pDC);
 }
 
 void LTScreenshotCtrl::Screenshot::OnMouseDown( CPoint point, CDC* pDC )
 {
-
+	p_EditButton->OnMouseDown(point, pDC);
+	p_CloseButton->OnMouseDown(point, pDC);
 }
 
 void LTScreenshotCtrl::Screenshot::OnMouseUp( CPoint point, CDC* pDC )
 {
-
+	p_EditButton->OnMouseUp(point, pDC);
+	p_CloseButton->OnMouseUp(point, pDC);
 }
 
 void LTScreenshotCtrl::Screenshot::OnMouseLeave( CDC* pDC )
 {
-
+	p_EditButton->OnMouseLeave(pDC);
+	p_CloseButton->OnMouseLeave(pDC);
 }
 
 void LTScreenshotCtrl::Screenshot::OnPaint( CDC* pDC )
 {
+	pDC->FillSolidRect(r_Rect, RGB(230,230,240));
 
+	p_EditButton->OnPaint( pDC);
+	p_CloseButton->OnPaint( pDC);
 }
 

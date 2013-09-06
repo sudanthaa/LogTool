@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 
 // LTScreenshotCtrl
 
@@ -41,7 +42,7 @@ public:
 	class Screenshot
 	{
 	public:
-		Screenshot(LTScreenshotCtrl* pCtrl);
+		Screenshot(LTScreenshotCtrl* pCtrl, HTHEME* pTheme);
 		~Screenshot();
 
 		void	OnMouseMove(CPoint point, CDC* pDC);
@@ -49,12 +50,13 @@ public:
 		void	OnMouseUp(CPoint point, CDC* pDC);
 		void	OnMouseLeave(CDC* pDC);
 		void	OnPaint(CDC* pDC);
-		void	Layout(CRect rContainer);
+		void	Layout(CRect rContainer, int iIndex);
 
 		LTScreenshotCtrl* p_Ctrl;
 		ArrowButton* p_CloseButton;
 		ArrowButton* p_EditButton;
 		CRect	r_Rect;
+		CRect	r_Image;
 
 		HTHEME* ph_Theme;
 	};
@@ -68,6 +70,8 @@ public:
 
 	ArrowButton* p_PrevButton;
 	ArrowButton* p_NextButton;
+
+	std::vector<Screenshot*> a_ScreenShots;
 
 	void	OnArrowButtonPress(ArrowButton* pButton);
 	void	OnArrowNext();
