@@ -171,10 +171,13 @@ void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	p_NextButton->OnMouseMove(point, &dc);
 	p_PrevButton->OnMouseMove(point, &dc);
 
-	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	if (r_Main.PtInRect(point))
 	{
-		Screenshot* pScreenShot = a_ScreenShots[i];
-		pScreenShot->OnMouseMove(point, &dc);
+		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		{
+			Screenshot* pScreenShot = a_ScreenShots[i];
+			pScreenShot->OnMouseMove(point, &dc);
+		}
 	}
 
 	CWnd::OnMouseMove(nFlags, point);
@@ -188,10 +191,13 @@ void LTScreenshotCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	p_NextButton->OnMouseDown(point, &dc);
 	p_PrevButton->OnMouseDown(point, &dc);
 
-	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	if (r_Main.PtInRect(point))
 	{
-		Screenshot* pScreenShot = a_ScreenShots[i];
-		pScreenShot->OnMouseDown(point, &dc);
+		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		{
+			Screenshot* pScreenShot = a_ScreenShots[i];
+			pScreenShot->OnMouseDown(point, &dc);
+		}
 	}
 
 	CWnd::OnLButtonDown(nFlags, point);
@@ -204,10 +210,13 @@ void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	p_NextButton->OnMouseUp(point, &dc);
 	p_PrevButton->OnMouseUp(point, &dc);
 
-	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	if (r_Main.PtInRect(point))
 	{
-		Screenshot* pScreenShot = a_ScreenShots[i];
-		pScreenShot->OnMouseUp(point, &dc);
+		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		{
+			Screenshot* pScreenShot = a_ScreenShots[i];
+			pScreenShot->OnMouseUp(point, &dc);
+		}
 	}
 
 	CWnd::OnLButtonUp(nFlags, point);
