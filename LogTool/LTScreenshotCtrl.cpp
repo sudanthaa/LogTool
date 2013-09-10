@@ -4,16 +4,18 @@
 #include "LTPch.h"
 #include "LTScreenshotCtrl.h"
 
+#include <resource.h>
 
-#define  SIDE_BUTTON_WIDTH   15
+
+#define  SIDE_BUTTON_WIDTH   16
 
 #define  BTN_STATE_NORMAL	1
 #define  BTN_STATE_HOT	2
 #define  BTN_STATE_PRESSED	3
 #define  BTN_STATE_DISABLED	4
 
-#define  CLOSE_BTN_WIDTH	13
-#define  CLOSE_BTN_HEIGHT	13
+#define  CLOSE_BTN_WIDTH	11
+#define  CLOSE_BTN_HEIGHT	11
 #define  BUTTON_PADDING		2
 #define  THUMBNAIL_GAP		2
 #define  THUMBNAIL_CONTAINER_PADDING	3
@@ -28,6 +30,7 @@ LTScreenshotCtrl::LTScreenshotCtrl()
 	p_PrevButton = NULL;
 	p_NextButton = NULL;
 	b_LeaveTracking = false;
+	i_SreenshotOffset = 0;
 }
 
 LTScreenshotCtrl::~LTScreenshotCtrl()
@@ -52,14 +55,6 @@ END_MESSAGE_MAP()
 
 BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
 {
-	p_PrevButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
-	p_NextButton = new ArrowButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
-
-	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
-	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
-	a_ScreenShots.push_back(new Screenshot(this, &h_thmWindow));
-
-	Layout(rArea);
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
 }
 
@@ -73,22 +68,25 @@ void LTScreenshotCtrl::OnPaint()
 	// TODO: Add your message handler code here
 	// Do not call CWnd::OnPaint() for painting messages
 
+	PaintCtrl(&dc);
+}
+
+void LTScreenshotCtrl::PaintCtrl( CDC* pDC )
+{
 	CRect rClient;
 	GetClientRect(rClient);
 
+	DrawThemeParentBackground(m_hWnd, pDC->m_hDC, rClient);
+	DrawThemeBackground(h_thmEdit, pDC->m_hDC, EP_EDITBORDER_NOSCROLL, EPSN_NORMAL, r_Main, NULL);
 
-	DrawThemeParentBackground(m_hWnd, dc.m_hDC, rClient);
-	DrawThemeBackground(h_thmEdit, dc.m_hDC, EP_EDITBORDER_NOSCROLL, EPSN_NORMAL, r_Main, NULL);
+	p_NextButton->OnPaint(pDC);
+	p_PrevButton->OnPaint(pDC);
 
-	p_NextButton->OnPaint(&dc);
-	p_PrevButton->OnPaint(&dc);
-
-	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	for (UINT i = 0; i < a_ScreenShots.size(); i++)
 	{
 		Screenshot* pScreenShot = a_ScreenShots[i];
-		pScreenShot->OnPaint(&dc);
+		pScreenShot->OnPaint(pDC);
 	}
-
 }
 
 void LTScreenshotCtrl::Layout( CRect rClient )
@@ -108,10 +106,10 @@ void LTScreenshotCtrl::Layout( CRect rClient )
 	p_NextButton->SetRect(rNextButton);
 	p_PrevButton->SetRect(rPrevButton);
 
-	for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+	for (int i = 0; i < (int)a_ScreenShots.size(); i++)
 	{
 		Screenshot* pScreenShot = a_ScreenShots[i];
-		pScreenShot->Layout(r_Main, i);
+		pScreenShot->Layout(r_Main, i + i_SreenshotOffset);
 	}
 }
 
@@ -129,13 +127,41 @@ int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	h_thmEdit = OpenThemeData(m_hWnd, L"EDIT");
-	//h_thmArrow = OpenThemeData(m_hWnd, L"SPIN");
+	h_thmEdit = OpenThemeData(m_hWnd, L"EDIT");;
 	h_thmArrow = OpenThemeData(m_hWnd, L"SCROLLBAR");
 	h_thmWindow = OpenThemeData(m_hWnd, L"WINDOW");
 
-	p_NextButton->SetTheme(&h_thmArrow);
-	p_PrevButton->SetTheme(&h_thmArrow);
+	p_PrevButton = new LTThemeButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
+	p_NextButton = new LTThemeButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
+
+	HICON ahCloseIcons[4];
+	ahCloseIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
+	ahCloseIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_HOT);
+	ahCloseIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_PRESSED);
+	ahCloseIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
+
+	HICON ahEditIcons[4];
+	ahEditIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
+	ahEditIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_HOT);
+	ahEditIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_PRESSED);
+	ahEditIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
+
+	Screenshot* pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+	pSS->SetName("Cat");
+	a_ScreenShots.push_back(pSS);
+
+	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+	pSS->SetName("Mouse");
+	a_ScreenShots.push_back(pSS);
+
+	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+	pSS->SetName("Gecko");
+	a_ScreenShots.push_back(pSS);
+
+	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+	pSS->SetName("MarketReplayServer");
+	a_ScreenShots.push_back(pSS);
+
 	// TODO:  Add your specialized creation code here
 
 	return 0;
@@ -152,7 +178,7 @@ void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (r_Main.PtInRect(point))
 	{
-		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		for (UINT i = 0; i < a_ScreenShots.size(); i++)
 		{
 			Screenshot* pScreenShot = a_ScreenShots[i];
 			pScreenShot->OnMouseMove(point, &dc);
@@ -172,7 +198,7 @@ void LTScreenshotCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (r_Main.PtInRect(point))
 	{
-		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		for (UINT i = 0; i < a_ScreenShots.size(); i++)
 		{
 			Screenshot* pScreenShot = a_ScreenShots[i];
 			pScreenShot->OnMouseDown(point, &dc);
@@ -191,7 +217,7 @@ void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 	if (r_Main.PtInRect(point))
 	{
-		for (unsigned int i = 0; i < a_ScreenShots.size(); i++)
+		for (UINT i = 0; i < a_ScreenShots.size(); i++)
 		{
 			Screenshot* pScreenShot = a_ScreenShots[i];
 			pScreenShot->OnMouseUp(point, &dc);
@@ -201,97 +227,10 @@ void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-
-void LTScreenshotCtrl::ArrowButton::OnMouseMove( CPoint point, CDC* pDC)
-{
-	int iOldState = i_State;
-
-	if (r_Area.PtInRect(point))
-	{
-		if (i_State == BTN_STATE_NORMAL)
-			i_State = BTN_STATE_HOT;
-		else if (i_State == BTN_STATE_PRESSED)
-			i_State = BTN_STATE_PRESSED; // No change
-	}
-	else
-	{
-		i_State = BTN_STATE_NORMAL;
-	}
-
-	if (i_State != iOldState)
-	{
-		DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, NULL);
-		if (i_State != BTN_STATE_NORMAL)
-			p_Ctrl->TrackMouseLeave();
-	}
-}
-
-void LTScreenshotCtrl::ArrowButton::OnMouseDown( CPoint point, CDC* pDC)
-{
-	int iOldState = i_State;
-
-	if (r_Area.PtInRect(point))
-		i_State = BTN_STATE_PRESSED;
-	else
-		i_State = BTN_STATE_NORMAL;
-
-	if (i_State != iOldState)
-	{
-		DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, NULL);
-		if (i_State != BTN_STATE_NORMAL)
-			p_Ctrl->TrackMouseLeave();
-	}
-}
-
-void LTScreenshotCtrl::ArrowButton::OnMouseUp( CPoint point, CDC* pDC)
-{
-	int iOldState = i_State;
-
-	if (r_Area.PtInRect(point))
-		i_State = BTN_STATE_HOT;
-	else
-		i_State = BTN_STATE_NORMAL;
-
-	if (i_State != iOldState)
-		DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, NULL);
-}
-
-void LTScreenshotCtrl::ArrowButton::OnMouseLeave( CDC* pDC )
-{
-	int iOldState = i_State;
-	i_State = BTN_STATE_NORMAL;
-
-	if (i_State != iOldState)
-		DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, NULL);
-}
-
-
-void LTScreenshotCtrl::ArrowButton::OnPaint( CDC* pDC )
-{
-	DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, NULL);
-}
-
-
-LTScreenshotCtrl::ArrowButton::ArrowButton(LTScreenshotCtrl* pCtrl, HTHEME* pTheme, int iPart, int iStateOffset)
-{
-	i_State = BTN_STATE_NORMAL;
-	p_Ctrl = pCtrl;
-	ph_Theme = pTheme;
-	i_Part = iPart;
-	i_StateOffset = iStateOffset;
-}
-
-LTScreenshotCtrl::ArrowButton::~ArrowButton()
-{
-
-}
-
-
-
 void LTScreenshotCtrl::OnMouseLeave()
 {
 	// TODO: Add your message handler code here and/or call default
-	b_LeaveTracking = false;
+	LTVirtualButtonOwner::OnMouseLeave();
 
 	CClientDC dc(this);
 	p_NextButton->OnMouseLeave(&dc);
@@ -300,27 +239,81 @@ void LTScreenshotCtrl::OnMouseLeave()
 	CWnd::OnMouseLeave();
 }
 
-bool LTScreenshotCtrl::TrackMouseLeave()
+CWnd* LTScreenshotCtrl::GetCWnd()
 {
-	if (b_LeaveTracking)
-		return false;
-
-	TRACKMOUSEEVENT tTrkMouse;
-	tTrkMouse.cbSize = sizeof(TRACKMOUSEEVENT);
-	tTrkMouse.dwFlags = TME_LEAVE;
-	tTrkMouse.hwndTrack = m_hWnd;
-	TrackMouseEvent(&tTrkMouse);
-
-	b_LeaveTracking = true;
-
-	return false;
+	return this;
 }
 
-LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl, HTHEME* pTheme)
+void LTScreenshotCtrl::OnPress( LTVirtualButton* pButton )
 {
+	if (pButton == p_NextButton)
+	{
+		bool bValidMove = false;
+		for (int i = 0; i < (int)a_ScreenShots.size(); i++)
+		{
+			Screenshot* pScreeshot = a_ScreenShots[i];
+			int iRightEdge = pScreeshot->GetRightEdge();
+			if (iRightEdge > r_Main.right)
+				bValidMove = true;
+		}
+
+		if (bValidMove)
+		{
+			i_SreenshotOffset--;
+			CRect rClient;
+			GetClientRect(rClient);
+			Layout(rClient);
+
+			CClientDC dc(this);
+			PaintCtrl(&dc);
+		}
+	}
+	else if (pButton == p_PrevButton)
+	{
+		bool bValidMove = false;
+		for (int ui = 0; ui < (int)a_ScreenShots.size(); ui++)
+		{
+			Screenshot* pScreeshot = a_ScreenShots[ui];
+			int iLeftEdge = pScreeshot->GetLeftEdge();
+			if (iLeftEdge < r_Main.left)
+				bValidMove = true;
+		}
+
+		if (bValidMove)
+		{
+			i_SreenshotOffset++;
+			CRect rClient;
+			GetClientRect(rClient);
+			Layout(rClient);
+
+			CClientDC dc(this);
+			PaintCtrl(&dc);
+		}
+	}
+}
+
+
+
+LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl, HTHEME* pBtnTheme)
+{
+	i_BackColor =  RGB(230,230,240);
 	p_Ctrl = pCtrl;
-	p_CloseButton = new ArrowButton(pCtrl, pTheme, WP_SMALLCLOSEBUTTON, 0);
-	p_EditButton = new ArrowButton(pCtrl, pTheme, WP_MAXBUTTON, 0);
+	p_CloseButton = new LTThemeButton(pCtrl, pBtnTheme, WP_SMALLCLOSEBUTTON, 0);
+	p_EditButton = new LTThemeButton(pCtrl, pBtnTheme, WP_MAXBUTTON, 0);
+
+	p_CloseButton->SetBackColor(i_BackColor);
+	p_EditButton->SetBackColor(i_BackColor);
+}
+
+LTScreenshotCtrl::Screenshot::Screenshot(LTScreenshotCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4])
+{
+	i_BackColor =  RGB(230,230,240);
+	p_Ctrl = pCtrl;
+	p_CloseButton = new LTIconButton(pCtrl, ahCloseBtnIcon);
+	p_EditButton = new LTIconButton(pCtrl, ahEditBtnIcon);
+
+	p_CloseButton->SetBackColor(i_BackColor);
+	p_EditButton->SetBackColor(i_BackColor);
 }
 
 LTScreenshotCtrl::Screenshot::~Screenshot()
@@ -336,6 +329,8 @@ void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
 	r_Rect.left += THUMBNAIL_CONTAINER_PADDING;
 	r_Rect.bottom -= THUMBNAIL_CONTAINER_PADDING;
 	r_Rect.right -= THUMBNAIL_CONTAINER_PADDING;
+
+	r_Clip = r_Rect;
 
 	int iWidth = (r_Rect.Height() * THUMBNAIL_TILE_HEIGHT_TO_WIDTH_RATIO);
 	
@@ -356,6 +351,9 @@ void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
 
 	p_EditButton->SetRect(rEdit);
 	p_CloseButton->SetRect(rClose);
+
+	p_EditButton->SetClipRect(r_Clip);
+	p_CloseButton->SetClipRect(r_Clip);
 }
 
 void LTScreenshotCtrl::Screenshot::OnMouseMove( CPoint point, CDC* pDC )
@@ -381,12 +379,36 @@ void LTScreenshotCtrl::Screenshot::OnMouseLeave( CDC* pDC )
 	p_EditButton->OnMouseLeave(pDC);
 	p_CloseButton->OnMouseLeave(pDC);
 }
+#define  TEXT_PADDING  2
 
 void LTScreenshotCtrl::Screenshot::OnPaint( CDC* pDC )
 {
-	pDC->FillSolidRect(r_Rect, RGB(230,230,240));
+	CRgn rgn;
+	rgn.CreateRectRgn(r_Clip.left, r_Clip.top, r_Clip.right, r_Clip.bottom);
+	pDC->SelectClipRgn(&rgn);
+	 
+	pDC->FillSolidRect(r_Rect, i_BackColor);
+
+	// Printing screen-shot name
+	CRect rText = r_Rect;
+	rText.right -= TEXT_PADDING;
+	CFont* pOld = pDC->SelectObject(p_Ctrl->GetParent()->GetFont());
+	CSize szText = pDC->GetTextExtent(GetName());
+	pDC->ExtTextOut(r_Rect.left + TEXT_PADDING, r_Rect.bottom - szText.cy - TEXT_PADDING, ETO_CLIPPED, 
+			&rText, GetName(), strlen(GetName()), NULL );
+	pDC->SelectObject(pOld);
 
 	p_EditButton->OnPaint( pDC);
 	p_CloseButton->OnPaint( pDC);
+}
+
+void LTScreenshotCtrl::Screenshot::SetName( const char* zName )
+{
+	s_Name = zName;
+}
+
+const char* LTScreenshotCtrl::Screenshot::GetName()
+{
+	return s_Name;
 }
 

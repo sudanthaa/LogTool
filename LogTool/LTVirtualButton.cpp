@@ -3,20 +3,25 @@
 
 LTVirtualButton::LTVirtualButton(LTVirtualButtonOwner* pOwner)
 {
+	pi_BackColor = NULL;
 	p_Owner = pOwner;
 	pr_Clip = NULL;
+	i_State = BTN_STATE_NORMAL;
 }
 
 LTVirtualButton::~LTVirtualButton(void)
 {
 	delete pr_Clip;
+	delete pi_BackColor;
 }
 
-void LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
+bool LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
 
-	if (r_Area.PtInRect(point))
+	bool bOwnedArea = IsOwnedArea(point);
+
+	if (bOwnedArea)
 	{
 		if (i_State == BTN_STATE_NORMAL)
 			i_State = BTN_STATE_HOT;
@@ -34,13 +39,17 @@ void LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
 		if (i_State != BTN_STATE_NORMAL)
 			p_Owner->TrackLeave();
 	}
+
+	return bOwnedArea;
 }
 
-void LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
+bool LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
 
-	if (r_Area.PtInRect(point))
+	bool bOwnedArea = IsOwnedArea(point);
+
+	if (bOwnedArea)
 		i_State = BTN_STATE_PRESSED;
 	else
 		i_State = BTN_STATE_NORMAL;
@@ -51,19 +60,33 @@ void LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
 		if (i_State != BTN_STATE_NORMAL)
 			p_Owner->TrackLeave();
 	}
+
+	return bOwnedArea;
 }
 
-void LTVirtualButton::OnMouseUp( CPoint point, CDC* pDC )
+bool LTVirtualButton::OnMouseUp( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
 
-	if (r_Area.PtInRect(point))
+	bool bOwnedArea = IsOwnedArea(point);
+
+	if (bOwnedArea)
+	{
+		if (i_State == BTN_STATE_PRESSED)
+		{
+			p_Owner->OnPress(this);
+			//p_Owner->GetCWnd()->PostMessage();
+		}
+
 		i_State = BTN_STATE_HOT;
+	}
 	else
 		i_State = BTN_STATE_NORMAL;
 
 	if (i_State != iOldState)
 		OnPaintButtonState(pDC);
+
+	return bOwnedArea;
 }
 
 void LTVirtualButton::OnMouseLeave( CDC* pDC )
@@ -95,10 +118,26 @@ void LTVirtualButton::SetClipRect( CRect rRect )
 	*pr_Clip = rRect;
 }
 
-LTThemeButton::LTThemeButton( LTVirtualButtonOwner* pCtrl, HTHEME* pTheme, int iPart, int StateOffset /*= 0*/ )
+bool LTVirtualButton::IsOwnedArea( CPoint point )
+{
+	bool bIsClippedOut = pr_Clip ? (!(pr_Clip->PtInRect(point))) : false;
+	return ((!bIsClippedOut) && r_Area.PtInRect(point));
+}
+
+void LTVirtualButton::SetBackColor( int iColor )
+{
+	delete pi_BackColor;
+	pi_BackColor = new int;
+	*pi_BackColor = iColor;
+}
+
+
+LTThemeButton::LTThemeButton( LTVirtualButtonOwner* pCtrl, HTHEME* pTheme, int iPart, int iStateOffset /*= 0*/ )
 :LTVirtualButton(pCtrl)
 {
-
+	ph_Theme = pTheme;
+	i_Part = iPart;
+	i_StateOffset = iStateOffset;
 }
 
 LTThemeButton::~LTThemeButton()
@@ -108,7 +147,11 @@ LTThemeButton::~LTThemeButton()
 
 void LTThemeButton::OnPaintButtonState( CDC* pDC )
 {
-	LTVirtualButton::OnPaintButtonState(pDC);
+	if (pi_BackColor)
+		pDC->FillSolidRect(r_Area, *pi_BackColor);
+	
+	DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, *pr_Clip);
+	//LTVirtualButton::OnPaintButtonState(pDC);
 }
 
 void LTVirtualButtonOwner::TrackLeave()
@@ -127,5 +170,32 @@ void LTVirtualButtonOwner::TrackLeave()
 
 void LTVirtualButtonOwner::OnMouseLeave()
 {
+	b_LeaveTracking = false;
+}
 
+LTVirtualButtonOwner::LTVirtualButtonOwner()
+{
+	b_LeaveTracking = false;
+}
+
+LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
+:LTVirtualButton(pOwner)
+{
+	for (int i = 0; i < 4; i++)
+		ah_Icon[i] = hIcon[i];
+}
+
+void LTIconButton::OnPaintButtonState( CDC* pDC )
+{
+	if (pr_Clip)
+	{
+		CRgn rgn;
+		rgn.CreateRectRgn(pr_Clip->left, pr_Clip->top, pr_Clip->right, pr_Clip->bottom);
+		pDC->SelectClipRgn(&rgn);
+	}
+
+	if (pi_BackColor)
+		pDC->FillSolidRect(r_Area, *pi_BackColor);
+
+	pDC->DrawIcon(r_Area.left, r_Area.top, ah_Icon[i_State - 1]);
 }

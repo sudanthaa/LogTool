@@ -6,11 +6,17 @@
 #define  BTN_STATE_PRESSED	3
 #define  BTN_STATE_DISABLED	4
 
+#define  WM_THMBNAIL_CLOSE		(WM_USER + 1)
+
+class LTVirtualButton;
+
 class LTVirtualButtonOwner
 {
 public:
 	LTVirtualButtonOwner();
 	virtual CWnd* GetCWnd(){ return NULL; };
+	virtual void	OnPress(LTVirtualButton* pButton){};
+
 	void	TrackLeave();
 	void	OnMouseLeave();
 
@@ -22,21 +28,27 @@ class LTVirtualButton
 {
 public:
 	LTVirtualButton(LTVirtualButtonOwner* pOwner);
-	~LTVirtualButton(void);
+	virtual ~LTVirtualButton(void);
 
 	void	SetRect(CRect rRect) { r_Area = rRect; };
 	void	SetClipRect(CRect rRect);
-	virtual	void	OnMouseMove(CPoint point, CDC* pDC);
-	virtual	void	OnMouseDown(CPoint point, CDC* pDC);
-	virtual void	OnMouseUp(CPoint point, CDC* pDC);
+	void	SetBackColor(int iColor);
+	int		GetRightEdge() {	return r_Area.right; };
+	int		GetLeftEdge(){	return r_Area.left; };;
+	virtual	bool	OnMouseMove(CPoint point, CDC* pDC);
+	virtual	bool	OnMouseDown(CPoint point, CDC* pDC);
+	virtual bool	OnMouseUp(CPoint point, CDC* pDC);
 	virtual void	OnMouseLeave(CDC* pDC);
 	virtual	void	OnPaint(CDC* pDC);
 	virtual void	OnPaintButtonState(CDC* pDC);
 
 protected:
+	bool	IsOwnedArea(CPoint point);
+
 	CRect	r_Area;
 	CRect*	pr_Clip;
 	int		i_State;
+	int*	pi_BackColor;
 	LTVirtualButtonOwner* p_Owner;
 };
 
@@ -53,4 +65,14 @@ protected:
 	HTHEME* ph_Theme;
 	int		i_Part;
 	int		i_StateOffset;
+};
+
+class LTIconButton: public LTVirtualButton
+{
+public:
+	LTIconButton(LTVirtualButtonOwner* pOwner, HICON hIcon[4]);
+
+	void	OnPaintButtonState(CDC* pDC);
+protected:
+	HICON	ah_Icon[4];
 };

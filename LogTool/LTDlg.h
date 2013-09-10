@@ -117,4 +117,5 @@ public:
 	CStatic o_StaticScreenshotBoundary;
 	CStatic o_StaticFrmScreenshots;
 //	afx_msg void OnHdnItemdblclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonScreenshotNew();
 };

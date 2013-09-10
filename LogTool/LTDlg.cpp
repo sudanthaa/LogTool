@@ -10,6 +10,7 @@
 #include "LTAddLogEnvDlg.h"
 #include "LTConfig.h"
 #include "LTSshSession.h"
+#include "LTScreenshotEditDlg.h"
 
 #include <libssh2.h>
 
@@ -125,6 +126,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_DELETE, &LTDlg::OnBnClickedButtonEnvDelete)
 	ON_WM_CREATE()
 //	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &LTDlg::OnHdnItemdblclickListEnv)
+ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_NEW, &LTDlg::OnBnClickedButtonScreenshotNew)
 END_MESSAGE_MAP()
 
 
@@ -749,3 +751,10 @@ int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	int i = 0;
 //	i++;
 //}
+
+void LTDlg::OnBnClickedButtonScreenshotNew()
+{
+	// TODO: Add your control notification handler code here
+	LTScreenshotEditDlg oDlg;
+	oDlg.DoModal();
+}
