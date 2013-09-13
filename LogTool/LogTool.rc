@@ -189,6 +189,12 @@ BEGIN
     PUSHBUTTON      "Take",IDC_BUTTON_TAKE,7,7,60,23
 END
 
+IDD_SCREEN_CAPTURE DIALOGEX 0, 0, 299, 164
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -275,6 +281,14 @@ BEGIN
         RIGHTMARGIN, 597
         TOPMARGIN, 7
         BOTTOMMARGIN, 316
+    END
+
+    IDD_SCREEN_CAPTURE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 289
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 157
     END
 END
 #endif    // APSTUDIO_INVOKED

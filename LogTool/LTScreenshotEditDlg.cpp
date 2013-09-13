@@ -3,6 +3,7 @@
 
 #include "LTPch.h"
 #include "LTScreenshotEditDlg.h"
+#include "LTScreenCaptureDlg.h"
 
 
 // LTScreenshotEditDlg dialog
@@ -57,23 +58,48 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 void LTScreenshotEditDlg::OnBnClickedButtonTake()
 {
 	// TODO: Add your control notification handler code here
-	BeginSelect();
+
+
+	LTScreenCaptureDlg oDlg;
+	oDlg.DoModal();
+
+
+	return;
+
+	CRect rDesktop;
+	CWnd::GetDesktopWindow()->GetWindowRect(rDesktop);
+	CRect rRect;
+	rRect.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	rRect.left = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	rRect.right = rRect.left + GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	rRect.bottom = rRect.top + GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	MoveWindow(rDesktop);
+
+	//BeginSelect();
 }
 
 void LTScreenshotEditDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+
+	CRect rWindow;
+	AfxGetApp()->GetMainWnd()->GetWindowRect(rWindow);
+	CPoint ptNew = point;
+	ptNew.y = point.y + rWindow.top;
+	ptNew.x = point.x+ rWindow.left;
+
 	if (e_CaputeState == CS_ON_SET_FIRST_POINT)
 	{
-		CClientDC dc(this);
+		CWindowDC dc(CWnd::GetDesktopWindow());
 		XORPenContext ctx(&dc);
+
 
 		dc.MoveTo(r_LastVir.TopLeft());
 		dc.LineTo(r_LastVir.BottomRight());
 		dc.MoveTo(r_LastHor.TopLeft());
 		dc.LineTo(r_LastHor.BottomRight());
 
-		PointToCrossLines(point, r_LastHor, r_LastVir);
+		PointToCrossLines(ptNew, r_LastHor, r_LastVir);
 
 		dc.MoveTo(r_LastVir.TopLeft());
 		dc.LineTo(r_LastVir.BottomRight());
@@ -82,13 +108,13 @@ void LTScreenshotEditDlg::OnMouseMove(UINT nFlags, CPoint point)
 	}
 	else if (e_CaputeState == CS_ON_SET_SECOND_POINT)
 	{
-		CClientDC dc(this);
+		CWindowDC dc(CWnd::GetDesktopWindow());
 		XORPenContext ctx(&dc);
 
 		DrawRect(&dc, r_Last);
 
-		r_Last.right = point.x;
-		r_Last.bottom = point.y;
+		r_Last.right = ptNew.x;
+		r_Last.bottom = ptNew.y;
 
 		DrawRect(&dc, r_Last);
 	}
@@ -161,8 +187,8 @@ void LTScreenshotEditDlg::BeginSelect()
 	e_CaputeState = CS_ON_SET_FIRST_POINT;
 	SetCapture();
 
-	ShowWindow(SW_HIDE);
-	GetParent()->ShowWindow(SW_HIDE);
+	//ShowWindow(SW_HIDE);
+	//GetParent()->ShowWindow(SW_HIDE);
 
 	//http://msdn.microsoft.com/en-us/library/windows/desktop/dd162729%28v=vs.85%29.aspx
 	//SM_XVIRTUALSCREEN and SM_YVIRTUALSCREEN identify the upper-left corner of the virtual screen, SM_CXVIRTUALSCREEN and SM_CYVIRTUALSCREEN are the vertical and horizontal
@@ -191,15 +217,15 @@ void LTScreenshotEditDlg::EndSelect()
 
 void LTScreenshotEditDlg::PointToCrossLines( CPoint pt, CRect& rHor, CRect& rVir )
 {
-	rVir.top = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	rVir.top = pt.y - 50;
 	rVir.left = pt.x;
-	rVir.bottom = r_LastVir.top + GetSystemMetrics(SM_CYVIRTUALSCREEN);
+	rVir.bottom = rVir.top + 100;
 	rVir.right = pt.x;
 
 	rHor.top = pt.y;
-	rHor.left =  GetSystemMetrics(SM_XVIRTUALSCREEN);
+	rHor.left =  pt.x - 50;
 	rHor.bottom = pt.y; 
-	rHor.right = r_LastHor.left + GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	rHor.right = rHor.left + 100;
 }
 
 
