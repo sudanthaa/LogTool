@@ -53,3 +53,10 @@ CBitmap* LTBitmapBuffer::DetachBitmap()
 	p_Bitmap = NULL;
 	return pBitmap;
 }
+
+LTBitmapBuffer* LTBitmapBuffer::Clone()
+{
+	LTBitmapBuffer* pBuffer = LTBitmapBuffer::Create(p_DC, Width(), Height());
+	pBuffer->GetDC()->BitBlt(0, 0, Width(), Height(), p_DC, 0, 0, SRCCOPY);
+	return pBuffer;
+}

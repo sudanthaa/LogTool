@@ -7,7 +7,8 @@ class LTBitmapBuffer
 public:
 	~LTBitmapBuffer(void);
 	static LTBitmapBuffer* Create(CDC* pRefer, int iWidth, int iHeight);
-
+	
+	LTBitmapBuffer* Clone();
 	CBitmap* GetBitmap()	{	return p_Bitmap; };
 	CDC*	GetDC()	{	return p_DC; };
 	void	Destory();

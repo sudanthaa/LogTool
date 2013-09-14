@@ -11,11 +11,16 @@ IMPLEMENT_DYNAMIC(LTScreenshotEditCtrl, CWnd)
 LTScreenshotEditCtrl::LTScreenshotEditCtrl()
 {
 	p_Bitmap = NULL;
+	p_OriginalBitmap = NULL;
 	pt_Offset.SetPoint(0,0);
 }
 
 LTScreenshotEditCtrl::~LTScreenshotEditCtrl()
 {
+	delete p_Bitmap;
+	delete p_OriginalBitmap;
+	p_Bitmap = NULL;
+	p_OriginalBitmap = NULL;
 }
 
 
@@ -144,6 +149,7 @@ void LTScreenshotEditCtrl::AdjustScroolBars( int cx, int cy )
 void LTScreenshotEditCtrl::SetImage( LTBitmapBuffer* pBitmap )
 {
 	p_Bitmap = pBitmap;
+	p_OriginalBitmap = p_Bitmap->Clone();
 
 	CRect rClient;
 	GetClientRect(rClient);

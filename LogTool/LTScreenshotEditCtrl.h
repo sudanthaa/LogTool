@@ -18,7 +18,15 @@ public:
 	void	DrawCtrl(CDC* pDC);
 
 	LTBitmapBuffer* p_Bitmap;
+	LTBitmapBuffer* p_OriginalBitmap;
 	CPoint  pt_Offset;
+
+	enum State
+	{
+		STATE_FREE,
+		STATE_DRAW_LINE,
+		STATE_DRAW_BOX_START,
+	};
 
 protected:
 	DECLARE_MESSAGE_MAP()
