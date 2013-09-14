@@ -17,8 +17,7 @@
 #define IDI_ICON_SMALL_CLOSE_HOT        134
 #define IDI_ICON_SMALL_CLOSE_NORMAL     135
 #define IDI_ICON_SMALL_CLOSE_PRESSED    136
-#define IDD_DIALOG_SCREENSHOT_EDIT      137
-#define IDD_DIALOG1                     138
+#define IDD_SCREENSHOT_EDIT             137
 #define IDD_SCREEN_CAPTURE              138
 #define IDC_LIST_SELECTION              1001
 #define IDC_BUTTON_TEST                 1002
@@ -63,7 +62,6 @@
 #define IDC_EDIT_ADD_LOG_ENV_BASE       1044
 #define IDC_STATIC_ADD_ENV_PASSWORD     1044
 #define IDC_EDIT_ADD_LOG_ENV_USER       1045
-#define IDC_EDIT_ADD_ENV_USER2          1045
 #define IDC_EDIT_ADD_ENV_PASSWORD       1045
 #define IDC_IPADDRESS_ADD_LOG_ENV_IP    1046
 #define IDC_STATIC_ADD_ENV_NAME         1046
@@ -74,8 +72,8 @@
 #define IDC_EDIT_ADD_ENV_NAME           1050
 #define IDC_STATIC_FRM_SCREENSHOTS      1051
 #define IDC_STATIC_SCREENSHOT_AREA      1052
-#define IDC_BUTTON1                     1053
 #define IDC_BUTTON_TAKE                 1053
+#define IDC_STATIC_SCREENSHOT_EDIT_CTRL 1054
 
 // Next default values for new objects
 // 
@@ -83,7 +81,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1054
+#define _APS_NEXT_CONTROL_VALUE         1055
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

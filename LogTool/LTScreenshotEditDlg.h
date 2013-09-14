@@ -1,6 +1,9 @@
 #pragma once
 
 #include "resource.h"
+#include "LTScreenshotEditCtrl.h"
+#include "LTResizeMan.h"
+#include "afxwin.h"
 
 // LTScreenshotEditDlg dialog
 
@@ -11,38 +14,14 @@ class LTScreenshotEditDlg : public CDialog
 public:
 	LTScreenshotEditDlg(CWnd* pParent = NULL);   // standard constructor
 	virtual ~LTScreenshotEditDlg();
+	
+	void	TakeScreenshot();
 
-	enum State
-	{
-		CS_FREE,
-		CS_ON_SET_FIRST_POINT,
-		CS_ON_SET_SECOND_POINT
-	};
-
-	class XORPenContext
-	{
-	public:
-		XORPenContext(CDC* pDC);
-		~XORPenContext();
-
-		CPen pen_XOR;
-		CPen* p_LastPen;
-		int i_LastROP;
-		CDC* p_DC;
-	};
-
-	State	e_CaputeState;
-	CRect	r_LastHor;
-	CRect	r_LastVir;
-	CRect	r_Last;
-
-	void	BeginSelect();
-	void	EndSelect();
-	void	PointToCrossLines(CPoint pt, CRect& rHor, CRect& rVir);
-	void	DrawRect(CDC* pDC, CRect rRect);
+	LTScreenshotEditCtrl o_ScreenshotEditCtrl;
+	LTResizeMan o_Resizer;
 
 // Dialog Data
-	enum { IDD = IDD_DIALOG_SCREENSHOT_EDIT };
+	enum { IDD = IDD_SCREENSHOT_EDIT };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -55,4 +34,15 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	CButton o_BtnOK;
+	CButton o_BtnCancel;
+protected:
+	virtual void OnOK();
+	virtual void OnCancel();
+public:
+	CButton o_BtnTake;
 };

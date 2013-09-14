@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTBitmapBuffer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTComboBox.cpp"
 				>
 			</File>
@@ -254,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTScreenshotEditCtrl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTScreenshotEditDlg.cpp"
 				>
 			</File>
@@ -285,6 +293,10 @@
 			</File>
 			<File
 				RelativePath=".\LTApp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTBitmapBuffer.h"
 				>
 			</File>
 			<File
@@ -321,6 +333,10 @@
 			</File>
 			<File
 				RelativePath=".\LTScreenshotCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTScreenshotEditCtrl.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resource.h"
+#include "LTBitmapBuffer.h"
 
 // LTScreenCaptureDlg dialog
 
@@ -12,21 +13,12 @@ public:
 	LTScreenCaptureDlg(CWnd* pParent = NULL);   // standard constructor
 	virtual ~LTScreenCaptureDlg();
 
+	LTBitmapBuffer*  DetachOutput();
+	void	SetOutput(LTBitmapBuffer* pBuffer);
+
+protected:
 	CRect r_Rect; 
-	CDC* pdc_VirScreenCopy;
-	CBitmap* pbmp_VirScreenCopy;
-
-	class XORPenContext
-	{
-	public:
-		XORPenContext(CDC* pDC);
-		~XORPenContext();
-
-		CPen pen_XOR;
-		CPen* p_LastPen;
-		int i_LastROP;
-		CDC* p_DC;
-	};
+	LTBitmapBuffer* p_Bitmap;
 
 	enum State 
 	{
@@ -35,15 +27,17 @@ public:
 		MOUSE_STATE_SECOND_POINT_SELECT,
 	};
 
-	void	PointToCrossLines(CPoint pt, CRect& rHor, CRect& rVir);
-	void	DrawCross(CDC* pDC, CRect& rHor, CRect& rVir);
-	void	DrawRect( CDC* pDC, CRect rRect );
+	void	DrawCross(CDC* pDC, CPoint& pt);
+	void	ClearCross(CDC* pDC, CPoint& pt, CDC* pDCBack);
+	void	DrawRect( CDC* pDC, CRect& rRect );
+	void	ClearRect( CDC* pDC, CRect& rRect, CDC* pDCBack);
 
-	
 	State	e_State;
-	CRect	r_LastHor;
-	CRect	r_LastVir;
-	CRect	r_Last;
+	CPoint	pt_Cross;
+	CRect	r_Select;
+
+	CPen	pen_Line;
+	LTBitmapBuffer*	p_OutputBitmap;
 
 // Dialog Data
 	enum { IDD = IDD_SCREEN_CAPTURE };
@@ -60,4 +54,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 };
