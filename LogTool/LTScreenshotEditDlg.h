@@ -49,4 +49,5 @@ public:
 	CButton o_BtnTake;
 	afx_msg void OnBnClickedButtonScreenshotEditPen();
 	afx_msg void OnBnClickedButtonScreenshotEditRect();
+	CEdit o_EditName;
 };

@@ -72,6 +72,13 @@ void LTScreenshotEditCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
 		SetCapture();
 	}
+	else if (e_State == STATE_ARROW_START)
+	{
+		e_State = STATE_ARROW_DRAW;
+		p_ActiveMarking = new LTArrowMarking(p_Screenshot);
+		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
+		SetCapture();
+	}
 
 	CWnd::OnLButtonDown(nFlags, point);
 }
@@ -98,6 +105,14 @@ void LTScreenshotEditCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		p_Screenshot->Add(p_ActiveMarking);
 		p_ActiveMarking = NULL;
 	}
+	else if (e_State == STATE_ARROW_DRAW)
+	{
+		e_State = STATE_ARROW_START;
+		ReleaseCapture();
+		p_ActiveMarking->OnMouseUp(&dc, point, pt_Offset);
+		p_Screenshot->Add(p_ActiveMarking);
+		p_ActiveMarking = NULL;
+	}
 
 	CWnd::OnLButtonUp(nFlags, point);
 }
@@ -113,6 +128,10 @@ void LTScreenshotEditCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		p_ActiveMarking->OnMouseMove(&dc, point, pt_Offset);
 	}
 	else if (e_State == STATE_RECT_DRAW)
+	{
+		p_ActiveMarking->OnMouseMove(&dc, point, pt_Offset);
+	}
+	else if (e_State == STATE_ARROW_DRAW)
 	{
 		p_ActiveMarking->OnMouseMove(&dc, point, pt_Offset);
 	}
@@ -339,6 +358,15 @@ void LTScreenshotEditCtrl::RectStart()
 		e_State = STATE_FREE;
 }
 
+void LTScreenshotEditCtrl::ArrowStart()
+{
+	if (e_State == STATE_FREE)
+		e_State = STATE_ARROW_START;
+	else if (e_State == STATE_ARROW_START)
+		e_State = STATE_FREE;
+}
+
+
 LTScreenshot* LTScreenshotEditCtrl::GetScreenshot()
 {
 	return p_Screenshot;
@@ -350,3 +378,4 @@ LTScreenshot* LTScreenshotEditCtrl::DetachScreenshot()
 	p_Screenshot = NULL;
 	return pSS;
 }
+

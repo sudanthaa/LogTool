@@ -3,6 +3,8 @@
 
 #include "LTPch.h"
 #include "LTThumbnailsCtrl.h"
+#include "LTScreenshot.h"
+#include "LTBitmapBuffer.h"
 
 #include <resource.h>
 
@@ -301,12 +303,28 @@ void LTThumbnailsCtrl::AddScreenshot( LTScreenshot* pScreenshot )
 	Invalidate();
 }
 
+bool LTThumbnailsCtrl::PaintBack( LTVirtualButton* pButton, CDC* pDC, CRect rRect )
+{
+	for (int ui = 0; ui < (int)a_ScreenShots.size(); ui++)
+	{
+		Screenshot* pScreeshot = a_ScreenShots[ui];
+		if ((pScreeshot->p_CloseButton == pButton) ||
+			(pScreeshot->p_EditButton == pButton))
+		{
+			pScreeshot->PaintThumbnailImage(pDC, rRect);
+			return true;
+		}
+	}
 
+	return false;
+}
+
+#define  TUMBNAIL_BACK_COLOR  RGB(200,200,220)
 
 LTThumbnailsCtrl::Screenshot::Screenshot( LTThumbnailsCtrl* pCtrl, HTHEME* pBtnTheme, LTScreenshot* pScreenshot)
 {
 	p_Screenshot = pScreenshot;
-	i_BackColor =  RGB(230,230,240);
+	i_BackColor =  TUMBNAIL_BACK_COLOR;
 	p_Ctrl = pCtrl;
 	p_CloseButton = new LTThemeButton(pCtrl, pBtnTheme, WP_SMALLCLOSEBUTTON, 0);
 	p_EditButton = new LTThemeButton(pCtrl, pBtnTheme, WP_MAXBUTTON, 0);
@@ -318,7 +336,7 @@ LTThumbnailsCtrl::Screenshot::Screenshot( LTThumbnailsCtrl* pCtrl, HTHEME* pBtnT
 LTThumbnailsCtrl::Screenshot::Screenshot(LTThumbnailsCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4], LTScreenshot* pScreenshot)
 {
 	p_Screenshot = pScreenshot;
-	i_BackColor =  RGB(230,230,240);
+	i_BackColor =  TUMBNAIL_BACK_COLOR;
 	p_Ctrl = pCtrl;
 	p_CloseButton = new LTIconButton(pCtrl, ahCloseBtnIcon);
 	p_EditButton = new LTIconButton(pCtrl, ahEditBtnIcon);
@@ -399,6 +417,9 @@ void LTThumbnailsCtrl::Screenshot::OnPaint( CDC* pDC )
 	pDC->SelectClipRgn(&rgn);
 	 
 	pDC->FillSolidRect(r_Rect, i_BackColor);
+	int i = pDC->SaveDC();
+
+	PaintThumbnailImage(pDC, r_Rect);
 
 	// Printing screen-shot name
 	CRect rText = r_Rect;
@@ -407,7 +428,9 @@ void LTThumbnailsCtrl::Screenshot::OnPaint( CDC* pDC )
 	CSize szText = pDC->GetTextExtent(GetName());
 	pDC->ExtTextOut(r_Rect.left + TEXT_PADDING, r_Rect.bottom - szText.cy - TEXT_PADDING, ETO_CLIPPED, 
 			&rText, GetName(), strlen(GetName()), NULL );
-	pDC->SelectObject(pOld);
+
+
+	pDC->RestoreDC(i);
 
 	p_EditButton->OnPaint( pDC);
 	p_CloseButton->OnPaint( pDC);
@@ -420,6 +443,27 @@ void LTThumbnailsCtrl::Screenshot::SetName( const char* zName )
 
 const char* LTThumbnailsCtrl::Screenshot::GetName()
 {
-	return s_Name;
+	return p_Screenshot->GetName();
+}
+
+void LTThumbnailsCtrl::Screenshot::PaintThumbnailImage( CDC* pDC, CRect& rRect)
+{
+	int i = pDC->SaveDC();
+
+	// Set the clipping region with hRegion.
+	// Draw preview image;
+	CRect rImage = r_Rect;
+	rImage.DeflateRect(TEXT_PADDING, TEXT_PADDING);
+	Gdiplus::Graphics graphics(pDC->m_hDC);
+	Gdiplus::Bitmap bmp(*p_Screenshot->GetBuffer()->GetBitmap(), NULL);
+	Gdiplus::Rect rect(rImage.left,rImage.top,rImage.Width(),rImage.Height());
+	Gdiplus::Region region(Gdiplus::Rect(rRect.left, rRect.top, rRect.Width(), rRect.Height()));
+	
+	HRGN hRegion = region.GetHRGN(&graphics);
+	graphics.SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+	graphics.SetClip(hRegion);
+	graphics.DrawImage(&bmp,rect);
+
+	pDC->RestoreDC(i);
 }
 

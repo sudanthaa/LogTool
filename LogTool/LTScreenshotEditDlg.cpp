@@ -28,6 +28,7 @@ void LTScreenshotEditDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDOK, o_BtnOK);
 	DDX_Control(pDX, IDCANCEL, o_BtnCancel);
 	DDX_Control(pDX, IDC_BUTTON_TAKE, o_BtnTake);
+	DDX_Control(pDX, IDC_EDIT_SCREENSHOT_EDIT_NAME, o_EditName);
 }
 
 
@@ -53,6 +54,10 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 	// TODO: Add your control notification handler code here
 
 	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
+	CString sName;
+	o_EditName.GetWindowText(sName);
+	p_Screenshot->SetName(sName);
+
 	EndDialog(IDOK);
 	//OnOK();
 }
@@ -71,11 +76,17 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	ScreenToClient(rSSEdit);
 	o_ScreenshotEditCtrl.MoveWindow(rSSEdit);
 
+	static int iNameSeed = 0;
+	iNameSeed++;
+	CString sName;
+	sName.Format("ss-%03d", iNameSeed);
+	o_EditName.SetWindowText(sName);
 
 	o_Resizer.Attach(&o_ScreenshotEditCtrl, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_BtnOK, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnCancel, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnTake, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_EditName, LT_RM_HORIZONTAL);
 	o_Resizer.Originate(this);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -166,6 +177,10 @@ void LTScreenshotEditDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
 	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
+
+	CString sName;
+	o_EditName.GetWindowText(sName);
+	p_Screenshot->SetName(sName);
 	CDialog::OnOK();
 }
 
@@ -185,7 +200,7 @@ void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen()
 
 void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect()
 {
-	o_ScreenshotEditCtrl.RectStart();
+	o_ScreenshotEditCtrl.ArrowStart();
 	// TODO: Add your control notification handler code here
 }
 

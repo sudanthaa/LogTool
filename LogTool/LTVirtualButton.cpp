@@ -147,9 +147,12 @@ LTThemeButton::~LTThemeButton()
 
 void LTThemeButton::OnPaintButtonState( CDC* pDC )
 {
-	if (pi_BackColor)
-		pDC->FillSolidRect(r_Area, *pi_BackColor);
-	
+	if (!p_Owner->PaintBack(this, pDC, r_Area))
+	{
+		if (pi_BackColor)
+			pDC->FillSolidRect(r_Area, *pi_BackColor);
+	}
+
 	DrawThemeBackground(*ph_Theme, pDC->m_hDC, i_Part, i_State + i_StateOffset, r_Area, *pr_Clip);
 	//LTVirtualButton::OnPaintButtonState(pDC);
 }
@@ -194,8 +197,11 @@ void LTIconButton::OnPaintButtonState( CDC* pDC )
 		pDC->SelectClipRgn(&rgn);
 	}
 
-	if (pi_BackColor)
-		pDC->FillSolidRect(r_Area, *pi_BackColor);
+	if (!p_Owner->PaintBack(this, pDC, r_Area))
+	{
+		if (pi_BackColor)
+			pDC->FillSolidRect(r_Area, *pi_BackColor);
+	}
 
 	pDC->DrawIcon(r_Area.left, r_Area.top, ah_Icon[i_State - 1]);
 }

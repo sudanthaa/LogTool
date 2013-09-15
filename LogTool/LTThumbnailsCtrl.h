@@ -22,6 +22,7 @@ public:
 	// LTVirtualButtonOwner overrides
 	CWnd*	GetCWnd();
 	void	OnPress(LTVirtualButton* pButton);
+	bool	PaintBack(LTVirtualButton* pButton, CDC* pDC, CRect rRect);
 
 	class Screenshot
 	{
@@ -35,6 +36,8 @@ public:
 		void	OnMouseUp(CPoint point, CDC* pDC);
 		void	OnMouseLeave(CDC* pDC);
 		void	OnPaint(CDC* pDC);
+		void	PaintThumbnailImage(CDC* pDC, CRect& rRect);
+
 		void	Layout(CRect rContainer, int iIndex);
 		int		GetLeftEdge(){ return r_Rect.left; };
 		int		GetRightEdge(){ return r_Rect.right; };

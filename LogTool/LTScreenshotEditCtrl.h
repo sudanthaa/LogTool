@@ -20,6 +20,7 @@ public:
 
 	void	PenStart();
 	void	RectStart();
+	void	ArrowStart();
 
 	LTScreenshot* GetScreenshot();
 	LTScreenshot* DetachScreenshot();
@@ -37,6 +38,8 @@ protected:
 		STATE_PEN_DRAW,
 		STATE_RECT_START,
 		STATE_RECT_DRAW,
+		STATE_ARROW_START,
+		STATE_ARROW_DRAW,
 	};
 
 	State	e_State;

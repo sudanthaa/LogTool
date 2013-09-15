@@ -16,6 +16,7 @@ public:
 	LTVirtualButtonOwner();
 	virtual CWnd* GetCWnd(){ return NULL; };
 	virtual void	OnPress(LTVirtualButton* pButton){};
+	virtual bool	PaintBack(LTVirtualButton* pButton, CDC* pDC, CRect rRect){ return false; };
 
 	void	TrackLeave();
 	void	OnMouseLeave();

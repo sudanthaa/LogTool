@@ -203,6 +203,7 @@ void LTScreenCaptureDlg::OnLButtonUp(UINT nFlags, CPoint point)
 		CClientDC dc(this);
 		ClearRect(&dc, r_Select, p_Bitmap->GetDC());
 
+		r_Select.NormalizeRect();
 		LTBitmapBuffer* pCropped = LTBitmapBuffer::Create(&dc, 
 			r_Select.Width(), r_Select.Height());
 		pCropped->GetDC()->BitBlt(0, 0, r_Select.Width(), r_Select.Height(), 

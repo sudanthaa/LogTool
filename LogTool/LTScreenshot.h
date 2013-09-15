@@ -8,6 +8,7 @@ class LTBitmapBuffer;
 
 #define  LT_MARKTYPE_PEN	0
 #define  LT_MARKTYPE_RECT	1
+#define  LT_MARKTYPE_ARROW	2
 
 class LTScreenshotMarking
 {
@@ -56,6 +57,22 @@ protected:
 	int		i_Width;
 };
 
+class LTArrowMarking: public LTScreenshotMarking
+{
+public:
+	LTArrowMarking(LTScreenshot* pScreenshot, COLORREF iColor = RGB(255,0,0), int iWidth = 2);
+	~LTArrowMarking();
+
+	void	OnMouseMove(CDC* pDC, CPoint pt, CPoint ptOffset);
+	void	OnMouseDown(CDC* pDC, CPoint pt, CPoint ptOffset);
+	void	OnMouseUp(CDC* pDC, CPoint pt, CPoint ptOffset);
+
+protected:
+	COLORREF cr_Arrow;
+	CRect	r_Rect;
+	int		i_Width;
+};
+
 class LTScreenshot
 {
 	LTScreenshot(void);
@@ -71,8 +88,11 @@ public:
 	int		Width();
 	int		Height();
 	void	Add(LTScreenshotMarking* pMarking);
+	void	SetName(const char* zName)	{	s_Name = zName; };
+	const char*		GetName() {	return s_Name; };
 
 protected:
+	CString		s_Name;
 	std::vector<LTScreenshotMarking*> a_Markings;
 	LTBitmapBuffer* p_OriginalBitmap;
 	LTBitmapBuffer* p_Bitmap;
