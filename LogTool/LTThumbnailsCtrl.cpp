@@ -2,7 +2,7 @@
 //
 
 #include "LTPch.h"
-#include "LTScreenshotCtrl.h"
+#include "LTThumbnailsCtrl.h"
 
 #include <resource.h>
 
@@ -23,9 +23,9 @@
 
 // LTScreenshotCtrl
 
-IMPLEMENT_DYNAMIC(LTScreenshotCtrl, CWnd)
+IMPLEMENT_DYNAMIC(LTThumbnailsCtrl, CWnd)
 
-LTScreenshotCtrl::LTScreenshotCtrl()
+LTThumbnailsCtrl::LTThumbnailsCtrl()
 {
 	p_PrevButton = NULL;
 	p_NextButton = NULL;
@@ -33,7 +33,7 @@ LTScreenshotCtrl::LTScreenshotCtrl()
 	i_SreenshotOffset = 0;
 }
 
-LTScreenshotCtrl::~LTScreenshotCtrl()
+LTThumbnailsCtrl::~LTThumbnailsCtrl()
 {
 	delete p_PrevButton;
 	delete p_NextButton;
@@ -43,7 +43,7 @@ LTScreenshotCtrl::~LTScreenshotCtrl()
 }
 
 
-BEGIN_MESSAGE_MAP(LTScreenshotCtrl, CWnd)
+BEGIN_MESSAGE_MAP(LTThumbnailsCtrl, CWnd)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
@@ -53,7 +53,7 @@ BEGIN_MESSAGE_MAP(LTScreenshotCtrl, CWnd)
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
+BOOL LTThumbnailsCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
 {
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
 }
@@ -62,7 +62,7 @@ BOOL LTScreenshotCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID
 
 
 
-void LTScreenshotCtrl::OnPaint()
+void LTThumbnailsCtrl::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
 	// TODO: Add your message handler code here
@@ -71,7 +71,7 @@ void LTScreenshotCtrl::OnPaint()
 	PaintCtrl(&dc);
 }
 
-void LTScreenshotCtrl::PaintCtrl( CDC* pDC )
+void LTThumbnailsCtrl::PaintCtrl( CDC* pDC )
 {
 	CRect rClient;
 	GetClientRect(rClient);
@@ -89,7 +89,7 @@ void LTScreenshotCtrl::PaintCtrl( CDC* pDC )
 	}
 }
 
-void LTScreenshotCtrl::Layout( CRect rClient )
+void LTThumbnailsCtrl::Layout( CRect rClient )
 {
 	r_Main = rClient;
 	CRect rPrevButton = rClient;
@@ -113,7 +113,7 @@ void LTScreenshotCtrl::Layout( CRect rClient )
 	}
 }
 
-void LTScreenshotCtrl::OnSize(UINT nType, int cx, int cy)
+void LTThumbnailsCtrl::OnSize(UINT nType, int cx, int cy)
 {
 	CWnd::OnSize(nType, cx, cy);
 
@@ -122,7 +122,7 @@ void LTScreenshotCtrl::OnSize(UINT nType, int cx, int cy)
 	// TODO: Add your message handler code here
 }
 
-int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
+int LTThumbnailsCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
@@ -134,40 +134,37 @@ int LTScreenshotCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	p_PrevButton = new LTThemeButton(this, &h_thmArrow, SBP_ARROWBTN, 8);
 	p_NextButton = new LTThemeButton(this, &h_thmArrow, SBP_ARROWBTN, 12);
 
-	HICON ahCloseIcons[4];
-	ahCloseIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
-	ahCloseIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_HOT);
-	ahCloseIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_PRESSED);
-	ahCloseIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
+	a_hCloseIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
+	a_hCloseIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_HOT);
+	a_hCloseIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_PRESSED);
+	a_hCloseIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_CLOSE_NORMAL);
+	a_hEditIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
+	a_hEditIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_HOT);
+	a_hEditIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_PRESSED);
+	a_hEditIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
 
-	HICON ahEditIcons[4];
-	ahEditIcons[0] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
-	ahEditIcons[1] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_HOT);
-	ahEditIcons[2] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_PRESSED);
-	ahEditIcons[3] = AfxGetApp()->LoadIcon(IDI_ICON_SMALL_EDIT_NORMAL);
-
-	Screenshot* pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
-	pSS->SetName("Cat");
-	a_ScreenShots.push_back(pSS);
-
-	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
-	pSS->SetName("Mouse");
-	a_ScreenShots.push_back(pSS);
-
-	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
-	pSS->SetName("Gecko");
-	a_ScreenShots.push_back(pSS);
-
-	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
-	pSS->SetName("MarketReplayServer");
-	a_ScreenShots.push_back(pSS);
+// 	Screenshot* pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+// 	pSS->SetName("Cat");
+// 	a_ScreenShots.push_back(pSS);
+// 
+// 	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+// 	pSS->SetName("Mouse");
+// 	a_ScreenShots.push_back(pSS);
+// 
+// 	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+// 	pSS->SetName("Gecko");
+// 	a_ScreenShots.push_back(pSS);
+// 
+// 	pSS = new Screenshot(this, ahCloseIcons, ahEditIcons);
+// 	pSS->SetName("MarketReplayServer");
+// 	a_ScreenShots.push_back(pSS);
 
 	// TODO:  Add your specialized creation code here
 
 	return 0;
 }
 
-void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
+void LTThumbnailsCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -188,7 +185,7 @@ void LTScreenshotCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	CWnd::OnMouseMove(nFlags, point);
 }
 
-void LTScreenshotCtrl::OnLButtonDown(UINT nFlags, CPoint point)
+void LTThumbnailsCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
@@ -208,7 +205,7 @@ void LTScreenshotCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
-void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
+void LTThumbnailsCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	CClientDC dc(this);
@@ -227,7 +224,7 @@ void LTScreenshotCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-void LTScreenshotCtrl::OnMouseLeave()
+void LTThumbnailsCtrl::OnMouseLeave()
 {
 	// TODO: Add your message handler code here and/or call default
 	LTVirtualButtonOwner::OnMouseLeave();
@@ -239,12 +236,12 @@ void LTScreenshotCtrl::OnMouseLeave()
 	CWnd::OnMouseLeave();
 }
 
-CWnd* LTScreenshotCtrl::GetCWnd()
+CWnd* LTThumbnailsCtrl::GetCWnd()
 {
 	return this;
 }
 
-void LTScreenshotCtrl::OnPress( LTVirtualButton* pButton )
+void LTThumbnailsCtrl::OnPress( LTVirtualButton* pButton )
 {
 	if (pButton == p_NextButton)
 	{
@@ -292,10 +289,23 @@ void LTScreenshotCtrl::OnPress( LTVirtualButton* pButton )
 	}
 }
 
-
-
-LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl, HTHEME* pBtnTheme)
+void LTThumbnailsCtrl::AddScreenshot( LTScreenshot* pScreenshot )
 {
+	Screenshot* pSS = new Screenshot(this, a_hCloseIcons, a_hEditIcons, pScreenshot);
+	// 	pSS->SetName("Cat");
+	a_ScreenShots.push_back(pSS);
+
+	CRect rClient;
+	GetClientRect(rClient);
+	Layout(rClient);
+	Invalidate();
+}
+
+
+
+LTThumbnailsCtrl::Screenshot::Screenshot( LTThumbnailsCtrl* pCtrl, HTHEME* pBtnTheme, LTScreenshot* pScreenshot)
+{
+	p_Screenshot = pScreenshot;
 	i_BackColor =  RGB(230,230,240);
 	p_Ctrl = pCtrl;
 	p_CloseButton = new LTThemeButton(pCtrl, pBtnTheme, WP_SMALLCLOSEBUTTON, 0);
@@ -305,8 +315,9 @@ LTScreenshotCtrl::Screenshot::Screenshot( LTScreenshotCtrl* pCtrl, HTHEME* pBtnT
 	p_EditButton->SetBackColor(i_BackColor);
 }
 
-LTScreenshotCtrl::Screenshot::Screenshot(LTScreenshotCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4])
+LTThumbnailsCtrl::Screenshot::Screenshot(LTThumbnailsCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4], LTScreenshot* pScreenshot)
 {
+	p_Screenshot = pScreenshot;
 	i_BackColor =  RGB(230,230,240);
 	p_Ctrl = pCtrl;
 	p_CloseButton = new LTIconButton(pCtrl, ahCloseBtnIcon);
@@ -316,13 +327,13 @@ LTScreenshotCtrl::Screenshot::Screenshot(LTScreenshotCtrl* pCtrl, HICON ahCloseB
 	p_EditButton->SetBackColor(i_BackColor);
 }
 
-LTScreenshotCtrl::Screenshot::~Screenshot()
+LTThumbnailsCtrl::Screenshot::~Screenshot()
 {
 	delete p_CloseButton;
 	delete p_EditButton;
 }
 
-void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
+void LTThumbnailsCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
 {
 	r_Rect = rContainer;
 	r_Rect.top += THUMBNAIL_CONTAINER_PADDING;
@@ -356,32 +367,32 @@ void LTScreenshotCtrl::Screenshot::Layout( CRect rContainer, int iIndex)
 	p_CloseButton->SetClipRect(r_Clip);
 }
 
-void LTScreenshotCtrl::Screenshot::OnMouseMove( CPoint point, CDC* pDC )
+void LTThumbnailsCtrl::Screenshot::OnMouseMove( CPoint point, CDC* pDC )
 {
 	p_EditButton->OnMouseMove(point, pDC);
 	p_CloseButton->OnMouseMove(point, pDC);
 }
 
-void LTScreenshotCtrl::Screenshot::OnMouseDown( CPoint point, CDC* pDC )
+void LTThumbnailsCtrl::Screenshot::OnMouseDown( CPoint point, CDC* pDC )
 {
 	p_EditButton->OnMouseDown(point, pDC);
 	p_CloseButton->OnMouseDown(point, pDC);
 }
 
-void LTScreenshotCtrl::Screenshot::OnMouseUp( CPoint point, CDC* pDC )
+void LTThumbnailsCtrl::Screenshot::OnMouseUp( CPoint point, CDC* pDC )
 {
 	p_EditButton->OnMouseUp(point, pDC);
 	p_CloseButton->OnMouseUp(point, pDC);
 }
 
-void LTScreenshotCtrl::Screenshot::OnMouseLeave( CDC* pDC )
+void LTThumbnailsCtrl::Screenshot::OnMouseLeave( CDC* pDC )
 {
 	p_EditButton->OnMouseLeave(pDC);
 	p_CloseButton->OnMouseLeave(pDC);
 }
 #define  TEXT_PADDING  2
 
-void LTScreenshotCtrl::Screenshot::OnPaint( CDC* pDC )
+void LTThumbnailsCtrl::Screenshot::OnPaint( CDC* pDC )
 {
 	CRgn rgn;
 	rgn.CreateRectRgn(r_Clip.left, r_Clip.top, r_Clip.right, r_Clip.bottom);
@@ -402,12 +413,12 @@ void LTScreenshotCtrl::Screenshot::OnPaint( CDC* pDC )
 	p_CloseButton->OnPaint( pDC);
 }
 
-void LTScreenshotCtrl::Screenshot::SetName( const char* zName )
+void LTThumbnailsCtrl::Screenshot::SetName( const char* zName )
 {
 	s_Name = zName;
 }
 
-const char* LTScreenshotCtrl::Screenshot::GetName()
+const char* LTThumbnailsCtrl::Screenshot::GetName()
 {
 	return s_Name;
 }

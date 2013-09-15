@@ -171,7 +171,7 @@ BOOL LTDlg::OnInitDialog()
 	CRect rScreenShot;
 	o_StaticScreenshotBoundary.GetWindowRect(rScreenShot);
 	ScreenToClient(rScreenShot);
-	o_Screenshot.MoveWindow(rScreenShot);
+	o_ThumbnailsCtrl.MoveWindow(rScreenShot);
 
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
@@ -247,7 +247,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_StaticFrmEnvionment, LT_RM_BOTTOM);
 
 	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_Screenshot, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_VIRTICAL);
 
 	o_Resizer.Originate(this);
 
@@ -735,7 +735,7 @@ int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (__super::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	o_Screenshot.CreateScreenshotCtrl(this, CRect(0,0,0,0), 300300);
+	o_ThumbnailsCtrl.CreateScreenshotCtrl(this, CRect(0,0,0,0), 300300);
 
 	// TODO:  Add your specialized creation code here
 
@@ -756,5 +756,11 @@ void LTDlg::OnBnClickedButtonScreenshotNew()
 {
 	// TODO: Add your control notification handler code here
 	LTScreenshotEditDlg oDlg;
-	oDlg.DoModal();
+	BOOL bRes = oDlg.DoModal();
+	if (bRes == IDOK)
+	{
+		LTScreenshot* pScreenshot = oDlg.DetachScreenshot();
+		if (pScreenshot)
+			o_ThumbnailsCtrl.AddScreenshot(pScreenshot);
+	}
 }

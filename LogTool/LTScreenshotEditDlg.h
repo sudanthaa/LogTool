@@ -16,9 +16,11 @@ public:
 	virtual ~LTScreenshotEditDlg();
 	
 	void	TakeScreenshot();
+	LTScreenshot*	DetachScreenshot();
 
 	LTScreenshotEditCtrl o_ScreenshotEditCtrl;
 	LTResizeMan o_Resizer;
+	LTScreenshot*	p_Screenshot;
 
 // Dialog Data
 	enum { IDD = IDD_SCREENSHOT_EDIT };
@@ -45,4 +47,6 @@ protected:
 	virtual void OnCancel();
 public:
 	CButton o_BtnTake;
+	afx_msg void OnBnClickedButtonScreenshotEditPen();
+	afx_msg void OnBnClickedButtonScreenshotEditRect();
 };

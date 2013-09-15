@@ -10,7 +10,7 @@
 #include "LTConfig.h"
 #include "LTEnv.h"
 #include "LTResizeMan.h"
-#include "LTScreenshotCtrl.h"
+#include "LTThumbnailsCtrl.h"
 
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener
@@ -52,7 +52,7 @@ public:
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 
 	LTResizeMan o_Resizer;
-	LTScreenshotCtrl o_Screenshot;
+	LTThumbnailsCtrl o_ThumbnailsCtrl;
 
 protected:
 	virtual void OnOK();

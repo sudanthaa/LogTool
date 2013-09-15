@@ -6,6 +6,7 @@
 #include "LTDlg.h"
 
 #include <libssh2.h>
+#include <GdiPlus.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,6 +67,10 @@ BOOL LTApp::InitInstance()
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
 
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR           gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
 	int rc = libssh2_init (0);
 	if (rc != 0) 
 	{
@@ -87,6 +92,7 @@ BOOL LTApp::InitInstance()
 		//  dismissed with Cancel
 	}
 
+	Gdiplus::GdiplusShutdown(gdiplusToken);
 	libssh2_exit();
 
 	// Since the dialog has been closed, return FALSE so that we exit the

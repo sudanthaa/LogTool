@@ -13,11 +13,13 @@ IMPLEMENT_DYNAMIC(LTScreenshotEditDlg, CDialog)
 LTScreenshotEditDlg::LTScreenshotEditDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(LTScreenshotEditDlg::IDD, pParent)
 {
-
+	p_Screenshot = NULL;
 }
 
 LTScreenshotEditDlg::~LTScreenshotEditDlg()
 {
+	delete p_Screenshot;
+	p_Screenshot = NULL;
 }
 
 void LTScreenshotEditDlg::DoDataExchange(CDataExchange* pDX)
@@ -39,6 +41,8 @@ BEGIN_MESSAGE_MAP(LTScreenshotEditDlg, CDialog)
 	ON_WM_TIMER()
 	ON_WM_CREATE()
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_PEN, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen)
+	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_RECT, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect)
 END_MESSAGE_MAP()
 
 
@@ -48,7 +52,8 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
 
-
+	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
+	EndDialog(IDOK);
 	//OnOK();
 }
 
@@ -160,7 +165,7 @@ void LTScreenshotEditDlg::TakeScreenshot()
 void LTScreenshotEditDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
-
+	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
 	CDialog::OnOK();
 }
 
@@ -169,4 +174,24 @@ void LTScreenshotEditDlg::OnCancel()
 	// TODO: Add your specialized code here and/or call the base class
 
 	CDialog::OnCancel();
+}
+
+void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen()
+{
+	// TODO: Add your control notification handler code here
+
+	o_ScreenshotEditCtrl.PenStart();
+}
+
+void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect()
+{
+	o_ScreenshotEditCtrl.RectStart();
+	// TODO: Add your control notification handler code here
+}
+
+LTScreenshot* LTScreenshotEditDlg::DetachScreenshot()
+{
+	LTScreenshot* pScreenshot = p_Screenshot;
+	p_Screenshot = NULL;
+	return pScreenshot;
 }

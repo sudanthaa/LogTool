@@ -4,18 +4,20 @@
 #include "LTVirtualButton.h"
 
 // LTScreenshotCtrl
+class LTScreenshot;
 
-class LTScreenshotCtrl : public CWnd, public LTVirtualButtonOwner
+class LTThumbnailsCtrl : public CWnd, public LTVirtualButtonOwner
 {
-	DECLARE_DYNAMIC(LTScreenshotCtrl)
+	DECLARE_DYNAMIC(LTThumbnailsCtrl)
 
 public:
-	LTScreenshotCtrl();
-	virtual ~LTScreenshotCtrl();
+	LTThumbnailsCtrl();
+	virtual ~LTThumbnailsCtrl();
 
 	BOOL	CreateScreenshotCtrl(CWnd* pParent, CRect rArea, int iID);
 	void	Layout(CRect rClient);
 	void	PaintCtrl(CDC* pDC);
+	void	AddScreenshot(LTScreenshot* pScreenshot);
 
 	// LTVirtualButtonOwner overrides
 	CWnd*	GetCWnd();
@@ -24,8 +26,8 @@ public:
 	class Screenshot
 	{
 	public:
-		Screenshot(LTScreenshotCtrl* pCtrl, HTHEME* pBtnTheme);
-		Screenshot(LTScreenshotCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4]);
+		Screenshot(LTThumbnailsCtrl* pCtrl, HTHEME* pBtnTheme, LTScreenshot* pScreenshot);
+		Screenshot(LTThumbnailsCtrl* pCtrl, HICON ahCloseBtnIcon[4], HICON ahEditBtnIcon[4], LTScreenshot* pScreenshot);
 		~Screenshot();
 
 		void	OnMouseMove(CPoint point, CDC* pDC);
@@ -40,7 +42,8 @@ public:
 		void	SetName(const char* zName);
 
 		int		i_BackColor;
-		LTScreenshotCtrl* p_Ctrl;
+		LTScreenshot* p_Screenshot;
+		LTThumbnailsCtrl* p_Ctrl;
 		LTVirtualButton* p_CloseButton;
 		LTVirtualButton* p_EditButton;
 		CRect	r_Clip;
@@ -60,6 +63,9 @@ public:
 
 	LTVirtualButton* p_PrevButton;
 	LTVirtualButton* p_NextButton;
+
+	HICON a_hCloseIcons[4];
+	HICON a_hEditIcons[4];
 
 	std::vector<Screenshot*> a_ScreenShots;
 

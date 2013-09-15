@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libssh2.lib uxtheme.lib"
+				AdditionalDependencies="libssh2.lib uxtheme.lib GdiPlus.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
@@ -254,7 +254,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotCtrl.cpp"
+				RelativePath=".\LTScreenshot.cpp"
 				>
 			</File>
 			<File
@@ -267,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\LTSshSession.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LTThumbnailsCtrl.cpp"
 				>
 			</File>
 			<File
@@ -332,7 +336,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotCtrl.h"
+				RelativePath=".\LTScreenshot.h"
 				>
 			</File>
 			<File
@@ -345,6 +349,10 @@
 			</File>
 			<File
 				RelativePath=".\LTSshSession.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTThumbnailsCtrl.h"
 				>
 			</File>
 			<File

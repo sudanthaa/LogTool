@@ -1,7 +1,8 @@
 #pragma once
 
+#include <list>
 #include "LTBitmapBuffer.h"
-
+#include "LTScreenshot.h"
 // LTScreenshotEditCtrl
 
 class LTScreenshotEditCtrl : public CWnd
@@ -17,16 +18,29 @@ public:
 	void	AdjustScroolBars(int cx, int cy);
 	void	DrawCtrl(CDC* pDC);
 
-	LTBitmapBuffer* p_Bitmap;
-	LTBitmapBuffer* p_OriginalBitmap;
+	void	PenStart();
+	void	RectStart();
+
+	LTScreenshot* GetScreenshot();
+	LTScreenshot* DetachScreenshot();
+
+protected:
+	LTScreenshot* p_Screenshot;
+	LTScreenshotMarking* p_ActiveMarking;
 	CPoint  pt_Offset;
+	CPen	pen_Line;
 
 	enum State
 	{
 		STATE_FREE,
-		STATE_DRAW_LINE,
-		STATE_DRAW_BOX_START,
+		STATE_PEN_START,
+		STATE_PEN_DRAW,
+		STATE_RECT_START,
+		STATE_RECT_DRAW,
 	};
+
+	State	e_State;
+	HTHEME	h_Theme;
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -40,6 +54,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnNcPaint();
 };
 
 

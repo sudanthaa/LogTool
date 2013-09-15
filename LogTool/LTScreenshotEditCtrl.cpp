@@ -2,6 +2,7 @@
 //
 
 #include "LTPch.h"
+
 #include "LTScreenshotEditCtrl.h"
 
 // LTScreenshotEditCtrl
@@ -10,17 +11,16 @@ IMPLEMENT_DYNAMIC(LTScreenshotEditCtrl, CWnd)
 
 LTScreenshotEditCtrl::LTScreenshotEditCtrl()
 {
-	p_Bitmap = NULL;
-	p_OriginalBitmap = NULL;
+	p_Screenshot = NULL;
 	pt_Offset.SetPoint(0,0);
+	e_State = STATE_FREE;
+	h_Theme = 0;
 }
 
 LTScreenshotEditCtrl::~LTScreenshotEditCtrl()
 {
-	delete p_Bitmap;
-	delete p_OriginalBitmap;
-	p_Bitmap = NULL;
-	p_OriginalBitmap = NULL;
+	delete p_Screenshot;
+	p_Screenshot = NULL;
 }
 
 
@@ -34,6 +34,7 @@ BEGIN_MESSAGE_MAP(LTScreenshotEditCtrl, CWnd)
 	ON_WM_SIZE()
 	ON_WM_VSCROLL()
 	ON_WM_HSCROLL()
+	ON_WM_NCPAINT()
 END_MESSAGE_MAP()
 
 
@@ -55,6 +56,23 @@ void LTScreenshotEditCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
+	CClientDC dc(this);
+
+	if (e_State == STATE_PEN_START)
+	{
+		e_State = STATE_PEN_DRAW;
+		p_ActiveMarking = new LTPenMarking(p_Screenshot);
+		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
+		SetCapture();
+	}
+	else if (e_State == STATE_RECT_START)
+	{
+		e_State = STATE_RECT_DRAW;
+		p_ActiveMarking = new LTRectMarking(p_Screenshot);
+		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
+		SetCapture();
+	}
+
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
@@ -62,12 +80,42 @@ void LTScreenshotEditCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 
+	CClientDC dc(this);
+
+	if (e_State == STATE_PEN_DRAW)
+	{
+		e_State = STATE_PEN_START;
+		p_ActiveMarking->OnMouseUp(&dc, point, pt_Offset);
+		p_Screenshot->Add(p_ActiveMarking);
+		p_ActiveMarking = NULL;
+		ReleaseCapture();
+	}
+	else if (e_State == STATE_RECT_DRAW)
+	{
+		e_State = STATE_RECT_START;
+		ReleaseCapture();
+		p_ActiveMarking->OnMouseUp(&dc, point, pt_Offset);
+		p_Screenshot->Add(p_ActiveMarking);
+		p_ActiveMarking = NULL;
+	}
+
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
 void LTScreenshotEditCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
+
+	CClientDC dc(this);
+
+	if (e_State == STATE_PEN_DRAW)
+	{
+		p_ActiveMarking->OnMouseMove(&dc, point, pt_Offset);
+	}
+	else if (e_State == STATE_RECT_DRAW)
+	{
+		p_ActiveMarking->OnMouseMove(&dc, point, pt_Offset);
+	}
 
 	CWnd::OnMouseMove(nFlags, point);
 }
@@ -77,6 +125,8 @@ int LTScreenshotEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
+	h_Theme = OpenThemeData(m_hWnd, L"EDIT");
+	pen_Line.CreatePen(PS_SOLID, 2, RGB(255,0,0));
 	// TODO:  Add your specialized creation code here
 
 	return 0;
@@ -85,7 +135,8 @@ int LTScreenshotEditCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 void LTScreenshotEditCtrl::OnDestroy()
 {
 	CWnd::OnDestroy();
-
+	CloseThemeData(h_Theme);
+	pen_Line.DeleteObject();
 	// TODO: Add your message handler code here
 }
 
@@ -111,11 +162,12 @@ void LTScreenshotEditCtrl::AdjustScroolBars( int cx, int cy )
 	si.cbSize = sizeof(SCROLLINFO);
 	si.fMask = SIF_ALL | SIF_DISABLENOSCROLL;
 
+
 	// Set horizontal 
-	if (p_Bitmap && p_Bitmap->Width() > cx)
+	if (p_Screenshot && p_Screenshot->Width() > cx)
 	{
 		si.nMin = 0;
-		si.nMax = p_Bitmap->Width() - 1;
+		si.nMax = p_Screenshot->Width() - 1;
 		si.nPage = cx;
 		//TRACE("HORSET: min=%d max=%d page=%d\n", si.nMin, si.nMax, si.nPage);
 	}
@@ -129,10 +181,10 @@ void LTScreenshotEditCtrl::AdjustScroolBars( int cx, int cy )
 
 
 	// Set vertical
-	if (p_Bitmap && p_Bitmap->Height() > cy)
+	if (p_Screenshot && p_Screenshot->Height() > cy)
 	{
 		si.nMin = 0;
-		si.nMax = p_Bitmap->Height() -1;
+		si.nMax = p_Screenshot->Height() -1;
 		si.nPage = cy;
 		//TRACE("VERSET: min=%d max=%d page=%d\n", si.nMin, si.nMax, si.nPage);
 	}
@@ -148,8 +200,8 @@ void LTScreenshotEditCtrl::AdjustScroolBars( int cx, int cy )
 
 void LTScreenshotEditCtrl::SetImage( LTBitmapBuffer* pBitmap )
 {
-	p_Bitmap = pBitmap;
-	p_OriginalBitmap = p_Bitmap->Clone();
+	delete p_Screenshot;
+	p_Screenshot = LTScreenshot::Create(pBitmap);
 
 	CRect rClient;
 	GetClientRect(rClient);
@@ -225,11 +277,76 @@ void LTScreenshotEditCtrl::DrawCtrl(CDC* pDC)
 	CRect rRect;
 	GetClientRect(rRect);
 
-	if (p_Bitmap)
+	if (p_Screenshot)
 	{
 		pDC->BitBlt(0, 0, rRect.Width(), rRect.Height(), 
-			p_Bitmap->GetDC(), pt_Offset.x, pt_Offset.y, SRCCOPY);
+			p_Screenshot->GetDC(), pt_Offset.x, pt_Offset.y, SRCCOPY);
 	}
 	else
 		pDC->FillSolidRect(rRect, RGB(200,200,200));
+}
+
+void LTScreenshotEditCtrl::OnNcPaint()
+{
+	// TODO: Add your message handler code here
+	// Do not call CWnd::OnNcPaint() for painting messages
+	Default();
+
+	CRect rWnd;
+	GetWindowRect(rWnd);
+	CWindowDC dc(this);
+	int iXWidth = GetSystemMetrics(SM_CXBORDER);
+	int iYWidth = GetSystemMetrics(SM_CYBORDER);
+	COLORREF cr;
+	GetThemeColor(h_Theme, EP_EDITTEXT, ETS_NORMAL, TMT_BORDERCOLOR, &cr);
+
+	CRect rWndEx(0,0,0,0);
+	rWndEx.right = rWnd.Width();
+	rWndEx.bottom = rWnd.Height();
+
+	CRect rBorder;
+
+	rBorder = rWndEx;
+	rBorder.bottom = rBorder.top + iYWidth;
+	dc.FillSolidRect(rBorder, cr);
+
+	rBorder = rWndEx;
+	rBorder.top = rBorder.bottom - iYWidth;
+	dc.FillSolidRect(rBorder, cr);
+
+	rBorder = rWndEx;
+	rBorder.left = rBorder.right - iXWidth;
+	dc.FillSolidRect(rBorder, cr);
+
+	rBorder = rWndEx;
+	rBorder.right = rBorder.left + iXWidth;
+	dc.FillSolidRect(rBorder, cr);
+}
+
+void LTScreenshotEditCtrl::PenStart()
+{
+	if (e_State == STATE_FREE)
+		e_State = STATE_PEN_START;
+	else if (e_State == STATE_PEN_START)
+		e_State = STATE_FREE;
+}
+
+void LTScreenshotEditCtrl::RectStart()
+{
+	if (e_State == STATE_FREE)
+		e_State = STATE_RECT_START;
+	else if (e_State == STATE_RECT_START)
+		e_State = STATE_FREE;
+}
+
+LTScreenshot* LTScreenshotEditCtrl::GetScreenshot()
+{
+	return p_Screenshot;
+}
+
+LTScreenshot* LTScreenshotEditCtrl::DetachScreenshot()
+{
+	LTScreenshot* pSS = p_Screenshot;
+	p_Screenshot = NULL;
+	return pSS;
 }
