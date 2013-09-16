@@ -66,6 +66,7 @@ public:
 	void	OnMouseMove(CDC* pDC, CPoint pt, CPoint ptOffset);
 	void	OnMouseDown(CDC* pDC, CPoint pt, CPoint ptOffset);
 	void	OnMouseUp(CDC* pDC, CPoint pt, CPoint ptOffset);
+	void	DrawArrow(CDC* pdcAct, CRect& rRect);
 
 protected:
 	COLORREF cr_Arrow;

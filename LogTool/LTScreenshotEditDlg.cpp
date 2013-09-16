@@ -200,7 +200,7 @@ void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen()
 
 void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect()
 {
-	o_ScreenshotEditCtrl.ArrowStart();
+	o_ScreenshotEditCtrl.RectStart();
 	// TODO: Add your control notification handler code here
 }
 

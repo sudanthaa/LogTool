@@ -3,6 +3,8 @@
 #include "LTBitmapBuffer.h"
 #include "LTUtils.h"
 
+#include <math.h>
+
 LTScreenshot::LTScreenshot(void)
 {
 }
@@ -85,7 +87,9 @@ void LTRectMarking::OnMouseUp( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 	CDC* pDC = p_Screenshot->GetDC();
 	int i = pDC->SaveDC();
 
-	DrawRect(pDC, r_Rect);
+	CRect rRect = r_Rect;
+	rRect.OffsetRect(ptOffset);
+	DrawRect(pDC, rRect);
 
 	pDC->RestoreDC(i);
 }
@@ -180,11 +184,13 @@ LTArrowMarking::~LTArrowMarking()
 
 }
 
+#define  MATH_PI 3.14159
+
 void LTArrowMarking::OnMouseMove( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 {
 	CRect rErase = r_Rect;
 	rErase.NormalizeRect();
-	rErase.InflateRect(i_Width + 3, i_Width + 3);
+	rErase.InflateRect(i_Width * 3, i_Width * 3);
 
 	CDC* pDC = p_Screenshot->GetDC();
 	int i = pdcAct->SaveDC();
@@ -194,12 +200,8 @@ void LTArrowMarking::OnMouseMove( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 		rErase.left + ptOffset.x, rErase.top + ptOffset.y, SRCCOPY);
 
 	r_Rect.SetRect(r_Rect.TopLeft(), pt);
-	Gdiplus::Graphics graphics(pdcAct->m_hDC);
-	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Arrow)), i_Width);
-	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
-	graphics.DrawLine(&pen, r_Rect.left, r_Rect.top, r_Rect.right, r_Rect.bottom);
 
-
+	DrawArrow(pdcAct, r_Rect);
 
 	pdcAct->RestoreDC(i);
 }
@@ -209,7 +211,37 @@ void LTArrowMarking::OnMouseDown( CDC* pDC, CPoint pt, CPoint ptOffset )
 	r_Rect.SetRect(pt, pt);
 }
 
-void LTArrowMarking::OnMouseUp( CDC* pDC, CPoint pt, CPoint ptOffset )
+void LTArrowMarking::OnMouseUp( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 {
+	CDC* pDC = p_Screenshot->GetDC();
 
+	CRect rRect = r_Rect;
+	rRect.OffsetRect(ptOffset);
+	DrawArrow(pDC, rRect);
+}
+
+void LTArrowMarking::DrawArrow( CDC* pdcAct, CRect& rRect)
+{
+	double dAngle = atan2((float)(rRect.top - rRect.bottom), (float)(rRect.left - rRect.right));
+	float fRadiusLineEnd = i_Width * 2.0;
+	float fRadiusArrowEdge = i_Width * 4.0;
+	float fAnLeft = dAngle + (MATH_PI / 5.0);
+	float fAnRight = dAngle - (MATH_PI / 5.0);
+	float fAnEdge = dAngle + (MATH_PI);
+
+	Gdiplus::PointF pointA(rRect.left, rRect.top);
+	Gdiplus::PointF pointB(((float)rRect.right) + (cos(dAngle) * fRadiusLineEnd), 
+		((float)rRect.bottom) + (sin(dAngle) * fRadiusLineEnd));
+
+	Gdiplus::Graphics graphics(pdcAct->m_hDC);
+	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Arrow)), i_Width);
+	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+	graphics.DrawLine(&pen, pointA, pointB);
+
+	Gdiplus::SolidBrush brush(Gdiplus::Color(255, RGB_PARAMS(cr_Arrow)));
+	Gdiplus::PointF point1(rRect.right + (cos(fAnLeft) * fRadiusArrowEdge), rRect.bottom + (sin(fAnLeft) * fRadiusArrowEdge));
+	Gdiplus::PointF point2(rRect.right + (cos(fAnRight) * fRadiusArrowEdge), rRect.bottom + (sin(fAnRight) * fRadiusArrowEdge));
+	Gdiplus::PointF point3(rRect.right, rRect.bottom);
+	Gdiplus::PointF points[3] = {point1, point2, point3};
+	graphics.FillPolygon(&brush, points, 3);
 }
