@@ -58,6 +58,8 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 	o_EditName.GetWindowText(sName);
 	p_Screenshot->SetName(sName);
 
+	p_Screenshot->Save("test.jpg");
+
 	EndDialog(IDOK);
 	//OnOK();
 }

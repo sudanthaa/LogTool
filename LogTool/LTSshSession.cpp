@@ -202,7 +202,7 @@ static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
 	return rc;
 }
 
-void LTSshSession::Execute(const char* zCommand)
+bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
 {
 	int rc = 0;
 	int bytecount = 0;
@@ -213,7 +213,7 @@ void LTSshSession::Execute(const char* zCommand)
 	if (!(pChannel = libssh2_channel_open_session(p_Session))) {
 
 		TRACE( "Unable to open a session\n");
-		return;
+		return false;
 	}
 
 	while ( (rc = libssh2_channel_exec(pChannel, zCommand)) == LIBSSH2_ERROR_EAGAIN )
@@ -224,7 +224,7 @@ void LTSshSession::Execute(const char* zCommand)
 	if ( rc != 0 )
     {
         TRACE("Error\n");
-        return;
+        return false;
     }
 
     for ( ;; )
@@ -236,13 +236,27 @@ void LTSshSession::Execute(const char* zCommand)
             char buffer[0x4000];
             rc = libssh2_channel_read( pChannel, buffer, sizeof(buffer) );
 
+			int istart = 0;
+
             if( rc > 0 )
             {
                 int i;
                 bytecount += rc;
                 TRACE( "We read:\n");
-                for( i=0; i < rc; ++i )
-                    TRACE( "%c" ,buffer[i]);
+                for (i = 0; i < rc; ++i )
+				{
+					char c = buffer[i];
+                    //TRACE( "%c" , c);
+					if (c == '\n' || c == '\r')
+					{
+						buffer[i] = 0;
+						CString sVal = buffer + istart;
+						plstOut->push_back(sVal);
+						buffer[i] = c;
+						TRACE( "%s - %d\n" , sVal, istart);
+						istart = i + 1;
+					}
+				}
                 TRACE( "\n");
             }
             else {
@@ -284,4 +298,6 @@ void LTSshSession::Execute(const char* zCommand)
 
 	libssh2_channel_free(pChannel);
 	pChannel = NULL;
+
+	return true;
 }

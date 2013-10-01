@@ -118,4 +118,6 @@ public:
 	CStatic o_StaticFrmScreenshots;
 //	afx_msg void OnHdnItemdblclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonScreenshotNew();
+	afx_msg void OnBnClickedButtonEnvRefresh();
+	CButton o_ButtonEnvRefresh;
 };

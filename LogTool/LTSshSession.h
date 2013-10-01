@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libssh2.h>
+#include <list>
 
 class LTEnv;
 
@@ -20,7 +21,7 @@ public:
 					LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
 					void **abstract);
 
-	void	Execute(const char* zCommand);
+	bool	Execute(const char* zCommand, std::list<CString>* plstOut = NULL);
 
 protected:
 	LTEnv* p_Env;

@@ -80,6 +80,7 @@
 #define IDC_EDIT_SCREENSHOT_EDIT_NAME   1057
 #define IDC_CHECK1                      1058
 #define IDC_BUTTON1                     1059
+#define IDC_BUTTON_ENV_REFRESH          1059
 #define IDC_CHECK2                      1060
 
 // Next default values for new objects

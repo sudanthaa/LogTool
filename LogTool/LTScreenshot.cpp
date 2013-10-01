@@ -46,6 +46,92 @@ LTScreenshot* LTScreenshot::Create( LTBitmapBuffer* pBuffer )
 	return pScreenshot;
 }
 
+wchar_t* AnsiCharToWChar(const char* zText)
+{
+	size_t newsize = strlen(zText) + 1;
+	wchar_t* wcstring = new wchar_t[newsize];
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, zText, _TRUNCATE);	
+	return wcstring;
+}
+
+int GetEncoderClsid(const char* format, CLSID* pClsid)
+{
+	UINT  num = 0;          // number of image encoders
+	UINT  size = 0;         // size of the image encoder array in bytes
+
+	Gdiplus::ImageCodecInfo* pImageCodecInfo = NULL;
+
+	Gdiplus::GetImageEncodersSize(&num, &size);
+	if(size == 0)
+		return -1;  // Failure
+
+	pImageCodecInfo = (Gdiplus::ImageCodecInfo*)(malloc(size));
+	if (pImageCodecInfo == NULL)
+		return -1;  // Failure
+
+	Gdiplus::GetImageEncoders(num, size, pImageCodecInfo);
+
+	wchar_t* wcstring = AnsiCharToWChar(format);
+
+	for(UINT j = 0; j < num; ++j)
+	{
+		size_t convertedChars = 0;
+
+
+		if (wcscmp(pImageCodecInfo[j].MimeType, wcstring) == 0 )
+		{
+			*pClsid = pImageCodecInfo[j].Clsid;
+			free(pImageCodecInfo);
+			return j;  // Success
+		}    
+	}
+
+	delete [] wcstring;
+
+	free(pImageCodecInfo);
+	return -1;  // Failure
+}
+
+bool LTScreenshot::Save( const char* zFileName, int iQuality)
+{
+	CLSID             encoderClsid;
+	Gdiplus::EncoderParameters encoderParameters;
+	ULONG             quality;
+	Gdiplus::Status            stat;
+
+	// Get an image from the disk.
+	//Gdiplus::Image* image = new Gdiplus::Image(L"Shapes.bmp");
+
+	Gdiplus::Bitmap image(*(GetBuffer()->GetBitmap()), NULL);
+
+	// Get the CLSID of the JPEG encoder.
+	GetEncoderClsid("image/jpeg", &encoderClsid);
+
+	// Before we call Image::Save, we must initialize an
+	// EncoderParameters object. The EncoderParameters object
+	// has an array of EncoderParameter objects. In this
+	// case, there is only one EncoderParameter object in the array.
+	// The one EncoderParameter object has an array of values.
+	// In this case, there is only one value (of type ULONG)
+	// in the array. We will let this value vary from 0 to 100.
+
+	encoderParameters.Count = 1;
+	encoderParameters.Parameter[0].Guid = Gdiplus::EncoderQuality;
+	encoderParameters.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
+	encoderParameters.Parameter[0].NumberOfValues = 1;
+
+	wchar_t* filename = AnsiCharToWChar(zFileName);
+
+	// Save the image as a JPEG with quality level 0.
+	quality = iQuality;
+	encoderParameters.Parameter[0].Value = &quality;
+	stat = image.Save(filename, &encoderClsid, &encoderParameters);
+	delete [] filename;
+
+	return (stat == Gdiplus::Ok);
+}
+
 void LTRectMarking::DrawRect( CDC* pDC, CRect& rRect )
 {
 	CRect rNormalRect = rRect;
@@ -223,7 +309,8 @@ void LTArrowMarking::OnMouseUp( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 void LTArrowMarking::DrawArrow( CDC* pdcAct, CRect& rRect)
 {
 	double dAngle = atan2((float)(rRect.top - rRect.bottom), (float)(rRect.left - rRect.right));
-	float fRadiusLineEnd = i_Width * 2.0;
+	float fRadiusLineEnd = i_Width * 2.0; 
+		// use this radius to stop line from reaching the end. if it reaches the end the point will get jeopardized 
 	float fRadiusArrowEdge = i_Width * 4.0;
 	float fAnLeft = dAngle + (MATH_PI / 5.0);
 	float fAnRight = dAngle - (MATH_PI / 5.0);

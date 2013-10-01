@@ -94,6 +94,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
 	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
 	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
+	DDX_Control(pDX, IDC_BUTTON_ENV_REFRESH, o_ButtonEnvRefresh);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -129,6 +130,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_CREATE()
 //	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &LTDlg::OnHdnItemdblclickListEnv)
 ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_NEW, &LTDlg::OnBnClickedButtonScreenshotNew)
+ON_BN_CLICKED(IDC_BUTTON_ENV_REFRESH, &LTDlg::OnBnClickedButtonEnvRefresh)
 END_MESSAGE_MAP()
 
 
@@ -177,24 +179,6 @@ BOOL LTDlg::OnInitDialog()
 
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, "logs/Reporting:1:1:ReportingEngine:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 1, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 2, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 3, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 4, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 5, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 6, "logs/Reporting:1:1:ReportingEngine:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 7, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 8, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 9, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 10, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 11, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 12, "logs/Reporting:1:1:ReportingEngine:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 13, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 14, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 15, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 16, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
-	o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 17, "logs/ReportingCommon:1:1:ConfigurationManager:1", 0, LVIS_SELECTED, 0, 0);
 
 
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
@@ -215,6 +199,7 @@ BOOL LTDlg::OnInitDialog()
 	//o_ButtonEnvNew.SetIcon(::LoadIcon(NULL, IDI_ERROR));
 	o_ButtonEnvDelete.EnableWindow(FALSE);
 	o_ButtonEnvEdit.EnableWindow(FALSE);
+	o_ButtonEnvRefresh.EnableWindow(FALSE);
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
 	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
@@ -246,6 +231,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonEnvDelete, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonEnvEdit, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonEnvNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonEnvRefresh, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticFrmEnvionment, LT_RM_BOTTOM);
 
 	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
@@ -393,6 +379,7 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 
 		o_ButtonEnvDelete.EnableWindow(TRUE);
 		o_ButtonEnvEdit.EnableWindow(TRUE);
+		o_ButtonEnvRefresh.EnableWindow(TRUE);
 	}
 }
 
@@ -781,6 +768,7 @@ void LTDlg::OnBnClickedButtonEnvDelete()
 				
 				o_ButtonEnvDelete.EnableWindow(FALSE);
 				o_ButtonEnvEdit.EnableWindow(FALSE);
+				o_ButtonEnvRefresh.EnableWindow(FALSE);
 			}
 		}
 	}
@@ -818,5 +806,38 @@ void LTDlg::OnBnClickedButtonScreenshotNew()
 		LTScreenshot* pScreenshot = oDlg.DetachScreenshot();
 		if (pScreenshot)
 			o_ThumbnailsCtrl.AddScreenshot(pScreenshot);
+	}
+}
+
+void LTDlg::OnBnClickedButtonEnvRefresh()
+{
+	// TODO: Add your control notification handler code here
+
+	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListEnv.GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
+			if (pEnv)
+			{
+				LTSshSession* pSession = new LTSshSession;
+
+				std::list<CString> lst;
+
+				CString sErr = "";
+				pSession->Connect(pEnv, sErr);
+				pSession->Execute("ls -1 logs/Surv* corefiles/*", &lst);
+				TRACE("===========================\n");
+
+
+				std::list<CString>::iterator itr = lst.begin();
+				for (; itr != lst.end(); itr++)
+				{
+					o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, *itr, 0, LVIS_SELECTED, 0, 0);
+				}
+			}
+		}
 	}
 }

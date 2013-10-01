@@ -91,6 +91,7 @@ public:
 	void	Add(LTScreenshotMarking* pMarking);
 	void	SetName(const char* zName)	{	s_Name = zName; };
 	const char*		GetName() {	return s_Name; };
+	bool	Save(const char* zFileName, int iQuality = 90);
 
 protected:
 	CString		s_Name;
