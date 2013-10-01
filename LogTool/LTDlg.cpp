@@ -12,6 +12,8 @@
 #include "LTSshSession.h"
 #include "LTScreenshotEditDlg.h"
 
+#include <WinCred.h>
+
 #include <libssh2.h>
 
 #ifdef _DEBUG
@@ -408,6 +410,60 @@ void LTDlg::OnBnClickedButtonTest()
 
 int LTDlg::TestCall()
 {
+	CREDUI_INFO info = { sizeof (CREDUI_INFO) };
+	info.hwndParent = GetSafeHwnd();
+
+	info.pszCaptionText = "Title";
+	info.pszMessageText = "Message";
+
+	//CBitmap bitmap;
+	//VERIFY(bitmap.LoadBitmap(IDB_PROMPT_BITMAP));
+	//info.hbmBanner = bitmap;
+	info.hbmBanner = 0;
+
+	CString target = "https://jira.millenniumit.com";
+	const DWORD errorCode = 0;
+
+	char userName[CREDUI_MAX_USERNAME_LENGTH + 1] = { 0 };
+
+	strcpy_s(userName,
+		_countof(userName),
+		"sudantha");
+
+	char password[CREDUI_MAX_PASSWORD_LENGTH + 1] = { 0 };
+
+	BOOL saveChecked = false;
+
+	DWORD flags = CREDUI_FLAGS_PERSIST | CREDUI_FLAGS_KEEP_USERNAME;
+
+	DWORD result = ::CredUIPromptForCredentials(&info, target, 0, // reserved
+		errorCode, userName, _countof(userName), password, _countof(password),
+		&saveChecked, flags);
+
+	switch (result)
+	{
+	case NO_ERROR:
+		{
+			// User chose OK...
+			break;
+		}
+	case ERROR_CANCELLED:
+		{
+			// User chose Cancel...
+			break;
+		}
+	default:
+		{
+			// Handle all other errors...
+		}
+	}
+
+	::SecureZeroMemory(password,
+		sizeof (password));
+
+	return 0;
+
+
 	LTSshSession* pSession = new LTSshSession;
 	LTEnv* pEnv = LTEnv::FindEnv("survdev11");
 
