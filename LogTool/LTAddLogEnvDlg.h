@@ -32,9 +32,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	virtual void OnOK();
 public:
-	CEdit o_EditUser;
-	CIPAddressCtrl o_IPIP;
 	CEdit o_EditBaseLocation;
 
 	virtual BOOL OnInitDialog();
+	CComboBox o_ComboEnv;
 };

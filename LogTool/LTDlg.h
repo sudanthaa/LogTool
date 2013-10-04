@@ -20,11 +20,11 @@ public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
 	void	AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword);
 	void	EditEnv(LTEnv* pEnv);
-	void	AddLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
-	void	EditLogEnv(const char* zUser, const char* zIP, const char* zBaseLocation = "");
+	void	AddLogEnv(const char* zEnvName, const char* zBaseLocation = "");
+	void	EditLogEnv(const char* zEnvName, const char* zBaseLocation = "");
 
 // Dialog Data
-	enum { IDD = IDD_LOGTOOL_DIALOG };
+	enum { IDD = IDD_LOGTOOL };
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
@@ -120,4 +120,5 @@ public:
 	afx_msg void OnBnClickedButtonScreenshotNew();
 	afx_msg void OnBnClickedButtonEnvRefresh();
 	CButton o_ButtonEnvRefresh;
+	afx_msg void OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 };

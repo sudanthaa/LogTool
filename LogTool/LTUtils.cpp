@@ -62,3 +62,37 @@ CString LTUtils::GetAppIniFile()
 
 	return sUserAppFolder;
 }
+
+bool LTUtils::DecodePathString(const char* zConnStr, CString& sUser, CString& sIP, CString& sPath )
+{
+	CString sEnvStr = zConnStr;
+	int iPosEUEnd = sEnvStr.Find('@');
+	int iPosIPEnd = sEnvStr.Find(':');
+	sUser = sEnvStr.Left(iPosEUEnd);
+
+	if (iPosIPEnd == -1)
+		sIP = sEnvStr.Right(sEnvStr.GetLength() - iPosEUEnd - 1);
+	else 
+	{
+		sIP = sEnvStr.Mid(iPosEUEnd + 1, iPosIPEnd - iPosEUEnd - 1);
+		sPath = sEnvStr.Right(sEnvStr.GetLength() - iPosIPEnd - 1);
+	}
+
+	return true;
+}
+
+bool LTUtils::DecodePathStringEx( const char* zConnStr, CString& sEnvName, CString& sPath )
+{
+	CString sEnvStr = zConnStr;
+	int iPosIPEnd = sEnvStr.Find(':');
+
+	if (iPosIPEnd == -1)
+		sEnvName = sEnvStr;
+	else 
+	{
+		sEnvName = sEnvStr.Left(iPosIPEnd);
+		sPath = sEnvStr.Right(sEnvStr.GetLength() - iPosIPEnd - 1);
+	}
+
+	return true;
+}

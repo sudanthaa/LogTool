@@ -4,6 +4,7 @@
 #include "LTPch.h"
 #include "LTAddLogEnvDlg.h"
 #include "LTDlg.h"
+#include "LTUtils.h"
 
 // LTAddLogEnvDlg dialog
 
@@ -24,9 +25,8 @@ LTAddLogEnvDlg::~LTAddLogEnvDlg()
 void LTAddLogEnvDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_EDIT_ADD_LOG_ENV_USER, o_EditUser);
-	DDX_Control(pDX, IDC_IPADDRESS_ADD_LOG_ENV_IP, o_IPIP);
 	DDX_Control(pDX, IDC_EDIT_ADD_LOG_ENV_BASE, o_EditBaseLocation);
+	DDX_Control(pDX, IDC_ADD_LOG_ENV_ENV, o_ComboEnv);
 }
 
 
@@ -40,18 +40,16 @@ void LTAddLogEnvDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
 
-	CString sUser = "";
-	CString sIP = "";
+	CString sEnvName = "";
 	CString sBaseLoc = "";
 
+	o_ComboEnv.GetLBText(o_ComboEnv.GetCurSel(), sEnvName);
 	o_EditBaseLocation.GetWindowText(sBaseLoc);
-	o_EditUser.GetWindowText(sUser);
-	o_IPIP.GetWindowText(sIP);
 
 	if (b_EditMode)
-		p_Dlg->EditLogEnv(sUser, sIP, sBaseLoc);
+		p_Dlg->EditLogEnv(sEnvName, sBaseLoc);
 	else 
-		p_Dlg->AddLogEnv(sUser, sIP, sBaseLoc);
+		p_Dlg->AddLogEnv(sEnvName, sBaseLoc);
 
 	CDialog::OnOK();
 }
@@ -62,28 +60,31 @@ BOOL LTAddLogEnvDlg::OnInitDialog()
 
 	if (b_EditMode)
 	{
-		int iPosEUEnd = s_EnvString.Find('@');
-		int iPosIPEnd = s_EnvString.Find(':');
-		CString sEnvUser = s_EnvString.Left(iPosEUEnd);
-		CString sIP = "";
-		CString sBase = "";
+		CString sEnvName,sPath;
 
-		if (iPosIPEnd == -1)
-			sIP = s_EnvString.Right(s_EnvString.GetLength() - iPosEUEnd - 1);
-		else 
-		{
-			sIP = s_EnvString.Mid(iPosEUEnd + 1, iPosIPEnd - iPosEUEnd - 1);
-			sBase = s_EnvString.Right(s_EnvString.GetLength() - iPosIPEnd - 1);
-		}
-
-		o_EditUser.EnableWindow(FALSE);
-		o_EditUser.SetWindowText(sEnvUser);
-		o_IPIP.SetWindowText(sIP);
-		o_EditBaseLocation.SetWindowText(sBase);
+		LTUtils::DecodePathStringEx(s_EnvString, sEnvName, sPath);
+		o_EditBaseLocation.SetWindowText(sPath);
 
 		CString sTitle;
 		sTitle.Format("Edit Log Environment - (%s)", s_EnvString);
 		SetWindowText(sTitle);
+
+		o_ComboEnv.AddString(sEnvName);
+		o_ComboEnv.SetCurSel(0);
+
+		o_ComboEnv.EnableWindow(FALSE);
+	}
+	else
+	{
+		VEC_ENV_ITR itr = LTEnv::vec_Env.begin();
+		for (; itr != LTEnv::vec_Env.end(); itr++)
+		{
+			LTEnv* pEnv = *itr;
+			o_ComboEnv.AddString(pEnv->s_Name);
+		}
+
+		if (LTEnv::vec_Env.size() > 0)
+			o_ComboEnv.SetCurSel(0);
 	}
 
 	// TODO:  Add extra initialization here

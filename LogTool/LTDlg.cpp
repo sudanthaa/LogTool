@@ -129,6 +129,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 //	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &LTDlg::OnHdnItemdblclickListEnv)
 ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_NEW, &LTDlg::OnBnClickedButtonScreenshotNew)
 ON_BN_CLICKED(IDC_BUTTON_ENV_REFRESH, &LTDlg::OnBnClickedButtonEnvRefresh)
+ON_NOTIFY(NM_RCLICK, IDC_LIST_ENV, &LTDlg::OnNMRClickListEnv)
 END_MESSAGE_MAP()
 
 
@@ -378,6 +379,8 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 		o_ButtonEnvDelete.EnableWindow(TRUE);
 		o_ButtonEnvEdit.EnableWindow(TRUE);
 		o_ButtonEnvRefresh.EnableWindow(TRUE);
+
+		o_ListSelection.DeleteAllItems();
 	}
 }
 
@@ -419,22 +422,21 @@ void LTDlg::OnBnClickedButtonEnvAdd()
 }
 
 
-void LTDlg::AddLogEnv( const char* zUser, const char* zIP, const char* zBaseLocation /*= ""*/ )
+void LTDlg::AddLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
 {
 	CString sNew;
-	sNew.Format("%s@%s:%s", zUser, zIP, zBaseLocation);
+	sNew.Format("%s:%s", zUser, zBaseLocation);
 
 	o_ComboLogMachines.AddString(sNew);
 	o_StaticLogEnv.SetWindowText(sNew);
 
-
 	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
 
-void LTDlg::EditLogEnv( const char* zUser, const char* zIP, const char* zBaseLocation /*= ""*/ )
+void LTDlg::EditLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
 {
 	CString sNew;
-	sNew.Format("%s@%s:%s", zUser, zIP, zBaseLocation);
+	sNew.Format("%s:%s", zUser, zBaseLocation);
 
 	o_ComboLogMachines.SetWindowText(sNew);
 	o_StaticLogEnv.SetWindowText(sNew);
@@ -713,6 +715,8 @@ void LTDlg::OnBnClickedButtonEnvDelete()
 				o_ButtonEnvDelete.EnableWindow(FALSE);
 				o_ButtonEnvEdit.EnableWindow(FALSE);
 				o_ButtonEnvRefresh.EnableWindow(FALSE);
+
+				o_ListSelection.DeleteAllItems();
 			}
 		}
 	}
@@ -772,7 +776,7 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 
 				CString sErr = "";
 				pSession->Connect(pEnv, sErr);
-				pSession->Execute("ls -1 logs/Surv* corefiles/*", &lst);
+				pSession->Execute("ls -1 logs/*:*:* corefiles/*", &lst);
 				TRACE("===========================\n");
 
 
@@ -783,5 +787,33 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 				}
 			}
 		}
+	}
+}
+
+void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+{
+//	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<NMITEMACTIVATE>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	// display a menu created using CreateMenu()
+	HMENU hMenu = ::CreatePopupMenu();
+	if (NULL != hMenu)
+	{
+		// add a few test items
+		::AppendMenu(hMenu, MF_STRING, 1, "Item 1");
+		::AppendMenu(hMenu, MF_STRING, 2, "Item 2");
+		::AppendMenu(hMenu, MF_STRING, 3, "Item 3");
+
+		CPoint point(50,10);
+		o_ListEnv.ClientToScreen(&point);
+
+		int sel = ::TrackPopupMenuEx(hMenu, 
+			TPM_CENTERALIGN | TPM_RETURNCMD,
+			point.x,
+			point.y,
+			m_hWnd,
+			NULL);
+		::DestroyMenu(hMenu);
 	}
 }
