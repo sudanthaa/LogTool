@@ -24,6 +24,22 @@ LTSshSession::LTSshSession(void)
 
 LTSshSession::~LTSshSession(void)
 {
+	if (p_Session)
+	{
+		libssh2_session_disconnect(p_Session, "Normal Shutdown, Thank you for playing");
+		libssh2_session_free(p_Session);
+		p_Session = NULL;
+	}
+
+	if (i_Socket != -1)
+	{
+#ifdef WIN32
+		closesocket(i_Socket);
+#else
+		close(i_Socket);
+#endif
+		i_Socket = -1;
+	}
 }
 
 void LTSshSession::KeyboadCallback( const char *name, int name_len, const char *instruction, 
@@ -65,6 +81,7 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
     if (connect(i_Socket, (struct sockaddr*)(&sin),
                 sizeof(struct sockaddr_in)) != 0) {
         TRACE( "failed to connect!\n");
+		sErr = "failed to connect!";
         return false;
     }
  
@@ -167,6 +184,9 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 #else
     close(i_Socket);
 #endif
+
+	i_Socket = -1;
+
     TRACE( "all done!\n");
     return 0;
 }
@@ -279,7 +299,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
 	
 
 	int exitcode = 127;
-	char *exitsignal=(char *)"none";
+	char *exitsignal = (char *)"none";
 
 	while( (rc = libssh2_channel_close(pChannel)) == LIBSSH2_ERROR_EAGAIN )
         waitsocket(i_Socket, p_Session);

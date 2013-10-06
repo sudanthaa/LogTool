@@ -12,6 +12,8 @@
 #include "LTResizeMan.h"
 #include "LTThumbnailsCtrl.h"
 
+class LTSshSession;
+
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener
 {
@@ -21,7 +23,8 @@ public:
 	void	AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword);
 	void	EditEnv(LTEnv* pEnv);
 	void	AddLogEnv(const char* zEnvName, const char* zBaseLocation = "");
-	void	EditLogEnv(const char* zEnvName, const char* zBaseLocation = "");
+	void	EditLogEnv(const char* zCurrentStr, const char* zEnvName, const char* zBaseLocation = "");
+	LTEnv*  GetSelectedEnv();
 
 // Dialog Data
 	enum { IDD = IDD_LOGTOOL };
@@ -51,6 +54,7 @@ public:
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 
+	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
 	LTThumbnailsCtrl o_ThumbnailsCtrl;
 
@@ -121,4 +125,7 @@ public:
 	afx_msg void OnBnClickedButtonEnvRefresh();
 	CButton o_ButtonEnvRefresh;
 	afx_msg void OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	CButton o_ButtonUpload;
+	afx_msg void OnBnClickedButtonUpload();
+	afx_msg void OnDestroy();
 };

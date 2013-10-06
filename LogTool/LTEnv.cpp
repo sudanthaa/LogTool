@@ -71,6 +71,27 @@ LTEnv* LTEnv::FindEnv( const char* zName )
 	return NULL;
 }
 
+LTEnv* LTEnv::FindEnvFQ( const char* zFQName )
+{
+	for (unsigned int ui = 0; ui < vec_Env.size(); ui++)
+	{
+		LTEnv* pEnv = vec_Env[ui];
+
+		CString sFQEnv;
+		pEnv->GetFQName(sFQEnv);
+
+		if (sFQEnv == zFQName)
+			return pEnv;
+	}
+
+	return NULL;
+}
+
+LTEnv* LTEnv::FindEnv( const char* zName, const char* zFolder )
+{
+	return NULL;
+}
+
 void LTEnv::Remove( LTEnv* pEnv )
 {
 	VEC_ENV_ITR itr = vec_Env.begin();
@@ -85,3 +106,18 @@ void LTEnv::Remove( LTEnv* pEnv )
 	
 	remove(pEnv->s_FullFile);
 }
+
+void LTEnv::GetFQName( CString& sName )
+{
+	if (s_Folder.GetLength() > 0)
+		sName.Format("%s\\%s", s_Folder, s_Name);
+	else
+		sName = s_Name;
+}
+
+bool LTEnv::IsSame( LTEnv* pEnv )
+{
+	return ((pEnv->s_IP == s_IP) && (pEnv->s_EnvUser == s_EnvUser));
+}
+
+

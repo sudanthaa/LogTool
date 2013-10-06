@@ -47,7 +47,7 @@ void LTAddLogEnvDlg::OnOK()
 	o_EditBaseLocation.GetWindowText(sBaseLoc);
 
 	if (b_EditMode)
-		p_Dlg->EditLogEnv(sEnvName, sBaseLoc);
+		p_Dlg->EditLogEnv(s_EnvString, sEnvName, sBaseLoc);
 	else 
 		p_Dlg->AddLogEnv(sEnvName, sBaseLoc);
 
@@ -80,7 +80,9 @@ BOOL LTAddLogEnvDlg::OnInitDialog()
 		for (; itr != LTEnv::vec_Env.end(); itr++)
 		{
 			LTEnv* pEnv = *itr;
-			o_ComboEnv.AddString(pEnv->s_Name);
+			CString sFullEnv;
+			pEnv->GetFQName(sFullEnv);
+			o_ComboEnv.AddString(sFullEnv);
 		}
 
 		if (LTEnv::vec_Env.size() > 0)

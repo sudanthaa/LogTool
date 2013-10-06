@@ -58,6 +58,7 @@ LTDlg::LTDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(LTDlg::IDD, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	p_ConnectedSession = NULL;
 }
 
 void LTDlg::DoDataExchange(CDataExchange* pDX)
@@ -95,6 +96,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
 	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
 	DDX_Control(pDX, IDC_BUTTON_ENV_REFRESH, o_ButtonEnvRefresh);
+	DDX_Control(pDX, IDC_BUTTON_UPLOAD, o_ButtonUpload);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -103,7 +105,6 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ENV, &LTDlg::OnLvnItemchangedListEnv)
-//	ON_NOTIFY(HDN_ITEMCLICK, 0, &LTDlg::OnHdnItemclickListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	
 	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
 	ON_CBN_KILLFOCUS(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnKillfocusComboJiraProject)
@@ -124,14 +125,14 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LOGMAC_EDIT, &LTDlg::OnBnClickedButtonLogmacEdit)
 	ON_WM_CLOSE()
 	ON_WM_SIZE()
-//	ON_NOTIFY(HDN_ITEMCHANGED, 0, &LTDlg::OnHdnItemchangedListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_EDIT, &LTDlg::OnBnClickedButtonEnvEdit)
 	ON_BN_CLICKED(IDC_BUTTON_ENV_DELETE, &LTDlg::OnBnClickedButtonEnvDelete)
 	ON_WM_CREATE()
-//	ON_NOTIFY(HDN_ITEMDBLCLICK, 0, &LTDlg::OnHdnItemdblclickListEnv)
-ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_NEW, &LTDlg::OnBnClickedButtonScreenshotNew)
-ON_BN_CLICKED(IDC_BUTTON_ENV_REFRESH, &LTDlg::OnBnClickedButtonEnvRefresh)
-ON_NOTIFY(NM_RCLICK, IDC_LIST_ENV, &LTDlg::OnNMRClickListEnv)
+	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_NEW, &LTDlg::OnBnClickedButtonScreenshotNew)
+	ON_BN_CLICKED(IDC_BUTTON_ENV_REFRESH, &LTDlg::OnBnClickedButtonEnvRefresh)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_ENV, &LTDlg::OnNMRClickListEnv)
+	ON_BN_CLICKED(IDC_BUTTON_UPLOAD, &LTDlg::OnBnClickedButtonUpload)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -164,8 +165,12 @@ BOOL LTDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	// TODO: Add extra initialization here
 
+	o_ComboJiraProject.AddString("SLSESURV");
+	o_ComboJiraProject.AddString("SURV");
+	o_ComboJiraProject.SetCurSel(0);
+
+	// TODO: Add extra initialization here
 	o_ListEnv.SetExtendedStyle(o_ListEnv.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	o_ListEnv.InsertColumn(0,CString("Env"), LVCFMT_LEFT,75);
 	o_ListEnv.InsertColumn(1,CString("User"), LVCFMT_LEFT,75);
@@ -206,6 +211,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_StaticFrmFiles, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_ButtonCancel, LT_RM_ALL);
+	o_Resizer.Attach(&o_ButtonUpload, LT_RM_ALL);
 
 	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_VIRTICAL);
@@ -330,7 +336,10 @@ void LTDlg::GetAllFiles( CString sBaseFolder, CString sSubDir, VEC_ENV& rvecEvs)
 	HANDLE hFind;
 
 	CString sFindFileExp;
-	sFindFileExp.Format("%s/%s\\*",  sBaseFolder, sSubDir);
+	if (sSubDir.GetLength() > 0)
+		sFindFileExp.Format("%s\\%s\\*",  sBaseFolder, sSubDir);
+	else
+		sFindFileExp.Format("%s\\*", sBaseFolder);
 
 	hFind = FindFirstFile(sFindFileExp, &FindFileData);
 
@@ -344,8 +353,12 @@ void LTDlg::GetAllFiles( CString sBaseFolder, CString sSubDir, VEC_ENV& rvecEvs)
 			(strcmp(FindFileData.cFileName, ".") != 0) && 
 			(strcmp(FindFileData.cFileName, "..") != 0))
 		{
-			CString sNewSubDir;
-			sNewSubDir.Format("%s\\%s", sSubDir, FindFileData.cFileName);
+			CString sNewSubDir = "";
+			if (sSubDir.GetLength() > 0)
+				sNewSubDir.Format("%s\\%s", sSubDir, FindFileData.cFileName);
+			else
+				sNewSubDir = FindFileData.cFileName;
+
 			GetAllFiles(sBaseFolder, sNewSubDir, rvecEvs);
 		}
 		else if (sFoundFile.Find(".xsh") > -1)
@@ -483,19 +496,24 @@ void LTDlg::AddLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
 	CString sNew;
 	sNew.Format("%s:%s", zUser, zBaseLocation);
 
-	o_ComboLogMachines.AddString(sNew);
-	o_StaticLogEnv.SetWindowText(sNew);
+	int iSel = o_ComboLogMachines.AddString(sNew);
+	o_ComboLogMachines.SetCurSel(iSel);
 
 	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
 
-void LTDlg::EditLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
+void LTDlg::EditLogEnv(const char* zCurrentStr, const char* zUser, const char* zBaseLocation /*= ""*/ )
 {
 	CString sNew;
 	sNew.Format("%s:%s", zUser, zBaseLocation);
 
-	o_ComboLogMachines.SetWindowText(sNew);
-	o_StaticLogEnv.SetWindowText(sNew);
+	int iCurSel = o_ComboLogMachines.FindString(-1, zCurrentStr);
+
+	if (iCurSel > -1)
+		o_ComboLogMachines.DeleteString(iCurSel);
+
+	int iSel = o_ComboLogMachines.AddString(sNew);
+	o_ComboLogMachines.SetCurSel(iSel);
 
 	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
@@ -633,7 +651,9 @@ void LTDlg::OnBnClickedButtonLogmacEdit()
 {
 	// TODO: Add your control notification handler code here
 	CString sLogEnv = "";
-	o_StaticLogEnv.GetWindowText(sLogEnv);
+
+	int iSel = o_ComboLogMachines.GetCurSel();
+	o_ComboLogMachines.GetLBText(iSel, sLogEnv);
 
 	LTAddLogEnvDlg oDlg;
 	oDlg.SetEditMode(sLogEnv);
@@ -733,22 +753,13 @@ void LTDlg::OnSize(UINT nType, int cx, int cy)
 void LTDlg::OnBnClickedButtonEnvEdit()
 {
 	// TODO: Add your control notification handler code here
-
-	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
-	if (pos)
+	LTEnv* pEnv = GetSelectedEnv();
+	if (pEnv)
 	{
-		int nItem = o_ListEnv.GetNextSelectedItem(pos);
-		if (nItem > -1)
-		{
-			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
-			if (pEnv)
-			{
-				LTAddEnvDlg oDlg;
-				oDlg.SetDlg(this);
-				oDlg.SetEditMode(pEnv);
-				oDlg.DoModal();
-			}
-		}
+		LTAddEnvDlg oDlg;
+		oDlg.SetDlg(this);
+		oDlg.SetEditMode(pEnv);
+		oDlg.DoModal();
 	}
 	//returns -1 if not selected;
 }
@@ -826,20 +837,44 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
 			if (pEnv)
 			{
-				LTSshSession* pSession = new LTSshSession;
-
-				std::list<CString> lst;
-
-				CString sErr = "";
-				pSession->Connect(pEnv, sErr);
-				pSession->Execute("ls -1 logs/*:*:* corefiles/*", &lst);
-				TRACE("===========================\n");
-
-
-				std::list<CString>::iterator itr = lst.begin();
-				for (; itr != lst.end(); itr++)
+				if (p_ConnectedSession && !p_ConnectedSession->GetEnv()->IsSame(pEnv))
 				{
-					o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, *itr, 0, LVIS_SELECTED, 0, 0);
+					delete p_ConnectedSession;
+					p_ConnectedSession = NULL;
+				}
+
+				LTSshSession* pSession = p_ConnectedSession;
+				
+				if (!pSession)
+				{
+					pSession = new LTSshSession;
+					CString sErr = "";
+					if (pSession->Connect(pEnv, sErr))
+					{
+						p_ConnectedSession = pSession;
+					}
+					else
+					{
+						AfxMessageBox(sErr);
+						delete pSession;
+						pSession = NULL;
+					}
+				}
+
+				if (pSession)
+				{
+					std::list<CString> lst;
+
+					if (pSession->Execute("ls -1 logs/*:*:* corefiles/*", &lst))
+					{
+						TRACE("===========================\n");
+						std::list<CString>::iterator itr = lst.begin();
+						for (; itr != lst.end(); itr++)
+						{
+							o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, 
+								*itr, 0, LVIS_SELECTED, 0, 0);
+						}
+					}
 				}
 			}
 		}
@@ -872,4 +907,123 @@ void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 			NULL);
 		::DestroyMenu(hMenu);
 	}
+}
+
+void LTDlg::OnBnClickedButtonUpload()
+{
+	// TODO: Add your control notification handler code here
+
+	/*
+	mykey=`cat ~/.ssh/id_rsa.pub`
+	ssh $env_conn 'cur_key=`grep "'$mykey'" .ssh/authorized_keys ` ; if [ -z "$cur_key" ]; then echo adding key to authorized list; mkdir -p .ssh; echo "'$mykey'" >> .ssh/authorized_keys; else echo key already found authorized; fi'
+	*/
+
+	// Taking the public key from environment
+	//////////////////////////////////////////////////////////////////////////
+	LTEnv* pEnv = GetSelectedEnv();
+	if (!pEnv)
+	{
+		AfxMessageBox("No environment selected");
+		return;
+	}
+
+	LTSshSession* pSessionEnv = p_ConnectedSession;
+	CString sErr = "";
+
+	//if (!pSessionEnv->Connect(pEnv, sErr))
+	//{
+	//	delete pSessionEnv;
+	//	return;
+	//}
+
+	if (!pSessionEnv)
+		return;
+
+	std::list<CString> lst;
+	if (!pSessionEnv->Execute("cat .ssh/id_rsa.pub", &lst))
+	{
+		delete p_ConnectedSession;
+		p_ConnectedSession = NULL;
+		return;
+	}
+
+	if (lst.size() == 0)
+		return;
+
+	CString sKey = lst.front();
+
+
+	// Putting the public key of environment in authorized list of log-machine
+	//////////////////////////////////////////////////////////////////////////
+	CString sEnvName;
+	CString sEnvPath;
+	CString sConnStr;
+	o_ComboLogMachines.GetLBText(o_ComboLogMachines.GetCurSel(), sConnStr);
+	
+	if (!LTUtils::DecodePathStringEx(sConnStr, sEnvName, sEnvPath))
+		return;
+
+	LTEnv* pLogEnv = LTEnv::FindEnvFQ(sEnvName);
+	if (!pLogEnv)
+		return;
+
+	LTSshSession* pSession = new LTSshSession;
+
+	if (!pSession->Connect(pLogEnv, sErr))
+	{
+		delete pSession;
+		return;
+	}
+
+	CString sCmd;
+	sCmd.Format("cur_key=`grep \"%s\" .ssh/authorized_keys ` ; if [ -z \"$cur_key\"  ]; then echo adding key to authorized list; mkdir -p .ssh; echo \"%s\" >> .ssh/authorized_keys; else echo key already found authorized; fi"
+		, sKey, sKey);
+
+	std::list<CString> lstOut;
+	pSession->Execute(sCmd, &lstOut);
+
+	delete pSession;
+
+
+	// Getting selections;
+	//////////////////////////////////////////////////////////////////////////
+	int i = -1;
+	do
+	{
+		i = o_ListSelection.GetNextItem(i, LVNI_ALL);
+		if  (i == -1)
+			break;
+
+		if (o_ListSelection.GetCheck(i) )
+		{
+			CString sSel = o_ListSelection.GetItemText(i, 0);
+			int i = 0;
+		}
+	}
+	while(true);
+}
+
+LTEnv* LTDlg::GetSelectedEnv()
+{
+	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListEnv.GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
+			return pEnv;
+		}
+	}
+
+	return NULL;
+}
+
+void LTDlg::OnDestroy()
+{
+	__super::OnDestroy();
+
+	delete p_ConnectedSession;
+	p_ConnectedSession = NULL;
+	// TODO: Add your message handler code here
 }

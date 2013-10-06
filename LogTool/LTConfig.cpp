@@ -91,7 +91,7 @@ void LTConfig::_LoadBool( const char* zGroup, const char* zParam, bool& bVar, co
 
 
 void LTConfig::StringSet::Set( const char* zValue )
-{
+{	
 	dq_Strings.push_back(zValue);
 	if (dq_Strings.size() > (unsigned int) i_MaxCount)
 		dq_Strings.pop_front();
