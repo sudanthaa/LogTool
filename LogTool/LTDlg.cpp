@@ -985,6 +985,17 @@ void LTDlg::OnBnClickedButtonUpload()
 	delete pSession;
 
 
+
+	// Collecting logs
+	//////////////////////////////////////////////////////////////////////////
+	CString sTempDir;
+	sTempDir.Format("mkdir -p /tmp/%I64", time(NULL));
+
+	lstOut.clear();
+	pSessionEnv->Execute(sTempDir, &lstOut);
+
+	CString sFileList = "";
+
 	// Getting selections;
 	//////////////////////////////////////////////////////////////////////////
 	int i = -1;
@@ -997,10 +1008,48 @@ void LTDlg::OnBnClickedButtonUpload()
 		if (o_ListSelection.GetCheck(i) )
 		{
 			CString sSel = o_ListSelection.GetItemText(i, 0);
-			int i = 0;
+			CString sZipCmd;
+			CString sFile;
+			sFile.Format("%s/%s.gzip",  sTempDir, sSel);
+			sZipCmd.Format("gzip -c > %s", sTempDir, sFile);
+
+			sFileList += " ";
+			sFileList += sFile;
+
+			pSessionEnv->Execute(sZipCmd, &lstOut);
 		}
 	}
 	while(true);
+
+
+	// Make log location
+	//////////////////////////////////////////////////////////////////////////
+	CString sProject;
+	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
+	CString sJiraNo;
+	o_EditJiraTicket.GetWindowText(sJiraNo);
+	CString sJiraID;
+	sJiraID.Format("%s-%s", sProject, sJiraNo);
+
+
+	CString sTicketPath;
+	if (sEnvPath.GetLength() > 0)
+		sTicketPath.Format("%s/%s", sEnvPath, sJiraID);
+	else
+		sTicketPath = sJiraID;
+
+	CString sTicketDirMkCmd;
+	sTicketDirMkCmd.Format("mkdir -p %s", sTicketPath);
+
+	pSession->Execute(sTicketDirMkCmd);
+
+
+	// Copy logs
+	//////////////////////////////////////////////////////////////////////////
+	CString sCopyCmd;
+	sCopyCmd.Format("scp %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sEnvPath);
+
+	pSessionEnv->Execute(sCopyCmd);
 }
 
 LTEnv* LTDlg::GetSelectedEnv()

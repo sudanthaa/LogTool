@@ -271,7 +271,8 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
 					{
 						buffer[i] = 0;
 						CString sVal = buffer + istart;
-						plstOut->push_back(sVal);
+						if (plstOut)
+							plstOut->push_back(sVal);
 						buffer[i] = c;
 						TRACE( "%s - %d\n" , sVal, istart);
 						istart = i + 1;

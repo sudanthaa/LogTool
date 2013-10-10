@@ -63,7 +63,6 @@ protected:
 public:
 	CComboBox o_ComboJiraProject;
 	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-//	afx_msg void OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvAdd();
 	afx_msg void OnBnClickedButtonTest();
 	afx_msg void OnCbnKillfocusComboJiraProject();
@@ -84,6 +83,15 @@ public:
 	afx_msg void OnBnClickedButtonLogmacNew();
 	afx_msg void OnBnClickedButtonLogmacEdit();
 	afx_msg void OnClose();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnBnClickedButtonEnvEdit();
+	afx_msg void OnBnClickedButtonEnvDelete();
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnBnClickedButtonScreenshotNew();
+	afx_msg void OnBnClickedButtonEnvRefresh();
+	afx_msg void OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonUpload();
+	afx_msg void OnDestroy();
 
 	CListCtrl o_ListEnv;
 	CStatic o_StaticLogEnv;
@@ -96,7 +104,6 @@ public:
 	CComboBox o_ComboLogMachines;
 	CComboBox o_ComboIncludeFilters;
 	CComboBox o_ComboExcludeFilters;
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CStatic o_StaticFrmFiles;
 	CStatic o_StaticFrmJira;
 	CStatic o_StaticFrmEnvionment;
@@ -114,18 +121,8 @@ public:
 	CStatic o_StaticJiraUserID;
 	CStatic o_StaticJiraPassword;
 	CStatic o_StaticJiraTicketSep;
-//	afx_msg void OnHdnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedButtonEnvEdit();
-	afx_msg void OnBnClickedButtonEnvDelete();
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	CStatic o_StaticScreenshotBoundary;
 	CStatic o_StaticFrmScreenshots;
-//	afx_msg void OnHdnItemdblclickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedButtonScreenshotNew();
-	afx_msg void OnBnClickedButtonEnvRefresh();
 	CButton o_ButtonEnvRefresh;
-	afx_msg void OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	CButton o_ButtonUpload;
-	afx_msg void OnBnClickedButtonUpload();
-	afx_msg void OnDestroy();
 };
