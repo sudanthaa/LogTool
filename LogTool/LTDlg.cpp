@@ -982,17 +982,20 @@ void LTDlg::OnBnClickedButtonUpload()
 	std::list<CString> lstOut;
 	pSession->Execute(sCmd, &lstOut);
 
-	delete pSession;
+	
 
 
 
 	// Collecting logs
 	//////////////////////////////////////////////////////////////////////////
 	CString sTempDir;
-	sTempDir.Format("mkdir -p /tmp/%I64", time(NULL));
+	sTempDir.Format("/tmp/%I64u", time(NULL));
+
+	CString sMkTmpDir;
+	sMkTmpDir.Format("mkdir -p %s", sTempDir);
 
 	lstOut.clear();
-	pSessionEnv->Execute(sTempDir, &lstOut);
+	pSessionEnv->Execute(sMkTmpDir, &lstOut);
 
 	CString sFileList = "";
 
@@ -1011,7 +1014,7 @@ void LTDlg::OnBnClickedButtonUpload()
 			CString sZipCmd;
 			CString sFile;
 			sFile.Format("%s/%s.gzip",  sTempDir, sSel);
-			sZipCmd.Format("gzip -c > %s", sTempDir, sFile);
+			sZipCmd.Format("gzip -c %s > %s", sSel, sFile);
 
 			sFileList += " ";
 			sFileList += sFile;
@@ -1042,6 +1045,10 @@ void LTDlg::OnBnClickedButtonUpload()
 	sTicketDirMkCmd.Format("mkdir -p %s", sTicketPath);
 
 	pSession->Execute(sTicketDirMkCmd);
+
+
+	delete pSession;
+	pSession = NULL;
 
 
 	// Copy logs
