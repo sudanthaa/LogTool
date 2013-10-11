@@ -1013,7 +1013,10 @@ void LTDlg::OnBnClickedButtonUpload()
 			CString sSel = o_ListSelection.GetItemText(i, 0);
 			CString sZipCmd;
 			CString sFile;
-			sFile.Format("%s/%s.gzip",  sTempDir, sSel);
+			int iLO =  sSel.ReverseFind('/');
+			CString sRelFileName = iLO > -1 ? sSel.Right(sSel.GetLength() - iLO - 1) : sSel; 
+			sFile.Format("%s/%s.gz",  sTempDir, sRelFileName);
+			
 			sZipCmd.Format("gzip -c %s > %s", sSel, sFile);
 
 			sFileList += " ";
@@ -1054,9 +1057,17 @@ void LTDlg::OnBnClickedButtonUpload()
 	// Copy logs
 	//////////////////////////////////////////////////////////////////////////
 	CString sCopyCmd;
-	sCopyCmd.Format("scp %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sEnvPath);
+	sCopyCmd.Format("scp %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath);
 
 	pSessionEnv->Execute(sCopyCmd);
+
+	// Delete temp directory
+	//////////////////////////////////////////////////////////////////////////
+	CString sCleanDirCmd;
+	sCleanDirCmd.Format("rm -rf %s", sTempDir);
+	lstOut.clear();
+
+	pSessionEnv->Execute(sCleanDirCmd);
 }
 
 LTEnv* LTDlg::GetSelectedEnv()

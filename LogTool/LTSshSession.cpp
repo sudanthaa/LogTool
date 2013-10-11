@@ -315,7 +315,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
     if (exitsignal)
         TRACE( "\nGot signal: %s\n", exitsignal);
     else
-        TRACE( "\nEXIT: %d bytecount: %d\n", exitcode, bytecount);
+		TRACE( "\nEXIT: %d bytecount: %d  command:%s\n", exitcode, bytecount, zCommand);
 
 	libssh2_channel_free(pChannel);
 	pChannel = NULL;
