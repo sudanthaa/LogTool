@@ -49,10 +49,16 @@ public:
 	bool	LoadEnvFromXShellConfig(void);
 	void	InsertEnvToList( LTEnv* pEnv );
 	int		TestCall();
+	int		TestCurl();
+	void	AttachFileToJira(const char* zFile, const char* zFileName);
+	CString	CreateJiraTicket(const char* zProject, const char* zIssueType, const char* zSummary = "", 
+				const char* zDescription = "");
 	void	OnPressEnterKey();
 	void	InitResizes();
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
+	bool	ProvideJiraCred(CString& sUser, CString& sPassword, CString& sProject, CString& sURL, CString& sID,
+				bool bWithID = true);
 
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;

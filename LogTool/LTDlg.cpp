@@ -15,6 +15,7 @@
 #include <WinCred.h>
 
 #include <libssh2.h>
+#include <curl/curl.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -168,6 +169,9 @@ BOOL LTDlg::OnInitDialog()
 
 	o_ComboJiraProject.AddString("SLSESURV");
 	o_ComboJiraProject.AddString("SURV");
+	o_ComboJiraProject.AddString("JSESURV");
+	o_ComboJiraProject.AddString("LMEXSURV");
+	o_ComboJiraProject.AddString("BMESSURV");
 	o_ComboJiraProject.SetCurSel(0);
 
 	// TODO: Add extra initialization here
@@ -186,9 +190,9 @@ BOOL LTDlg::OnInitDialog()
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
 
-
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
 	o_EditJiraUser.SetWindowText(LTConfig::o_Inst.s_JiraUser);
+	o_EditJiraPassword.SetWindowText(LTConfig::o_Inst.s_JiraPassword);
 
 	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
 	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
@@ -408,7 +412,61 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 
 void LTDlg::OnBnClickedButtonTest()
 {
-	TestCall();
+	//TestCall();
+	TestCurl();
+}
+
+int LTDlg::TestCurl()
+{
+	CString sUser;
+	CString sURL;
+	CString sProject;
+	CString sPassword;
+	CString sID;
+	if (!ProvideJiraCred(sUser, sPassword, sProject, sURL, sID))
+		return 1;
+
+	CString sAttachmentURL;
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/comment", sURL, sProject, sID);
+
+	CString sAuth;
+	sAuth.Format("%s:%s", sUser, sPassword);
+
+	curl_global_init(CURL_GLOBAL_DEFAULT);
+
+
+	CURL* pCurlComment = NULL;
+	pCurlComment = curl_easy_init();
+	if (pCurlComment) 
+	{ 
+		struct curl_slist *chunk = NULL;
+		chunk = curl_slist_append(chunk, "Content-Type: application/json");
+
+		// '  "body" : "Logs uploaded to below location.\\r\\n\\r\\n _Location_: %s@%s:%s \\r\\n _Password_: %s \\r\\n _XShell-Link_: [^%s] \\r\\n _Uploaded from_: %s"\n'
+		const char* zTestComment  = "{ \"body\" : \"Test Commento\" }";
+		strlen(zTestComment);
+		curl_easy_setopt(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt(pCurlComment, CURLOPT_POST, 1);	
+		curl_easy_setopt(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDS, zTestComment);
+		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDSIZE, strlen(zTestComment));
+		curl_easy_setopt(pCurlComment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
+
+		CURLcode res = curl_easy_perform(pCurlComment);
+		/* Check for errors */ 
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		curl_easy_cleanup(pCurlComment);
+		curl_slist_free_all(chunk);
+	}
+
+	AttachFileToJira("","");
+	curl_global_cleanup();
+
+	return 0;
 }
 
 int LTDlg::TestCall()
@@ -578,6 +636,7 @@ void LTDlg::OnEnChangeEditJiraPassword()
 	// with the ENM_CHANGE flag ORed into the mask.
 
 	// TODO:  Add your control notification handler code here
+	o_EditJiraPassword.GetWindowText(LTConfig::o_Inst.s_JiraPassword);
 }
 
 void LTDlg::OnBnClickedCheckCommentOnJira()
@@ -1068,6 +1127,10 @@ void LTDlg::OnBnClickedButtonUpload()
 	lstOut.clear();
 
 	pSessionEnv->Execute(sCleanDirCmd);
+
+
+	// Add Comment on jira
+	//////////////////////////////////////////////////////////////////////////
 }
 
 LTEnv* LTDlg::GetSelectedEnv()
@@ -1094,3 +1157,129 @@ void LTDlg::OnDestroy()
 	p_ConnectedSession = NULL;
 	// TODO: Add your message handler code here
 }
+
+void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
+{
+	CString sUser;
+	CString sURL;
+	CString sProject;
+	CString sPassword;
+	CString sID;
+	if (!ProvideJiraCred(sUser, sPassword, sProject, sURL, sID))
+		return;
+
+	CString sAttachmentURL;
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", sURL, sProject, sID);
+
+	CString sAuth;
+	sAuth.Format("%s:%s", sUser, sPassword);
+
+	CURL* pCurlAttachment = NULL;
+	pCurlAttachment = curl_easy_init();
+	if (pCurlAttachment) 
+	{ 
+		struct curl_slist *chunk = NULL;
+		struct curl_httppost *formpost = NULL;
+		struct curl_httppost *lastptr = NULL;
+
+		chunk = curl_slist_append(chunk, "X-Atlassian-Token: nocheck");
+
+		const char* zFileContent = "my text content";
+
+		curl_formadd(&formpost,
+			&lastptr,
+			CURLFORM_COPYNAME, "file",
+			CURLFORM_BUFFER, zFileName,
+			CURLFORM_BUFFERPTR, zFileContent,
+			CURLFORM_BUFFERLENGTH, strlen(zFileContent),
+			CURLFORM_END);
+
+		curl_easy_setopt(pCurlAttachment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt(pCurlAttachment, CURLOPT_POST, 1);	
+		curl_easy_setopt(pCurlAttachment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt(pCurlAttachment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt(pCurlAttachment, CURLOPT_HTTPPOST, formpost);
+		curl_easy_setopt(pCurlAttachment, CURLOPT_SSL_VERIFYPEER, 0);
+
+		CURLcode res = curl_easy_perform(pCurlAttachment);
+		/* Check for errors */ 
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		curl_easy_cleanup(pCurlAttachment);
+		curl_slist_free_all(chunk);
+	}
+}
+
+CString LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, const char* zSummary, 
+								const char* zDescription)
+{
+	return "";
+}
+
+bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProject, CString& sURL, CString& sID, bool bWithID)
+{
+	o_EditJiraUser.GetWindowText(sUser);
+	o_EditJiraPassword.GetWindowText(sPassword);
+	o_EditJiraURL.GetWindowText(sURL);
+	o_EditJiraTicket.GetWindowText(sID);
+
+	int iSel = o_ComboJiraProject.GetCurSel();
+	o_ComboJiraProject.GetLBText(iSel, sProject);
+
+	if (sUser.IsEmpty())
+	{
+		AfxMessageBox("JIRA user name is empty.");
+		return false;
+	}
+
+	if (sPassword.IsEmpty())
+	{
+		AfxMessageBox("JIRA password is empty.");
+		return false;
+	}
+
+	if (sURL.IsEmpty())
+	{
+		AfxMessageBox("JIRA URL is empty.");
+		return false;
+	}
+
+	if (sProject.IsEmpty())
+	{
+		AfxMessageBox("JIRA project is empty.");
+		return false;
+	}
+
+	if (bWithID)
+	{
+		if (sID.IsEmpty())
+		{
+			AfxMessageBox("JIRA project/ticket-id is not specified");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+        //f = open(issueDescFile,'w')
+        //f.write('{\n')
+        //f.write('  "fields": {\n')
+        //f.write('    "project": {\n')
+        //f.write('      "key": "%s"\n' % selProjectKey)
+        //f.write('    },\n')
+        //f.write('    "summary": "%s",\n' % issueSummary)
+        //f.write('    "description": "",\n')
+        //f.write('    "issuetype": {\n')
+        //f.write('      "name": "%s"\n' % issueType)
+        //f.write('    }\n')
+        //f.write('  }\n')
+        //f.write('}\n')
+        //f.close()
+
+        //prepareJIRACredentials()
+
+        //createCmd='curl -D- -u %s:%s -X POST --data @%s -H "Content-Type: application/json" %s/issue/' % (jiraUser, jiraPassword, issueDescFile, jiraRESTURL)
+

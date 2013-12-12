@@ -46,6 +46,7 @@ void LTConfig::Save()
 
 	WritePrivateProfileString("MAIN","JIRA-USER", s_JiraUser, sIniFile);
 	WritePrivateProfileString("MAIN","JIRA-URL", s_JiraURL, sIniFile);
+	WritePrivateProfileString("MAIN","JIRA-PASSWORD", s_JiraPassword, sIniFile);
 	_SaveBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew , sIniFile);
 	_SaveBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 }
@@ -57,6 +58,7 @@ void LTConfig::Load()
 	char zBuff[100];
 	GetPrivateProfileString("MAIN","JIRA-USER", s_JiraUser, zBuff, 100, sIniFile); s_JiraUser = zBuff;
 	GetPrivateProfileString("MAIN","JIRA-URL", s_JiraURL, zBuff, 100, sIniFile); s_JiraURL = zBuff;
+	GetPrivateProfileString("MAIN","JIRA-PASSWORD", s_JiraPassword, zBuff, 100, sIniFile); s_JiraPassword = zBuff;
 	_LoadBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew, sIniFile);
 	_LoadBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 	

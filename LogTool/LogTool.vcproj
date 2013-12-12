@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libssh2.lib uxtheme.lib GdiPlus.lib Credui.lib"
+				AdditionalDependencies="libssh2.lib uxtheme.lib GdiPlus.lib Credui.lib curllibD.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
