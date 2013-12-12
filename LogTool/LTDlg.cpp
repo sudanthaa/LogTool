@@ -444,11 +444,22 @@ int LTDlg::TestCurl()
 	if (!pLogEnv)
 		return 1;
 
+	CString sTicketID;
+	sTicketID.Format("%s-%s", sProject, sID);
+
+	CString sTicketPath;
+	if (sEnvPath.IsEmpty())
+		sTicketPath = sTicketID;
+	else
+		sTicketPath.Format("%s/%s", sEnvPath, sTicketID);
+
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/comment", sURL, sProject, sID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment", sURL, sTicketID);
 
 	CString sAuth;
 	sAuth.Format("%s:%s", sUser, sPassword);
+
+	CString sXShellFile = sTicketID + "_logs.xsh";
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -468,9 +479,9 @@ int LTDlg::TestCurl()
 			" _XShell-Link_: [^%s] \\r\\n"
 			" _Uploaded from_: %s@%s\\r\\n"
 			" {color:gray}~_Uploaded via LogTool v1.0_~{color} \"\n }",
-			pLogEnv->s_EnvUser, pLogEnv->s_IP, sEnvPath,
+			pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath,
 			pLogEnv->s_Password,
-			"",
+			sXShellFile,
 			pDevEnv->s_EnvUser, pDevEnv->s_IP);
 		// '  "body" : "Logs uploaded to below location.\\r\\n\\r\\n _Location_: %s@%s:%s \\r\\n _Password_: %s \\r\\n _XShell-Link_: [^%s] \\r\\n _Uploaded from_: %s"\n'
 		//const char* zTestComment  = "{ \"body\" : \"Test Commento\" }";
@@ -492,27 +503,11 @@ int LTDlg::TestCurl()
 		curl_slist_free_all(chunk);
 	}
 
-	//f.write('[CONNECTION]\n')
-	//	f.write('Protocol=SSH\n')
-	//	f.write('Host=%s\n' % server)
-	//	f.write('[CONNECTION:AUTHENTICATION]\n')
-	//	f.write('TelnetLoginPrompt=ogin:\n')
-	//	f.write('TelnetPasswordPrompt=assword:\n')
-	//	f.write('UserName=%s\n' % user)
-	//	f.write('Method=2\n')
-	//	f.write('UseExpectSend=1\n')
-	//	f.write('ExpectSend_Count=1\n')
-	//	f.write('ExpectSend_Send_0=cd %s\n' % loc)
-	//	f.write('ExpectSend_Expect_0=>\n')
-	//	f.write('ExpectSend_Hide_0=0\n')
-	//	f.write('[TERMINAL:WINDOW]\n')
-	//	f.write('FontSize=9\n')
-	//	f.write('FontFace=Consolas\n')
-
 	CString sXShell;
 	const char* zXShellFmt = 
 		"[CONNECTION]\n"
 		"Protocol=SSH\n"
+		"Host=%s\n"
 		"[CONNECTION:AUTHENTICATION]\n"
 		"TelnetLoginPrompt=ogin:\n"
 		"TelnetPasswordPrompt=assword:\n"
@@ -526,10 +521,24 @@ int LTDlg::TestCurl()
 		"[TERMINAL:WINDOW]\n"
 		"FontSize=9\n"
 		"FontFace=Consolas\n";
-	sXShell.Format(zXShellFmt,);
 
+	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, sTicketPath);
 
-	//AttachFileToJira("","");
+	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile);
+
+	for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
+	{
+		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
+		CString sTmpFileName;
+		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
+
+		CString sFileName;
+		sFileName.Format("%s.jpg", pScreenshot->GetName());
+
+		pScreenshot->Save(sTmpFileName);
+		AttachFileToJira(sTmpFileName, sFileName);
+	}
+
 	curl_global_cleanup();
 
 	return 0;
@@ -1226,6 +1235,22 @@ void LTDlg::OnDestroy()
 
 void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 {
+	CFile oFile;
+	BOOL bRes = oFile.Open(zFile, CFile::modeRead);
+	if (bRes)
+	{
+		UINT  uiFileSize = oFile.GetLength();
+		char* pBuff = new char[uiFileSize];
+
+		oFile.Read(pBuff, uiFileSize);
+		AttachFileToJira(pBuff, uiFileSize, zFileName);
+
+		delete [] pBuff;
+	}
+}
+
+void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName )
+{
 	CString sUser;
 	CString sURL;
 	CString sProject;
@@ -1250,14 +1275,12 @@ void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 
 		chunk = curl_slist_append(chunk, "X-Atlassian-Token: nocheck");
 
-		const char* zFileContent = "my text content";
-
 		curl_formadd(&formpost,
 			&lastptr,
 			CURLFORM_COPYNAME, "file",
 			CURLFORM_BUFFER, zFileName,
-			CURLFORM_BUFFERPTR, zFileContent,
-			CURLFORM_BUFFERLENGTH, strlen(zFileContent),
+			CURLFORM_BUFFERPTR, zBuffer,
+			CURLFORM_BUFFERLENGTH, iBufferSize,
 			CURLFORM_END);
 
 		curl_easy_setopt(pCurlAttachment, CURLOPT_URL, sAttachmentURL.GetBuffer());

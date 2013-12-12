@@ -51,6 +51,7 @@ public:
 	int		TestCall();
 	int		TestCurl();
 	void	AttachFileToJira(const char* zFile, const char* zFileName);
+	void	AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName );
 	CString	CreateJiraTicket(const char* zProject, const char* zIssueType, const char* zSummary = "", 
 				const char* zDescription = "");
 	void	OnPressEnterKey();
