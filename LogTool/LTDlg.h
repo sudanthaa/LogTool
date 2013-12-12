@@ -63,6 +63,7 @@ public:
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
 	LTThumbnailsCtrl o_ThumbnailsCtrl;
+	bool	b_ChangeSkip;
 
 protected:
 	virtual void OnOK();
@@ -131,4 +132,5 @@ public:
 	CStatic o_StaticFrmScreenshots;
 	CButton o_ButtonEnvRefresh;
 	CButton o_ButtonUpload;
+	afx_msg void OnEnChangeEditTicketId();
 };

@@ -60,6 +60,7 @@ LTDlg::LTDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	p_ConnectedSession = NULL;
+	b_ChangeSkip = false;
 }
 
 void LTDlg::DoDataExchange(CDataExchange* pDX)
@@ -134,6 +135,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_NOTIFY(NM_RCLICK, IDC_LIST_ENV, &LTDlg::OnNMRClickListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_UPLOAD, &LTDlg::OnBnClickedButtonUpload)
 	ON_WM_DESTROY()
+	ON_EN_CHANGE(IDC_EDIT_TICKET_ID, &LTDlg::OnEnChangeEditTicketId)
 END_MESSAGE_MAP()
 
 
@@ -426,6 +428,22 @@ int LTDlg::TestCurl()
 	if (!ProvideJiraCred(sUser, sPassword, sProject, sURL, sID))
 		return 1;
 
+	LTEnv* pDevEnv = GetSelectedEnv();
+	if (!pDevEnv)
+		return 1;
+
+	CString sEnvName;
+	CString sEnvPath;
+	CString sConnStr;
+	o_ComboLogMachines.GetLBText(o_ComboLogMachines.GetCurSel(), sConnStr);
+
+	if (!LTUtils::DecodePathStringEx(sConnStr, sEnvName, sEnvPath))
+		return 1;
+
+	LTEnv* pLogEnv = LTEnv::FindEnvFQ(sEnvName);
+	if (!pLogEnv)
+		return 1;
+
 	CString sAttachmentURL;
 	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/comment", sURL, sProject, sID);
 
@@ -442,14 +460,25 @@ int LTDlg::TestCurl()
 		struct curl_slist *chunk = NULL;
 		chunk = curl_slist_append(chunk, "Content-Type: application/json");
 
+		CString sComment;
+		sComment.Format("{ \"body\" : \"Logs uploaded to below location.\\r\\n"
+			"\\r\\n"
+			" _Location_: %s@%s:%s \\r\\n"
+			" _Password_: %s \\r\\n"
+			" _XShell-Link_: [^%s] \\r\\n"
+			" _Uploaded from_: %s@%s\\r\\n"
+			" {color:gray}~_Uploaded via LogTool v1.0_~{color} \"\n }",
+			pLogEnv->s_EnvUser, pLogEnv->s_IP, sEnvPath,
+			pLogEnv->s_Password,
+			"",
+			pDevEnv->s_EnvUser, pDevEnv->s_IP);
 		// '  "body" : "Logs uploaded to below location.\\r\\n\\r\\n _Location_: %s@%s:%s \\r\\n _Password_: %s \\r\\n _XShell-Link_: [^%s] \\r\\n _Uploaded from_: %s"\n'
-		const char* zTestComment  = "{ \"body\" : \"Test Commento\" }";
-		strlen(zTestComment);
+		//const char* zTestComment  = "{ \"body\" : \"Test Commento\" }";
 		curl_easy_setopt(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
 		curl_easy_setopt(pCurlComment, CURLOPT_POST, 1);	
 		curl_easy_setopt(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
-		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDS, zTestComment);
-		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDSIZE, strlen(zTestComment));
+		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
+		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
 		curl_easy_setopt(pCurlComment, CURLOPT_HTTPHEADER, chunk);
 		curl_easy_setopt(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
 
@@ -463,7 +492,44 @@ int LTDlg::TestCurl()
 		curl_slist_free_all(chunk);
 	}
 
-	AttachFileToJira("","");
+	//f.write('[CONNECTION]\n')
+	//	f.write('Protocol=SSH\n')
+	//	f.write('Host=%s\n' % server)
+	//	f.write('[CONNECTION:AUTHENTICATION]\n')
+	//	f.write('TelnetLoginPrompt=ogin:\n')
+	//	f.write('TelnetPasswordPrompt=assword:\n')
+	//	f.write('UserName=%s\n' % user)
+	//	f.write('Method=2\n')
+	//	f.write('UseExpectSend=1\n')
+	//	f.write('ExpectSend_Count=1\n')
+	//	f.write('ExpectSend_Send_0=cd %s\n' % loc)
+	//	f.write('ExpectSend_Expect_0=>\n')
+	//	f.write('ExpectSend_Hide_0=0\n')
+	//	f.write('[TERMINAL:WINDOW]\n')
+	//	f.write('FontSize=9\n')
+	//	f.write('FontFace=Consolas\n')
+
+	CString sXShell;
+	const char* zXShellFmt = 
+		"[CONNECTION]\n"
+		"Protocol=SSH\n"
+		"[CONNECTION:AUTHENTICATION]\n"
+		"TelnetLoginPrompt=ogin:\n"
+		"TelnetPasswordPrompt=assword:\n"
+		"UserName=%s\n"
+		"Method=2\n"
+		"UseExpectSend=1\n"
+		"ExpectSend_Count=1\n"
+		"ExpectSend_Send_0=cd %s\n"
+		"ExpectSend_Expect_0=>\n"
+		"ExpectSend_Hide_0=0\n"
+		"[TERMINAL:WINDOW]\n"
+		"FontSize=9\n"
+		"FontFace=Consolas\n";
+	sXShell.Format(zXShellFmt,);
+
+
+	//AttachFileToJira("","");
 	curl_global_cleanup();
 
 	return 0;
@@ -1283,3 +1349,73 @@ bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProje
 
         //createCmd='curl -D- -u %s:%s -X POST --data @%s -H "Content-Type: application/json" %s/issue/' % (jiraUser, jiraPassword, issueDescFile, jiraRESTURL)
 
+bool SkipChar(CString& sVal)
+{
+	const char* zStr = sVal;
+	const char* zItr = zStr;
+	char zBuff[10];
+	int iBufIdx = 0;
+	bool bChanged = false;
+
+	while (*zItr != 0)
+	{
+		char cVal = *zItr;
+		if ((cVal >= '0') && (cVal <= '9'))
+			zBuff[iBufIdx++] = cVal;
+		else
+			bChanged = true;
+
+		zItr++;
+	}
+
+	if (bChanged)
+	{
+		zBuff[iBufIdx] = 0;
+		sVal = zBuff;
+	}
+	return bChanged;
+}
+
+void LTDlg::OnEnChangeEditTicketId()
+{
+	// TODO:  If this is a RICHEDIT control, the control will not
+	// send this notification unless you override the __super::OnInitDialog()
+	// function and call CRichEditCtrl().SetEventMask()
+	// with the ENM_CHANGE flag ORed into the mask.
+
+	// TODO:  Add your control notification handler code here
+
+	CString sTicketID;
+	o_EditJiraTicket.GetWindowText(sTicketID);
+
+	LTConfig::o_Inst.s_JiraTicket = sTicketID;
+
+	if (b_ChangeSkip)
+	{
+		b_ChangeSkip = false;
+		return;
+	}
+
+	int iChange = sTicketID.Find('-');
+	if (iChange > -1)
+	{
+		CString sProj = sTicketID.Left(iChange);
+		CString sID = sTicketID.Mid(iChange + 1);
+		SkipChar(sID);
+
+		int iCurSel = o_ComboJiraProject.FindString(-1, sProj);
+		if (iCurSel > -1)
+			o_ComboJiraProject.SetCurSel(iCurSel);
+
+		b_ChangeSkip = true;
+		o_EditJiraTicket.SetWindowText(sID);
+	}
+	else
+	{
+		//if (SkipChar(sTicketID))
+		//{
+		//	b_ChangeSkip = true;
+		//	o_EditJiraTicket.SetWindowText(sTicketID);
+		//}
+	}
+}
