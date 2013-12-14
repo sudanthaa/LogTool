@@ -193,6 +193,7 @@ BEGIN
     EDITTEXT        IDC_EDIT_SCREENSHOT_EDIT_NAME,549,31,48,12,ES_AUTOHSCROLL
     CONTROL         "Check1",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,554,193,31,15
     CONTROL         "Check2",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,558,216,30,15
+    LTEXT           "ToolBarArea",IDC_STATIC_DRAW_TOOLBAR,549,47,48,14,WS_BORDER
 END
 
 IDD_SCREEN_CAPTURE DIALOGEX 0, 0, 299, 164
@@ -224,13 +225,14 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "Comments", "Author: Sudantha Athauda (sudantha@millenniumit.com)"
+            VALUE "CompanyName", "Millenniumt Information Technologies"
+            VALUE "FileDescription", "LogTool"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "LogTool.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "LegalCopyright", "(c) 2013. Millenniumt Information Technologies.  All rights reserved."
             VALUE "OriginalFilename", "LogTool.exe"
-            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductName", "LogTool"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END

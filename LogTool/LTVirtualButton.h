@@ -16,13 +16,23 @@ public:
 	LTVirtualButtonOwner();
 	virtual CWnd* GetCWnd(){ return NULL; };
 	virtual void	OnPress(LTVirtualButton* pButton){};
+	virtual void	OnRelease(LTVirtualButton* pButton){};
 	virtual bool	PaintBack(LTVirtualButton* pButton, CDC* pDC, CRect rRect){ return false; };
 
 	void	TrackLeave();
 	void	OnMouseLeave();
 
+	enum ButtonType
+	{
+		PUSH_BUTTON = 0,
+		CHECK_SINGLE = 1,
+		CHECK_SINGLE_OR_NOCHECK = 2
+	};
+
 protected:
 	bool	b_LeaveTracking;
+	ButtonType  e_ButtonType;
+	LTVirtualButton* p_Pressed;
 };
 
 class LTVirtualButton

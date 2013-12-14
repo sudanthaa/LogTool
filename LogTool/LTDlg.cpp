@@ -136,6 +136,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_UPLOAD, &LTDlg::OnBnClickedButtonUpload)
 	ON_WM_DESTROY()
 	ON_EN_CHANGE(IDC_EDIT_TICKET_ID, &LTDlg::OnEnChangeEditTicketId)
+	ON_CBN_SELCHANGE(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnSelchangeComboJiraProject)
 END_MESSAGE_MAP()
 
 
@@ -174,7 +175,11 @@ BOOL LTDlg::OnInitDialog()
 	o_ComboJiraProject.AddString("JSESURV");
 	o_ComboJiraProject.AddString("LMEXSURV");
 	o_ComboJiraProject.AddString("BMESSURV");
-	o_ComboJiraProject.SetCurSel(0);
+	int iIndex = o_ComboJiraProject.FindString(-1, LTConfig::o_Inst.GetJiraProjectSet()->Get());
+	if (iIndex < 0)
+		iIndex = 0;
+	o_ComboJiraProject.SetCurSel(iIndex);
+
 
 	// TODO: Add extra initialization here
 	o_ListEnv.SetExtendedStyle(o_ListEnv.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -195,6 +200,7 @@ BOOL LTDlg::OnInitDialog()
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
 	o_EditJiraUser.SetWindowText(LTConfig::o_Inst.s_JiraUser);
 	o_EditJiraPassword.SetWindowText(LTConfig::o_Inst.s_JiraPassword);
+	o_EditJiraTicket.SetWindowText(LTConfig::o_Inst.s_JiraTicket);
 
 	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
 	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
@@ -463,6 +469,7 @@ int LTDlg::TestCurl()
 
 	curl_global_init(CURL_GLOBAL_DEFAULT);
 
+	CString sVersion = LTUtils::GetProductVersionX();
 
 	CURL* pCurlComment = NULL;
 	pCurlComment = curl_easy_init();
@@ -478,13 +485,13 @@ int LTDlg::TestCurl()
 			" _Password_: %s \\r\\n"
 			" _XShell-Link_: [^%s] \\r\\n"
 			" _Uploaded from_: %s@%s\\r\\n"
-			" {color:gray}~_Uploaded via LogTool v1.0_~{color} \"\n }",
+			" {color:gray}~_Uploaded via LogTool v%s_~{color} \"\n }",
 			pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath,
 			pLogEnv->s_Password,
 			sXShellFile,
-			pDevEnv->s_EnvUser, pDevEnv->s_IP);
-		// '  "body" : "Logs uploaded to below location.\\r\\n\\r\\n _Location_: %s@%s:%s \\r\\n _Password_: %s \\r\\n _XShell-Link_: [^%s] \\r\\n _Uploaded from_: %s"\n'
-		//const char* zTestComment  = "{ \"body\" : \"Test Commento\" }";
+			pDevEnv->s_EnvUser, pDevEnv->s_IP,
+			sVersion);
+
 		curl_easy_setopt(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
 		curl_easy_setopt(pCurlComment, CURLOPT_POST, 1);	
 		curl_easy_setopt(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
@@ -521,6 +528,9 @@ int LTDlg::TestCurl()
 		"[TERMINAL:WINDOW]\n"
 		"FontSize=9\n"
 		"FontFace=Consolas\n";
+
+	//UserKey=id_rsa_1024
+	//Method=1
 
 	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, sTicketPath);
 
@@ -1239,7 +1249,7 @@ void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 	BOOL bRes = oFile.Open(zFile, CFile::modeRead);
 	if (bRes)
 	{
-		UINT  uiFileSize = oFile.GetLength();
+		UINT uiFileSize = (UINT) oFile.GetLength();
 		char* pBuff = new char[uiFileSize];
 
 		oFile.Read(pBuff, uiFileSize);
@@ -1428,7 +1438,10 @@ void LTDlg::OnEnChangeEditTicketId()
 
 		int iCurSel = o_ComboJiraProject.FindString(-1, sProj);
 		if (iCurSel > -1)
+		{
 			o_ComboJiraProject.SetCurSel(iCurSel);
+			LTConfig::o_Inst.GetJiraProjectSet()->Set(sProj);
+		}
 
 		b_ChangeSkip = true;
 		o_EditJiraTicket.SetWindowText(sID);
@@ -1441,4 +1454,12 @@ void LTDlg::OnEnChangeEditTicketId()
 		//	o_EditJiraTicket.SetWindowText(sTicketID);
 		//}
 	}
+}
+
+void LTDlg::OnCbnSelchangeComboJiraProject()
+{
+	// TODO: Add your control notification handler code here
+	CString sProject;
+	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
+	LTConfig::o_Inst.GetJiraProjectSet()->Set(sProject);
 }

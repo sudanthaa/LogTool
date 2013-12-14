@@ -138,7 +138,7 @@ void LTRectMarking::DrawRect( CDC* pDC, CRect& rRect )
 	rNormalRect.NormalizeRect();
 
 	Gdiplus::Graphics graphics(pDC->m_hDC);
-	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Line)), i_Width);
+	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Line)), (Gdiplus::REAL)i_Width);
 	graphics.DrawRectangle(&pen, rNormalRect.left, rNormalRect.top, rNormalRect.Width(), rNormalRect.Height());
 }
 
@@ -213,7 +213,7 @@ void LTPenMarking::OnMouseMove( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 
 	//GDI+ draw
 	Gdiplus::Graphics graphics(pDC->m_hDC);
-	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Line)), i_Width);
+	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Line)), (Gdiplus::REAL)i_Width);
 	//graphics.SetCompositingMode(Gdiplus::CompositingMode::CompositingModeSourceOver);
 	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 	graphics.DrawLine(&pen, ptStart.x, ptStart.y, ptEnd.x, ptEnd.y);
@@ -309,19 +309,19 @@ void LTArrowMarking::OnMouseUp( CDC* pdcAct, CPoint pt, CPoint ptOffset )
 void LTArrowMarking::DrawArrow( CDC* pdcAct, CRect& rRect)
 {
 	double dAngle = atan2((float)(rRect.top - rRect.bottom), (float)(rRect.left - rRect.right));
-	float fRadiusLineEnd = i_Width * 2.0; 
+	float fRadiusLineEnd = (float)(i_Width * 2.0); 
 		// use this radius to stop line from reaching the end. if it reaches the end the point will get jeopardized 
-	float fRadiusArrowEdge = i_Width * 4.0;
-	float fAnLeft = dAngle + (MATH_PI / 5.0);
-	float fAnRight = dAngle - (MATH_PI / 5.0);
-	float fAnEdge = dAngle + (MATH_PI);
+	float fRadiusArrowEdge = (float)(i_Width * 4.0);
+	float fAnLeft = (float)(dAngle + (MATH_PI / 5.0));
+	float fAnRight = (float)(dAngle - (MATH_PI / 5.0));
+	float fAnEdge = (float)(dAngle + (MATH_PI));
 
-	Gdiplus::PointF pointA(rRect.left, rRect.top);
+	Gdiplus::PointF pointA((Gdiplus::REAL)rRect.left, (Gdiplus::REAL)rRect.top);
 	Gdiplus::PointF pointB(((float)rRect.right) + (cos(dAngle) * fRadiusLineEnd), 
 		((float)rRect.bottom) + (sin(dAngle) * fRadiusLineEnd));
 
 	Gdiplus::Graphics graphics(pdcAct->m_hDC);
-	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Arrow)), i_Width);
+	Gdiplus::Pen      pen(Gdiplus::Color(255, RGB_PARAMS(cr_Arrow)),(Gdiplus::REAL) i_Width);
 	graphics.SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 	graphics.DrawLine(&pen, pointA, pointB);
 

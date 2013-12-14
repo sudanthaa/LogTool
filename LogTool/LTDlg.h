@@ -134,4 +134,5 @@ public:
 	CButton o_ButtonEnvRefresh;
 	CButton o_ButtonUpload;
 	afx_msg void OnEnChangeEditTicketId();
+	afx_msg void OnCbnSelchangeComboJiraProject();
 };

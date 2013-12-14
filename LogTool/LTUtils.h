@@ -21,4 +21,11 @@ public:
 	static CString GetAppIniFile();
 	static bool DecodePathString(const char* zConnStr, CString& sUser, CString& sIP, CString& sPath);
 	static bool DecodePathStringEx(const char* zConnStr, CString& sEnvName, CString& sPath);
+	static CString GetVersionInfo(HMODULE hLib, CString csEntry);
+	static CString FormatVersion(CString cs);
+
+
+	static CString GetProductVersionX();
+	static CString GetFileVersionX();
+
 };

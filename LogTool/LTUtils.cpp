@@ -23,6 +23,105 @@ CString LTUtils::GetAppPath()
 	return sAppPath;
 }
 
+CString LTUtils::GetVersionInfo(HMODULE hLib, CString csEntry)
+{
+	CString csRet;
+
+	if (hLib == NULL)
+		hLib = AfxGetResourceHandle();
+
+	HRSRC hVersion = FindResource( hLib, 
+		MAKEINTRESOURCE(VS_VERSION_INFO), RT_VERSION );
+	if (hVersion != NULL)
+	{
+		HGLOBAL hGlobal = LoadResource( hLib, hVersion ); 
+		if ( hGlobal != NULL)  
+		{  
+
+			LPVOID versionInfo  = LockResource(hGlobal);  
+			if (versionInfo != NULL)
+			{
+				DWORD vLen,langD;
+				BOOL retVal;    
+
+				LPVOID retbuf=NULL;
+
+				static char fileEntry[256];
+
+				sprintf(fileEntry,"\\VarFileInfo\\Translation");
+				retVal = VerQueryValue(versionInfo,fileEntry,&retbuf,(UINT *)&vLen);
+				if (retVal && vLen==4) 
+				{
+					memcpy(&langD,retbuf,4);            
+					sprintf(fileEntry, "\\StringFileInfo\\%02X%02X%02X%02X\\%s",
+						(langD & 0xff00)>>8,langD & 0xff,(langD & 0xff000000)>>24, 
+						(langD & 0xff0000)>>16, csEntry);            
+				}
+				else 
+					sprintf(fileEntry, "\\StringFileInfo\\%04X04B0\\%s", 
+					GetUserDefaultLangID(), csEntry);
+
+				if (VerQueryValue(versionInfo,fileEntry,&retbuf,(UINT *)&vLen)) 
+					csRet = (char*)retbuf;
+			}
+		}
+
+		UnlockResource( hGlobal );  
+		FreeResource( hGlobal );  
+	}
+
+	return csRet;
+}
+
+CString LTUtils::FormatVersion(CString cs)
+{
+	CString csRet;
+	if (!cs.IsEmpty())
+	{
+		cs.TrimRight();
+		int iPos = cs.Find(',');
+		if (iPos == -1)
+			return "";
+		cs.TrimLeft();
+		cs.TrimRight();
+		csRet.Format("%s.", cs.Left(iPos));
+
+		while (1)
+		{
+			cs = cs.Mid(iPos + 1);
+			cs.TrimLeft();
+			iPos = cs.Find(',');
+			if (iPos == -1)
+			{
+				csRet +=cs;
+				break;
+			}
+			csRet += cs.Left(iPos);
+		}
+	}
+
+	return csRet;
+}
+
+
+
+// Loads "FileVersion" from resource formats it and keeps it in mind
+CString LTUtils::GetFileVersionX()
+{
+	CString csVersion = FormatVersion(GetVersionInfo(NULL, "FileVersion"));
+	CString sFileVersion;
+	sFileVersion.Format("Version %s (Build %s)", 
+		csVersion, GetVersionInfo(NULL, "SpecialBuild"));
+
+	return sFileVersion;
+}
+
+// Loads "ProductVersion" from resource formats it and keeps it in mind
+CString LTUtils::GetProductVersionX()
+{
+	return GetVersionInfo(NULL, "ProductVersion");
+}
+
 CString LTUtils::GetUserLocal()
 {
 	return "";

@@ -179,6 +179,8 @@ void LTVirtualButtonOwner::OnMouseLeave()
 LTVirtualButtonOwner::LTVirtualButtonOwner()
 {
 	b_LeaveTracking = false;
+	p_Pressed = NULL;
+	e_ButtonType = PUSH_BUTTON;
 }
 
 LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
