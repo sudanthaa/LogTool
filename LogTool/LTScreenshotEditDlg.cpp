@@ -14,12 +14,15 @@ LTScreenshotEditDlg::LTScreenshotEditDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(LTScreenshotEditDlg::IDD, pParent)
 {
 	p_Screenshot = NULL;
+	p_DrawToolbar = NULL;
 }
 
 LTScreenshotEditDlg::~LTScreenshotEditDlg()
 {
 	delete p_Screenshot;
 	p_Screenshot = NULL;
+	delete p_DrawToolbar;
+	p_DrawToolbar = NULL;
 }
 
 void LTScreenshotEditDlg::DoDataExchange(CDataExchange* pDX)
@@ -78,6 +81,14 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	ScreenToClient(rSSEdit);
 	o_ScreenshotEditCtrl.MoveWindow(rSSEdit);
 
+
+	CRect rDTEdit;
+	CWnd* pStaticDrawToobar = GetDlgItem(IDC_STATIC_DRAW_TOOLBAR);
+	pStaticDrawToobar->GetWindowRect(rDTEdit);
+	ScreenToClient(rDTEdit);
+	p_DrawToolbar->MoveWindow(rDTEdit);
+
+
 	static int iNameSeed = 0;
 	iNameSeed++;
 	CString sName;
@@ -89,6 +100,7 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	o_Resizer.Attach(&o_BtnCancel, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnTake, LT_RM_HORIZONTAL);
 	o_Resizer.Attach(&o_EditName, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(p_DrawToolbar, LT_RM_ALL);
 	o_Resizer.Originate(this);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -151,6 +163,10 @@ int LTScreenshotEditDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CRect rClient(0,0,0,0);
 	o_ScreenshotEditCtrl.CreateScreenshotEditCtrl(this, rClient);
+
+	p_DrawToolbar = new LTDrawToolBar;
+	p_DrawToolbar->SetListener(this);
+	p_DrawToolbar->Create(NULL, NULL, WS_VISIBLE | WS_CHILD, rClient, this, 10001);
 	// TODO:  Add your specialized creation code here
 
 	return 0;
@@ -211,4 +227,210 @@ LTScreenshot* LTScreenshotEditDlg::DetachScreenshot()
 	LTScreenshot* pScreenshot = p_Screenshot;
 	p_Screenshot = NULL;
 	return pScreenshot;
+}
+
+void LTScreenshotEditDlg::OnToolPen( bool bPress )
+{
+	o_ScreenshotEditCtrl.PenStart();
+}
+
+void LTScreenshotEditDlg::OnToolRect( bool bPress )
+{
+	o_ScreenshotEditCtrl.RectStart();
+}
+
+void LTScreenshotEditDlg::OnToolArrow( bool bPress )
+{
+	o_ScreenshotEditCtrl.ArrowStart();
+}
+
+// LTDrawToolBar
+
+IMPLEMENT_DYNAMIC(LTDrawToolBar, CWnd)
+
+LTDrawToolBar::LTDrawToolBar()
+{
+	p_PenButton = new LTPaintFnButton(this, PaintToolButtonState, this);
+	p_RectButton = new LTPaintFnButton(this, PaintToolButtonState, this);
+	p_ArrowButton = new LTPaintFnButton(this, PaintToolButtonState, this);
+	p_Listener = NULL;
+
+	SetType(LTVirtualButtonOwner::CHECK_OPTIONAL_BUTTON);
+}
+
+LTDrawToolBar::~LTDrawToolBar()
+{
+}
+
+
+BEGIN_MESSAGE_MAP(LTDrawToolBar, CWnd)
+	ON_WM_CREATE()
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSELEAVE()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+END_MESSAGE_MAP()
+
+
+
+// LTDrawToolBar message handlers
+
+
+
+int LTDrawToolBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CWnd::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	//h_Theme = OpenThemeData(m_hWnd, L"EDIT");
+
+	// TODO:  Add your specialized creation code here
+
+	return 0;
+}
+
+void LTDrawToolBar::OnPaint()
+{
+	CPaintDC dc(this); // device context for painting
+	// TODO: Add your message handler code here
+	// Do not call CWnd::OnPaint() for painting messages
+
+	p_PenButton->OnPaint(&dc);
+	p_RectButton->OnPaint(&dc);
+	p_ArrowButton->OnPaint(&dc);
+}
+
+void LTDrawToolBar::OnSize(UINT nType, int cx, int cy)
+{
+	CWnd::OnSize(nType, cx, cy);
+
+	CRect rRect(0, 0, 0, 0);
+	rRect.right = cx;
+	rRect.bottom = cy;
+	Layout(rRect);
+
+	// TODO: Add your message handler code here
+}
+
+CWnd* LTDrawToolBar::GetCWnd()
+{
+	return this;
+}
+
+void LTDrawToolBar::OnPress( LTVirtualButton* pButton )
+{
+	//TRACE("PRESS..-%p:\n", pButton);
+	if (pButton == p_PenButton)
+		p_Listener->OnToolPen(true);
+	else if (pButton == p_RectButton)
+		p_Listener->OnToolRect(true);
+	else if (pButton == p_ArrowButton)
+		p_Listener->OnToolArrow(true);
+}
+
+void LTDrawToolBar::OnRelease( LTVirtualButton* pButton )
+{
+	//TRACE("RELEASE-%p:\n", pButton);
+	if (pButton == p_PenButton)
+		p_Listener->OnToolPen(false);
+	else if (pButton == p_RectButton)
+		p_Listener->OnToolRect(false);
+	else if (pButton == p_ArrowButton)
+		p_Listener->OnToolArrow(false);
+}
+
+void LTDrawToolBar::Layout( CRect rRect )
+{
+	CRect rPenButton = rRect;
+	CRect rRectButton = rRect;
+	CRect rArrowButton = rRect;
+
+	int iWidth = rRect.Width() / 3;
+
+	rPenButton.right = iWidth - 1;
+	rRectButton.left = iWidth;
+	rRectButton.right = iWidth * 2 - 1;
+	rArrowButton.left = iWidth * 2;
+	rArrowButton.right = rRect.right;
+
+	p_PenButton->SetRect(rPenButton);
+	p_RectButton->SetRect(rRectButton);
+	p_ArrowButton->SetRect(rArrowButton);
+}
+
+void LTDrawToolBar::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CClientDC dc(this);
+	p_PenButton->OnMouseMove(point,&dc);
+	p_RectButton->OnMouseMove(point,&dc);
+	p_ArrowButton->OnMouseMove(point,&dc);
+
+	__super::OnMouseMove(nFlags, point);
+}
+
+void LTDrawToolBar::OnMouseLeave()
+{
+	// TODO: Add your message handler code here and/or call default
+	MouseLeave();
+
+	CClientDC dc(this);
+	p_PenButton->OnMouseLeave(&dc);
+	p_RectButton->OnMouseLeave(&dc);
+	p_ArrowButton->OnMouseLeave(&dc);
+
+	__super::OnMouseLeave();
+}
+
+void LTDrawToolBar::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CClientDC dc(this);
+	p_PenButton->OnMouseDown(point, &dc);
+	p_RectButton->OnMouseDown(point, &dc);
+	p_ArrowButton->OnMouseDown(point, &dc);
+
+	__super::OnLButtonDown(nFlags, point);
+}
+
+void LTDrawToolBar::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: Add your message handler code here and/or call default
+	CClientDC dc(this);
+	p_PenButton->OnMouseUp(point,&dc);
+	p_RectButton->OnMouseUp(point,&dc);
+	p_ArrowButton->OnMouseUp(point,&dc);
+
+	__super::OnLButtonUp(nFlags, point);
+}
+
+#define  ICON_PADDING 4.0
+
+void LTDrawToolBar::PaintToolButtonState( int iState, CDC* pDC, CRect rArea, LTVirtualButton* pButton, void* pContext )
+{
+	int iColor;
+
+	if		(iState == BTN_STATE_NORMAL)		iColor = RGB(200,200,200);
+	else if (iState == BTN_STATE_HOT)		iColor = RGB(220,200,200);
+	else if (iState == BTN_STATE_PRESSED)		iColor = RGB(150,150,240);
+	else if (iState == BTN_STATE_DISABLED)		iColor = RGB(200,200,200);
+
+	Gdiplus::Image img(L"pen.png");
+
+	pDC->FillSolidRect(rArea, iColor);
+
+	Gdiplus::Graphics g(pDC->m_hDC);
+	Gdiplus::Rect rect(rArea.left + ICON_PADDING, rArea.top + ICON_PADDING, 
+		rArea.Width() - ICON_PADDING * 2.0,rArea.Height() - ICON_PADDING * 2.0);
+
+	g.DrawImage(&img,rect);
+}
+
+bool LTDrawToolBar::PaintBack( LTVirtualButton* pButton, CDC* pDC, CRect rRect )
+{
+	return false;
 }

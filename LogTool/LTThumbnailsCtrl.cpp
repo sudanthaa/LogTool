@@ -229,7 +229,7 @@ void LTThumbnailsCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 void LTThumbnailsCtrl::OnMouseLeave()
 {
 	// TODO: Add your message handler code here and/or call default
-	LTVirtualButtonOwner::OnMouseLeave();
+	LTVirtualButtonOwner::MouseLeave();
 
 	CClientDC dc(this);
 	p_NextButton->OnMouseLeave(&dc);

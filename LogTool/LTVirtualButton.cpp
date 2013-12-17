@@ -19,80 +19,59 @@ bool LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
 
-	bool bOwnedArea = IsOwnedArea(point);
+	bool bIsSelfArea = IsSelfArea(point);
 
-	if (bOwnedArea)
-	{
-		if (i_State == BTN_STATE_NORMAL)
-			i_State = BTN_STATE_HOT;
-		else if (i_State == BTN_STATE_PRESSED)
-			i_State = BTN_STATE_PRESSED; // No change
-	}
-	else
-	{
-		i_State = BTN_STATE_NORMAL;
-	}
+	LTButtonStateEngine* pStateEng = p_Owner->GetStateEngine();
+	pStateEng->OnMouseMove(this, bIsSelfArea);
 
 	if (i_State != iOldState)
 	{
 		OnPaintButtonState(pDC);
-		if (i_State != BTN_STATE_NORMAL)
+		if (pStateEng->TrackRequired(i_State))
 			p_Owner->TrackLeave();
 	}
 
-	return bOwnedArea;
+	return bIsSelfArea;
 }
 
 bool LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
+	bool bIsSelfArea = IsSelfArea(point);
 
-	bool bOwnedArea = IsOwnedArea(point);
-
-	if (bOwnedArea)
-		i_State = BTN_STATE_PRESSED;
-	else
-		i_State = BTN_STATE_NORMAL;
+	LTButtonStateEngine* pStateEng = p_Owner->GetStateEngine();
+	pStateEng->OnMouseDown(this, bIsSelfArea);
 
 	if (i_State != iOldState)
 	{
 		OnPaintButtonState(pDC);
-		if (i_State != BTN_STATE_NORMAL)
+		if (pStateEng->TrackRequired(i_State))
 			p_Owner->TrackLeave();
 	}
 
-	return bOwnedArea;
+	return bIsSelfArea;
 }
 
 bool LTVirtualButton::OnMouseUp( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
+	bool bIsSelfArea = IsSelfArea(point);
 
-	bool bOwnedArea = IsOwnedArea(point);
-
-	if (bOwnedArea)
-	{
-		if (i_State == BTN_STATE_PRESSED)
-		{
-			p_Owner->OnPress(this);
-			//p_Owner->GetCWnd()->PostMessage();
-		}
-
-		i_State = BTN_STATE_HOT;
-	}
-	else
-		i_State = BTN_STATE_NORMAL;
+	LTButtonStateEngine* pStateEng = p_Owner->GetStateEngine();
+	pStateEng->OnMouseUp(this, bIsSelfArea);
 
 	if (i_State != iOldState)
 		OnPaintButtonState(pDC);
 
-	return bOwnedArea;
+	return bIsSelfArea;
 }
 
 void LTVirtualButton::OnMouseLeave( CDC* pDC )
 {
 	int iOldState = i_State;
-	i_State = BTN_STATE_NORMAL;
+	
+	LTButtonStateEngine* pStateEng = p_Owner->GetStateEngine();
+	pStateEng->OnMouseLeave(this);
 
 	if (i_State != iOldState)
 		OnPaintButtonState(pDC);
@@ -118,7 +97,7 @@ void LTVirtualButton::SetClipRect( CRect rRect )
 	*pr_Clip = rRect;
 }
 
-bool LTVirtualButton::IsOwnedArea( CPoint point )
+bool LTVirtualButton::IsSelfArea( CPoint point )
 {
 	bool bIsClippedOut = pr_Clip ? (!(pr_Clip->PtInRect(point))) : false;
 	return ((!bIsClippedOut) && r_Area.PtInRect(point));
@@ -171,7 +150,7 @@ void LTVirtualButtonOwner::TrackLeave()
 	b_LeaveTracking = true;
 }
 
-void LTVirtualButtonOwner::OnMouseLeave()
+void LTVirtualButtonOwner::MouseLeave()
 {
 	b_LeaveTracking = false;
 }
@@ -180,7 +159,27 @@ LTVirtualButtonOwner::LTVirtualButtonOwner()
 {
 	b_LeaveTracking = false;
 	p_Pressed = NULL;
-	e_ButtonType = PUSH_BUTTON;
+	SetType(PUSH_BUTTON);
+}
+
+void LTVirtualButtonOwner::SetType( ButtonType eType )
+{
+	e_ButtonType = eType;
+	if (eType == PUSH_BUTTON)
+	{
+		static LTPushButtonState oPushButtonEng;
+		p_StateEngine = &oPushButtonEng;
+	}
+	else if (eType == CHECK_BUTTON)
+	{
+		static LTCheckButtonState oPushButtonEng;
+		p_StateEngine = &oPushButtonEng;
+	}
+	else if (eType == CHECK_OPTIONAL_BUTTON)
+	{
+		static LTCheckOptionButtonState oPushButtonEng;
+		p_StateEngine = &oPushButtonEng;
+	}
 }
 
 LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
@@ -206,4 +205,249 @@ void LTIconButton::OnPaintButtonState( CDC* pDC )
 	}
 
 	pDC->DrawIcon(r_Area.left, r_Area.top, ah_Icon[i_State - 1]);
+}
+
+void LTPushButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_NORMAL)
+			pButton->SetState(BTN_STATE_HOT);
+		else if (iState == BTN_STATE_PRESSED)
+			pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+	{
+		pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+void LTPushButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
+{
+	if (bSelfArea)
+		pButton->SetState(BTN_STATE_PRESSED);
+	else
+		pButton->SetState(BTN_STATE_NORMAL);
+}
+
+void LTPushButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_PRESSED)
+			pButton->GetOwner()->OnPress(pButton);
+
+		pButton->SetState(BTN_STATE_HOT);
+	}
+	else
+		pButton->SetState(BTN_STATE_NORMAL);
+}
+
+bool LTPushButtonState::TrackRequired( int iState )
+{
+	if (iState != BTN_STATE_NORMAL)
+		return true;
+
+	return false;
+}
+
+void LTPushButtonState::OnMouseLeave( LTVirtualButton* pButton)
+{
+	pButton->SetState(BTN_STATE_NORMAL);
+}
+
+void LTCheckButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_NORMAL)
+			pButton->SetState(BTN_STATE_HOT);
+		else if (iState == BTN_STATE_PRESSED)
+			pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+	{
+		if (iState == BTN_STATE_HOT)
+			pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+void LTCheckButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
+{
+	if (bSelfArea)
+	{
+		pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+	{
+		pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+void LTCheckButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_PRESSED)
+		{
+			LTVirtualButtonOwner* pOwener = pButton->GetOwner();
+			LTVirtualButton* pPressed = pOwener->GetPressed();
+			if (pPressed)
+				pOwener->OnRelease(pPressed);
+
+			pOwener->OnPress(pButton);
+			pOwener->SetPressed(pButton);
+		}
+
+		pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+		pButton->SetState(BTN_STATE_NORMAL);
+
+}
+
+bool LTCheckButtonState::TrackRequired( int iState )
+{
+	if (iState != BTN_STATE_NORMAL)
+		return true;
+
+	return false;
+}
+
+void LTCheckButtonState::OnMouseLeave( LTVirtualButton* pButton )
+{
+
+}
+
+void LTCheckOptionButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_NORMAL)
+			pButton->SetState(BTN_STATE_HOT);
+		else if (iState == BTN_STATE_PRESSED)
+			pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+	{
+		if (iState == BTN_STATE_HOT)
+			pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+void LTCheckOptionButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_HOT)
+			pButton->SetState(BTN_STATE_PRESSED);
+	}
+	else
+	{
+		pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+void LTCheckOptionButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
+{
+	int iState = pButton->GetState();
+
+	if (bSelfArea)
+	{
+		if (iState == BTN_STATE_PRESSED)
+		{
+			LTVirtualButtonOwner* pOwener = pButton->GetOwner();
+			LTVirtualButton* pPressed = pOwener->GetPressed();
+			if (pPressed)
+			{
+				if (pPressed == pButton)
+				{
+					pOwener->OnRelease(pButton);
+					pOwener->SetPressed(NULL);
+					pButton->SetState(BTN_STATE_HOT);
+				}
+				else 
+				{
+					pOwener->OnRelease(pPressed);
+					pOwener->OnPress(pButton);
+					pOwener->SetPressed(pButton);
+				}
+			}
+			else
+			{
+				pOwener->OnPress(pButton);
+				pOwener->SetPressed(pButton);
+			}
+		}
+	}
+	else
+		pButton->SetState(BTN_STATE_NORMAL);
+}
+
+bool LTCheckOptionButtonState::TrackRequired( int iState )
+{
+	if (iState != BTN_STATE_NORMAL)
+		return true;
+
+	return false;
+}
+
+void LTCheckOptionButtonState::OnMouseLeave( LTVirtualButton* pButton)
+{
+	//LTVirtualButtonOwner* pOwner = pButton->GetOwner();
+	//if (pButton != pOwner->GetPressed())
+	//	pButton->SetState(BTN_STATE_NORMAL);
+
+	int iState = pButton->GetState();
+
+	if (iState == BTN_STATE_PRESSED)
+	{
+		//LTVirtualButtonOwner* pOwener = pButton->GetOwner();
+		//LTVirtualButton* pPressed = pOwener->GetPressed();
+		//if (pPressed)
+		//{
+		//	if (pPressed == pButton)
+		//	{
+		//		pOwener->OnRelease(pButton);
+		//		pOwener->SetPressed(NULL);
+		//		pButton->SetState(BTN_STATE_NORMAL);
+		//	}
+		//	else 
+		//	{
+		//		pOwener->OnRelease(pPressed);
+		//		pOwener->OnPress(pButton);
+		//		pOwener->SetPressed(pButton);
+		//	}
+		//}
+		//else
+		//{
+		//	pOwener->OnPress(pButton);
+		//	pOwener->SetPressed(pButton);
+		//}
+	}
+	else if (iState == BTN_STATE_HOT)
+	{
+		pButton->SetState(BTN_STATE_NORMAL);
+	}
+}
+
+LTPaintFnButton::LTPaintFnButton( LTVirtualButtonOwner* pOwner, PainterFn pPainter, void* pContext)
+:LTVirtualButton(pOwner)
+{
+	p_Painter = pPainter;
+	p_Context = pContext; 
+}
+
+void LTPaintFnButton::OnPaintButtonState( CDC* pDC )
+{
+	p_Painter(i_State, pDC, r_Area, this, p_Context);
 }

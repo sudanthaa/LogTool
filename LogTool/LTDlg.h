@@ -135,4 +135,6 @@ public:
 	CButton o_ButtonUpload;
 	afx_msg void OnEnChangeEditTicketId();
 	afx_msg void OnCbnSelchangeComboJiraProject();
+	CButton o_BtnScreenshotNew;
+	CButton o_BtnScreenshotClear;
 };

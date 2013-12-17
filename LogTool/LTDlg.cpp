@@ -99,6 +99,8 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
 	DDX_Control(pDX, IDC_BUTTON_ENV_REFRESH, o_ButtonEnvRefresh);
 	DDX_Control(pDX, IDC_BUTTON_UPLOAD, o_ButtonUpload);
+	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_NEW, o_BtnScreenshotNew);
+	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_CLEAR, o_BtnScreenshotClear);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -255,6 +257,9 @@ BOOL LTDlg::OnInitDialog()
 
 	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_BtnScreenshotNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_BtnScreenshotClear, LT_RM_VIRTICAL);
 
 	o_Resizer.Originate(this);
 

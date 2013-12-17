@@ -86,6 +86,8 @@
 #define IDC_BUTTON1                     1062
 #define IDC_BUTTON_UPLOAD               1062
 #define IDC_STATIC_DRAW_TOOLBAR         1063
+#define IDC_BUTTON_SCREENSHOT_CLEAR     1064
+#define IDC_STATIC_FRAME_SELECTION      1065
 
 // Next default values for new objects
 // 
@@ -93,7 +95,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        139
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1064
+#define _APS_NEXT_CONTROL_VALUE         1066
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
