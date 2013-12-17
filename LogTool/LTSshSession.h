@@ -21,7 +21,7 @@ public:
 					LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
 					void **abstract);
 
-	bool	Execute(const char* zCommand, std::list<CString>* plstOut = NULL);
+	bool	Execute(const char* zCommand, std::list<CString>* plstOut = NULL, CString* pErr = NULL);
 
 protected:
 	LTEnv* p_Env;

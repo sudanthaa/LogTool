@@ -8,7 +8,7 @@ LTBitmapBuffer::LTBitmapBuffer()
 	p_OldBitmap = NULL;
 }
 
-LTBitmapBuffer::~LTBitmapBuffer(void)
+LTBitmapBuffer::~LTBitmapBuffer()
 {
 	Destory();
 }

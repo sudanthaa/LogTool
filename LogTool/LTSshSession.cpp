@@ -222,7 +222,7 @@ static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
 	return rc;
 }
 
-bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
+bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CString* pErr)
 {
 	int rc = 0;
 	int bytecount = 0;
@@ -243,7 +243,8 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
     
 	if ( rc != 0 )
     {
-        TRACE("Error\n");
+		if (pErr)
+			pErr->Format("socket error.");
         return false;
     }
 
@@ -258,7 +259,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
 
 			int istart = 0;
 
-            if( rc > 0 )
+            if ( rc > 0 )
             {
                 int i;
                 bytecount += rc;
@@ -281,7 +282,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut)
                 TRACE( "\n");
             }
             else {
-                if( rc != LIBSSH2_ERROR_EAGAIN )
+                if ( rc != LIBSSH2_ERROR_EAGAIN )
                     /* no need to output this for the EAGAIN case */ 
                     TRACE( "libssh2_channel_read returned %d\n", rc);
             }

@@ -559,6 +559,7 @@ int LTDlg::TestCurl()
 	return 0;
 }
 
+//**************************************************************************************************
 int LTDlg::TestCall()
 {
 	CREDUI_INFO info = { sizeof (CREDUI_INFO) };
@@ -629,7 +630,7 @@ int LTDlg::TestCall()
 	return 0;
 }
 
-
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonEnvAdd()
 {
 	// TODO: Add your control notification handler code here
@@ -638,7 +639,7 @@ void LTDlg::OnBnClickedButtonEnvAdd()
 	oDlg.DoModal();
 }
 
-
+//**************************************************************************************************
 void LTDlg::AddLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
 {
 	CString sNew;
@@ -650,6 +651,7 @@ void LTDlg::AddLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
 	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
 
+//**************************************************************************************************
 void LTDlg::EditLogEnv(const char* zCurrentStr, const char* zUser, const char* zBaseLocation /*= ""*/ )
 {
 	CString sNew;
@@ -666,6 +668,7 @@ void LTDlg::EditLogEnv(const char* zCurrentStr, const char* zUser, const char* z
 	LTConfig::o_Inst.GetLogMacSet()->Set(sNew);
 }
 
+//**************************************************************************************************
 void LTDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
@@ -673,31 +676,37 @@ void LTDlg::OnOK()
 	//CDialog::OnOK();
 }
 
+//**************************************************************************************************
 void LTDlg::OnChangeCombo( LTComboBox* pComboBox, const char* zValue )
 {
 	CString s = zValue;
 }
 
+//**************************************************************************************************
 void LTDlg::OnCbnKillfocusComboJiraProject()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnCbnKillfocusComboIncludeFilter()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnCbnKillfocusComboExcludeFilter()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnEnKillfocusEditTicketId()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedCheckJiraCreateTicket()
 {
 	// TODO: Add your control notification handler code here
@@ -707,6 +716,7 @@ void LTDlg::OnBnClickedCheckJiraCreateTicket()
 	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
 }
 
+//**************************************************************************************************
 void LTDlg::OnEnChangeEditJiraUserId()
 {
 	// TODO:  If this is a RICHEDIT control, the control will not
@@ -718,6 +728,7 @@ void LTDlg::OnEnChangeEditJiraUserId()
 	o_EditJiraUser.GetWindowText(LTConfig::o_Inst.s_JiraUser);
 }
 
+//**************************************************************************************************
 void LTDlg::OnEnChangeEditJiraPassword()
 {
 	// TODO:  If this is a RICHEDIT control, the control will not
@@ -729,6 +740,7 @@ void LTDlg::OnEnChangeEditJiraPassword()
 	o_EditJiraPassword.GetWindowText(LTConfig::o_Inst.s_JiraPassword);
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedCheckCommentOnJira()
 {
 	// TODO: Add your control notification handler code here
@@ -736,26 +748,31 @@ void LTDlg::OnBnClickedCheckCommentOnJira()
 	LTConfig::o_Inst.b_JiraDoComment = (iCheck != 0);
 }
 
+//**************************************************************************************************
 void LTDlg::OnCbnKillfocusComboSelection()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonFileSelectionAll()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonFileSelectionClear()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedCheckFilterSelectAll()
 {
 	// TODO: Add your control notification handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -763,12 +780,14 @@ void LTDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	__super::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
+//**************************************************************************************************
 void LTDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// TODO: Add your message handler code here and/or call default
 	__super::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
+//**************************************************************************************************
 BOOL LTDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: Add your specialized code here and/or call the base class
@@ -783,11 +802,13 @@ BOOL LTDlg::PreTranslateMessage(MSG* pMsg)
 	return __super::PreTranslateMessage(pMsg);
 }
 
+//**************************************************************************************************
 void LTDlg::OnPressEnterKey()
 {
 	
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonLogmacNew()
 {
 	// TODO: Add your control notification handler code here
@@ -796,6 +817,7 @@ void LTDlg::OnBnClickedButtonLogmacNew()
 	oDlg.DoModal();
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonLogmacEdit()
 {
 	// TODO: Add your control notification handler code here
@@ -811,7 +833,7 @@ void LTDlg::OnBnClickedButtonLogmacEdit()
 }
 
 
-
+//**************************************************************************************************
 void LTDlg::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
@@ -819,6 +841,7 @@ void LTDlg::OnClose()
 	__super::OnClose();
 }
 
+//**************************************************************************************************
 void LTDlg::AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword )
 {
 	LTEnv* pEnvCur = LTEnv::FindEnv(zUser);
@@ -848,6 +871,7 @@ void LTDlg::AddEnv(const char* zName, const char* zUser, const char* zIP, const 
 	InsertEnvToList(pNew);
 }
 
+//**************************************************************************************************
 void LTDlg::EditEnv( LTEnv* pEnvEdited )
 {
 	int i = -1;
@@ -871,6 +895,7 @@ void LTDlg::EditEnv( LTEnv* pEnvEdited )
 	while(true);
 }
 
+//**************************************************************************************************
 void LTDlg::InsertEnvToList( LTEnv* pEnv )
 {
 	int iCurCount = o_ListEnv.GetItemCount();
@@ -883,7 +908,7 @@ void LTDlg::InsertEnvToList( LTEnv* pEnv )
 	o_ListEnv.SetItemData(iCurCount, (DWORD_PTR)pEnv);
 }
 
-
+//**************************************************************************************************
 void LTDlg::OnSize(UINT nType, int cx, int cy)
 {
 	__super::OnSize(nType, cx, cy);
@@ -899,6 +924,7 @@ void LTDlg::OnSize(UINT nType, int cx, int cy)
 //	*pResult = 0;
 //}
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonEnvEdit()
 {
 	// TODO: Add your control notification handler code here
@@ -913,6 +939,7 @@ void LTDlg::OnBnClickedButtonEnvEdit()
 	//returns -1 if not selected;
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonEnvDelete()
 {
 	// TODO: Add your control notification handler code here
@@ -938,6 +965,7 @@ void LTDlg::OnBnClickedButtonEnvDelete()
 	}
 }
 
+//**************************************************************************************************
 int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
 	if (__super::OnCreate(lpCreateStruct) == -1)
@@ -960,6 +988,7 @@ int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 //	i++;
 //}
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonScreenshotNew()
 {
 	// TODO: Add your control notification handler code here
@@ -973,6 +1002,7 @@ void LTDlg::OnBnClickedButtonScreenshotNew()
 	}
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonEnvRefresh()
 {
 	// TODO: Add your control notification handler code here
@@ -1030,6 +1060,7 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 	}
 }
 
+//**************************************************************************************************
 void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 {
 //	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<NMITEMACTIVATE>(pNMHDR);
@@ -1058,6 +1089,7 @@ void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
+//**************************************************************************************************
 void LTDlg::OnBnClickedButtonUpload()
 {
 	// TODO: Add your control notification handler code here
@@ -1223,6 +1255,7 @@ void LTDlg::OnBnClickedButtonUpload()
 	//////////////////////////////////////////////////////////////////////////
 }
 
+//**************************************************************************************************
 LTEnv* LTDlg::GetSelectedEnv()
 {
 	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
@@ -1239,6 +1272,7 @@ LTEnv* LTDlg::GetSelectedEnv()
 	return NULL;
 }
 
+//**************************************************************************************************
 void LTDlg::OnDestroy()
 {
 	__super::OnDestroy();
@@ -1248,6 +1282,7 @@ void LTDlg::OnDestroy()
 	// TODO: Add your message handler code here
 }
 
+//**************************************************************************************************
 void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 {
 	CFile oFile;
@@ -1264,6 +1299,7 @@ void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 	}
 }
 
+//**************************************************************************************************
 void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName )
 {
 	CString sUser;
@@ -1316,13 +1352,16 @@ void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 	}
 }
 
+//**************************************************************************************************
 CString LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, const char* zSummary, 
 								const char* zDescription)
 {
 	return "";
 }
 
-bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProject, CString& sURL, CString& sID, bool bWithID)
+//**************************************************************************************************
+bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProject, 
+								CString& sURL, CString& sID, bool bWithID)
 {
 	o_EditJiraUser.GetWindowText(sUser);
 	o_EditJiraPassword.GetWindowText(sPassword);
@@ -1387,6 +1426,7 @@ bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProje
 
         //createCmd='curl -D- -u %s:%s -X POST --data @%s -H "Content-Type: application/json" %s/issue/' % (jiraUser, jiraPassword, issueDescFile, jiraRESTURL)
 
+//**************************************************************************************************
 bool SkipChar(CString& sVal)
 {
 	const char* zStr = sVal;
@@ -1414,6 +1454,7 @@ bool SkipChar(CString& sVal)
 	return bChanged;
 }
 
+//**************************************************************************************************
 void LTDlg::OnEnChangeEditTicketId()
 {
 	// TODO:  If this is a RICHEDIT control, the control will not
@@ -1461,6 +1502,7 @@ void LTDlg::OnEnChangeEditTicketId()
 	}
 }
 
+//**************************************************************************************************
 void LTDlg::OnCbnSelchangeComboJiraProject()
 {
 	// TODO: Add your control notification handler code here
@@ -1468,3 +1510,6 @@ void LTDlg::OnCbnSelchangeComboJiraProject()
 	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
 	LTConfig::o_Inst.GetJiraProjectSet()->Set(sProject);
 }
+
+//**************************************************************************************************
+

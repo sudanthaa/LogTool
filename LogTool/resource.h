@@ -19,6 +19,7 @@
 #define IDI_ICON_SMALL_CLOSE_PRESSED    136
 #define IDD_SCREENSHOT_EDIT             137
 #define IDD_SCREEN_CAPTURE              138
+#define IDD_NEW_JIRA                    139
 #define IDC_LIST_SELECTION              1001
 #define IDC_BUTTON_TEST                 1002
 #define IDC_BUTTON_ENV_ADD              1003
@@ -78,24 +79,31 @@
 #define IDC_BUTTON_SCREENSHOT_EDIT_RECT 1056
 #define IDC_EDIT1                       1057
 #define IDC_EDIT_SCREENSHOT_EDIT_NAME   1057
+#define IDC_EDIT_NEW_JIRA_SUMMARY       1057
 #define IDC_CHECK1                      1058
 #define IDC_BUTTON_ENV_REFRESH          1059
 #define IDC_CHECK2                      1060
 #define IDC_COMBO1                      1061
 #define IDC_ADD_LOG_ENV_ENV             1061
+#define IDC_COMBO_NEW_JIRA_TICKET_TYPE  1061
 #define IDC_BUTTON1                     1062
 #define IDC_BUTTON_UPLOAD               1062
 #define IDC_STATIC_DRAW_TOOLBAR         1063
 #define IDC_BUTTON_SCREENSHOT_CLEAR     1064
 #define IDC_STATIC_FRAME_SELECTION      1065
+#define IDC_EDIT_NEW_JIRA_DESCRIPTION   1066
+#define IDC_STATIC_NEW_JIRA_TICKET_TYPE 1067
+#define IDC_STATIC_NEW_JIRA_TICKET_SUMMARY 1068
+#define IDC_STATIC_NEW_JIRA_TICKET_SUMMARY2 1069
+#define IDC_STATIC_NEW_JIRA_TICKET_DESCRIPTION 1069
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        139
+#define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1066
+#define _APS_NEXT_CONTROL_VALUE         1068
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
