@@ -256,6 +256,9 @@ LTDrawToolBar::LTDrawToolBar()
 	p_Listener = NULL;
 
 	SetType(LTVirtualButtonOwner::CHECK_OPTIONAL_BUTTON);
+
+	p_ActiveIcons = new Gdiplus::Image(L"draw-tools-active.png");
+	p_DisabledIcons = new Gdiplus::Image(L"draw-tools-disabled.png");
 }
 
 LTDrawToolBar::~LTDrawToolBar()
@@ -284,7 +287,7 @@ int LTDrawToolBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	//h_Theme = OpenThemeData(m_hWnd, L"EDIT");
+	h_Theme = OpenThemeData(m_hWnd, L"BUTTON");
 
 	// TODO:  Add your specialized creation code here
 
@@ -349,9 +352,9 @@ void LTDrawToolBar::Layout( CRect rRect )
 
 	int iWidth = rRect.Width() / 3;
 
-	rPenButton.right = iWidth - 1;
+	rPenButton.right = iWidth;
 	rRectButton.left = iWidth;
-	rRectButton.right = iWidth * 2 - 1;
+	rRectButton.right = iWidth * 2;
 	rArrowButton.left = iWidth * 2;
 	rArrowButton.right = rRect.right;
 
@@ -372,6 +375,7 @@ void LTDrawToolBar::OnMouseMove(UINT nFlags, CPoint point)
 	__super::OnMouseMove(nFlags, point);
 }
 
+//**************************************************************************************************
 void LTDrawToolBar::OnMouseLeave()
 {
 	// TODO: Add your message handler code here and/or call default
@@ -385,6 +389,7 @@ void LTDrawToolBar::OnMouseLeave()
 	__super::OnMouseLeave();
 }
 
+//**************************************************************************************************
 void LTDrawToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -397,6 +402,7 @@ void LTDrawToolBar::OnLButtonDown(UINT nFlags, CPoint point)
 	__super::OnLButtonDown(nFlags, point);
 }
 
+//**************************************************************************************************
 void LTDrawToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
@@ -408,29 +414,63 @@ void LTDrawToolBar::OnLButtonUp(UINT nFlags, CPoint point)
 	__super::OnLButtonUp(nFlags, point);
 }
 
-#define  ICON_PADDING 4.0
+#define  ICON_PADDING 2.0
 
-void LTDrawToolBar::PaintToolButtonState( int iState, CDC* pDC, CRect rArea, LTVirtualButton* pButton, void* pContext )
+//**************************************************************************************************
+void LTDrawToolBar::PaintToolButtonState( int iState, CDC* pDC, CRect rArea, 
+											LTVirtualButton* pButton, void* pContext )
 {
 	int iColor;
+	int iIndex = 0;
+
+	LTDrawToolBar* pDrawToobalr = (LTDrawToolBar*) pContext;
 
 	if		(iState == BTN_STATE_NORMAL)		iColor = RGB(200,200,200);
 	else if (iState == BTN_STATE_HOT)		iColor = RGB(220,200,200);
-	else if (iState == BTN_STATE_PRESSED)		iColor = RGB(150,150,240);
+	else if (iState == BTN_STATE_PRESSED)		iColor = RGB(200,200,200);
 	else if (iState == BTN_STATE_DISABLED)		iColor = RGB(200,200,200);
 
-	Gdiplus::Image img(L"pen.png");
+	if		(pButton == pDrawToobalr->p_PenButton)		iIndex = 0;
+	else if	(pButton == pDrawToobalr->p_RectButton)		iIndex = 1;
+	else if	(pButton == pDrawToobalr->p_ArrowButton)	iIndex = 2;
 
-	pDC->FillSolidRect(rArea, iColor);
+	int iHeight =  pDrawToobalr->p_ActiveIcons->GetHeight();
 
-	Gdiplus::Graphics g(pDC->m_hDC);
-	Gdiplus::Rect rect(rArea.left + ICON_PADDING, rArea.top + ICON_PADDING, 
-		rArea.Width() - ICON_PADDING * 2.0,rArea.Height() - ICON_PADDING * 2.0);
+	Gdiplus::Image* pImage = pDrawToobalr->p_DisabledIcons;
+	if (iState == BTN_STATE_PRESSED)
+		pImage =  pDrawToobalr->p_ActiveIcons;
 
-	g.DrawImage(&img,rect);
+	Gdiplus::RectF rSource(0 * iIndex, 0, iHeight, iHeight);
+	Gdiplus::RectF rTarget((rArea.left + (rArea.Width() - iHeight) / 2) , 
+		(rArea.top + (rArea.Height() - iHeight) / 2), 
+		iHeight, iHeight);
+
+
+	//pDC->FillSolidRect(rArea, iColor);
+
+
+	Gdiplus::Image imgBack(L"tool-tile.png");
+	Gdiplus::Graphics oGraphics(pDC->m_hDC);
+
+
+	oGraphics.DrawImage(&imgBack, rTarget, 0, 0, 
+		iHeight, iHeight, Gdiplus::UnitPixel);
+
+	//CRect rAreaEx = rArea;
+	//rAreaEx.right += 1;
+	//DrawThemeParentBackground(pDrawToobalr->m_hWnd, pDC->m_hDC, rAreaEx);
+	//DrawThemeBackground(pDrawToobalr->h_Theme, pDC->m_hDC, BP_PUSHBUTTON, iState, rAreaEx, NULL);
+
+	
+	oGraphics.DrawImage(pImage, rTarget, iHeight * iIndex, 0, 
+		iHeight, iHeight, Gdiplus::UnitPixel);
 }
 
+//**************************************************************************************************
 bool LTDrawToolBar::PaintBack( LTVirtualButton* pButton, CDC* pDC, CRect rRect )
 {
 	return false;
 }
+
+
+//**************************************************************************************************

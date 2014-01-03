@@ -34,6 +34,9 @@ protected:
 	LTVirtualButton* p_ArrowButton;
 	LTDrawToolBarListener* p_Listener;
 
+	Gdiplus::Image*		p_ActiveIcons;
+	Gdiplus::Image*		p_DisabledIcons;
+
 	HTHEME	h_Theme;
 	CWnd*	GetCWnd();
 	void	Layout(CRect rRect);

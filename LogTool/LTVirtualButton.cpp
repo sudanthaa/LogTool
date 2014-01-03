@@ -1,6 +1,7 @@
 #include "LTPch.h"
 #include "LTVirtualButton.h"
 
+//**************************************************************************************************
 LTVirtualButton::LTVirtualButton(LTVirtualButtonOwner* pOwner)
 {
 	pi_BackColor = NULL;
@@ -9,12 +10,14 @@ LTVirtualButton::LTVirtualButton(LTVirtualButtonOwner* pOwner)
 	i_State = BTN_STATE_NORMAL;
 }
 
+//**************************************************************************************************
 LTVirtualButton::~LTVirtualButton(void)
 {
 	delete pr_Clip;
 	delete pi_BackColor;
 }
 
+//**************************************************************************************************
 bool LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
@@ -34,6 +37,7 @@ bool LTVirtualButton::OnMouseMove( CPoint point, CDC* pDC )
 	return bIsSelfArea;
 }
 
+//**************************************************************************************************
 bool LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
@@ -52,6 +56,7 @@ bool LTVirtualButton::OnMouseDown( CPoint point, CDC* pDC )
 	return bIsSelfArea;
 }
 
+//**************************************************************************************************
 bool LTVirtualButton::OnMouseUp( CPoint point, CDC* pDC )
 {
 	int iOldState = i_State;
@@ -66,6 +71,7 @@ bool LTVirtualButton::OnMouseUp( CPoint point, CDC* pDC )
 	return bIsSelfArea;
 }
 
+//**************************************************************************************************
 void LTVirtualButton::OnMouseLeave( CDC* pDC )
 {
 	int iOldState = i_State;
@@ -77,11 +83,13 @@ void LTVirtualButton::OnMouseLeave( CDC* pDC )
 		OnPaintButtonState(pDC);
 }
 
+//**************************************************************************************************
 void LTVirtualButton::OnPaint( CDC* pDC )
 {
 	OnPaintButtonState(pDC);
 }
 
+//**************************************************************************************************
 void LTVirtualButton::OnPaintButtonState( CDC* pDC )
 {
 	int iC = i_State * 50;
@@ -90,6 +98,7 @@ void LTVirtualButton::OnPaintButtonState( CDC* pDC )
 	pDC->FillSolidRect(r_Area, RGB(iC,iC,iC));
 }
 
+//**************************************************************************************************
 void LTVirtualButton::SetClipRect( CRect rRect )
 {
 	delete pr_Clip;
@@ -97,12 +106,14 @@ void LTVirtualButton::SetClipRect( CRect rRect )
 	*pr_Clip = rRect;
 }
 
+//**************************************************************************************************
 bool LTVirtualButton::IsSelfArea( CPoint point )
 {
 	bool bIsClippedOut = pr_Clip ? (!(pr_Clip->PtInRect(point))) : false;
 	return ((!bIsClippedOut) && r_Area.PtInRect(point));
 }
 
+//**************************************************************************************************
 void LTVirtualButton::SetBackColor( int iColor )
 {
 	delete pi_BackColor;
@@ -110,7 +121,7 @@ void LTVirtualButton::SetBackColor( int iColor )
 	*pi_BackColor = iColor;
 }
 
-
+//**************************************************************************************************
 LTThemeButton::LTThemeButton( LTVirtualButtonOwner* pCtrl, HTHEME* pTheme, int iPart, int iStateOffset /*= 0*/ )
 :LTVirtualButton(pCtrl)
 {
@@ -119,11 +130,13 @@ LTThemeButton::LTThemeButton( LTVirtualButtonOwner* pCtrl, HTHEME* pTheme, int i
 	i_StateOffset = iStateOffset;
 }
 
+//**************************************************************************************************
 LTThemeButton::~LTThemeButton()
 {
 
 }
 
+//**************************************************************************************************
 void LTThemeButton::OnPaintButtonState( CDC* pDC )
 {
 	if (!p_Owner->PaintBack(this, pDC, r_Area))
@@ -136,6 +149,7 @@ void LTThemeButton::OnPaintButtonState( CDC* pDC )
 	//LTVirtualButton::OnPaintButtonState(pDC);
 }
 
+//**************************************************************************************************
 void LTVirtualButtonOwner::TrackLeave()
 {
 	if (b_LeaveTracking)
@@ -150,11 +164,13 @@ void LTVirtualButtonOwner::TrackLeave()
 	b_LeaveTracking = true;
 }
 
+//**************************************************************************************************
 void LTVirtualButtonOwner::MouseLeave()
 {
 	b_LeaveTracking = false;
 }
 
+//**************************************************************************************************
 LTVirtualButtonOwner::LTVirtualButtonOwner()
 {
 	b_LeaveTracking = false;
@@ -162,6 +178,7 @@ LTVirtualButtonOwner::LTVirtualButtonOwner()
 	SetType(PUSH_BUTTON);
 }
 
+//**************************************************************************************************
 void LTVirtualButtonOwner::SetType( ButtonType eType )
 {
 	e_ButtonType = eType;
@@ -182,6 +199,7 @@ void LTVirtualButtonOwner::SetType( ButtonType eType )
 	}
 }
 
+//**************************************************************************************************
 LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
 :LTVirtualButton(pOwner)
 {
@@ -189,6 +207,7 @@ LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
 		ah_Icon[i] = hIcon[i];
 }
 
+//**************************************************************************************************
 void LTIconButton::OnPaintButtonState( CDC* pDC )
 {
 	if (pr_Clip)
@@ -207,6 +226,7 @@ void LTIconButton::OnPaintButtonState( CDC* pDC )
 	pDC->DrawIcon(r_Area.left, r_Area.top, ah_Icon[i_State - 1]);
 }
 
+//**************************************************************************************************
 void LTPushButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -223,6 +243,7 @@ void LTPushButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
 	}
 }
 
+//**************************************************************************************************
 void LTPushButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
 {
 	if (bSelfArea)
@@ -231,6 +252,7 @@ void LTPushButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
 		pButton->SetState(BTN_STATE_NORMAL);
 }
 
+//**************************************************************************************************
 void LTPushButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -246,6 +268,7 @@ void LTPushButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 		pButton->SetState(BTN_STATE_NORMAL);
 }
 
+//**************************************************************************************************
 bool LTPushButtonState::TrackRequired( int iState )
 {
 	if (iState != BTN_STATE_NORMAL)
@@ -254,11 +277,13 @@ bool LTPushButtonState::TrackRequired( int iState )
 	return false;
 }
 
+//**************************************************************************************************
 void LTPushButtonState::OnMouseLeave( LTVirtualButton* pButton)
 {
 	pButton->SetState(BTN_STATE_NORMAL);
 }
 
+//**************************************************************************************************
 void LTCheckButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -276,6 +301,7 @@ void LTCheckButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
 	}
 }
 
+//**************************************************************************************************
 void LTCheckButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
 {
 	if (bSelfArea)
@@ -288,6 +314,7 @@ void LTCheckButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
 	}
 }
 
+//**************************************************************************************************
 void LTCheckButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -312,6 +339,7 @@ void LTCheckButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 
 }
 
+//**************************************************************************************************
 bool LTCheckButtonState::TrackRequired( int iState )
 {
 	if (iState != BTN_STATE_NORMAL)
@@ -320,11 +348,13 @@ bool LTCheckButtonState::TrackRequired( int iState )
 	return false;
 }
 
+//**************************************************************************************************
 void LTCheckButtonState::OnMouseLeave( LTVirtualButton* pButton )
 {
 
 }
 
+//**************************************************************************************************
 void LTCheckOptionButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -342,6 +372,7 @@ void LTCheckOptionButtonState::OnMouseMove( LTVirtualButton* pButton, bool bSelf
 	}
 }
 
+//**************************************************************************************************
 void LTCheckOptionButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -357,6 +388,7 @@ void LTCheckOptionButtonState::OnMouseDown( LTVirtualButton* pButton, bool bSelf
 	}
 }
 
+//**************************************************************************************************
 void LTCheckOptionButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 {
 	int iState = pButton->GetState();
@@ -393,6 +425,7 @@ void LTCheckOptionButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfAr
 		pButton->SetState(BTN_STATE_NORMAL);
 }
 
+//**************************************************************************************************
 bool LTCheckOptionButtonState::TrackRequired( int iState )
 {
 	if (iState != BTN_STATE_NORMAL)
@@ -401,6 +434,7 @@ bool LTCheckOptionButtonState::TrackRequired( int iState )
 	return false;
 }
 
+//**************************************************************************************************
 void LTCheckOptionButtonState::OnMouseLeave( LTVirtualButton* pButton)
 {
 	//LTVirtualButtonOwner* pOwner = pButton->GetOwner();
@@ -440,6 +474,7 @@ void LTCheckOptionButtonState::OnMouseLeave( LTVirtualButton* pButton)
 	}
 }
 
+//**************************************************************************************************
 LTPaintFnButton::LTPaintFnButton( LTVirtualButtonOwner* pOwner, PainterFn pPainter, void* pContext)
 :LTVirtualButton(pOwner)
 {
@@ -447,7 +482,11 @@ LTPaintFnButton::LTPaintFnButton( LTVirtualButtonOwner* pOwner, PainterFn pPaint
 	p_Context = pContext; 
 }
 
+//**************************************************************************************************
 void LTPaintFnButton::OnPaintButtonState( CDC* pDC )
 {
 	p_Painter(i_State, pDC, r_Area, this, p_Context);
 }
+
+//**************************************************************************************************
+
