@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTNewJIRADlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTPch.cpp"
 				>
 				<FileConfiguration
@@ -321,6 +325,10 @@
 			</File>
 			<File
 				RelativePath=".\LTFieldListener.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTNewJIRADlg.h"
 				>
 			</File>
 			<File
