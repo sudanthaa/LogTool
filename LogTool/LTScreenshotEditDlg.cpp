@@ -13,14 +13,15 @@ IMPLEMENT_DYNAMIC(LTScreenshotEditDlg, CDialog)
 LTScreenshotEditDlg::LTScreenshotEditDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(LTScreenshotEditDlg::IDD, pParent)
 {
-	p_Screenshot = NULL;
+	p_OutputScreenshot = NULL;
 	p_DrawToolbar = NULL;
+	p_PreLoadScreenshot = NULL;
 }
 
 LTScreenshotEditDlg::~LTScreenshotEditDlg()
 {
-	delete p_Screenshot;
-	p_Screenshot = NULL;
+	delete p_OutputScreenshot;
+	p_OutputScreenshot = NULL;
 	delete p_DrawToolbar;
 	p_DrawToolbar = NULL;
 }
@@ -56,12 +57,12 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 {
 	// TODO: Add your control notification handler code here
 
-	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
+	p_OutputScreenshot = o_ScreenshotEditCtrl.DetachScreenshot();
 	CString sName;
 	o_EditName.GetWindowText(sName);
-	p_Screenshot->SetName(sName);
+	p_OutputScreenshot->SetName(sName);
 
-	p_Screenshot->Save("test.jpg");
+	p_OutputScreenshot->Save("test.jpg");
 
 	EndDialog(IDOK);
 	//OnOK();
@@ -70,10 +71,7 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 BOOL LTScreenshotEditDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-
 	// TODO:  Add extra initialization here
-	SetTimer(AUTO_SPAWN_INITIATE_TIMER_ID, 100, NULL);
-
 
 	CRect rSSEdit;
 	CWnd* pStaticSSEdit = GetDlgItem(IDC_STATIC_SCREENSHOT_EDIT_CTRL);
@@ -88,13 +86,6 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	ScreenToClient(rDTEdit);
 	p_DrawToolbar->MoveWindow(rDTEdit);
 
-
-	static int iNameSeed = 0;
-	iNameSeed++;
-	CString sName;
-	sName.Format("ss-%03d", iNameSeed);
-	o_EditName.SetWindowText(sName);
-
 	o_Resizer.Attach(&o_ScreenshotEditCtrl, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_BtnOK, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnCancel, LT_RM_ALL);
@@ -102,6 +93,25 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	o_Resizer.Attach(&o_EditName, LT_RM_HORIZONTAL);
 	o_Resizer.Attach(p_DrawToolbar, LT_RM_ALL);
 	o_Resizer.Originate(this);
+
+
+	if (p_PreLoadScreenshot)
+	{
+		o_ScreenshotEditCtrl.SetScreenshot(p_PreLoadScreenshot);
+		o_BtnTake.EnableWindow(FALSE);
+		o_BtnCancel.EnableWindow(FALSE);
+		o_EditName.SetWindowText(p_PreLoadScreenshot->GetName());
+		p_PreLoadScreenshot = NULL;
+	}
+	else 
+	{
+		SetTimer(AUTO_SPAWN_INITIATE_TIMER_ID, 100, NULL);
+		static int iNameSeed = 0;
+		iNameSeed++;
+		CString sName;
+		sName.Format("ss-%03d", iNameSeed);
+		o_EditName.SetWindowText(sName);
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -194,11 +204,11 @@ void LTScreenshotEditDlg::TakeScreenshot()
 void LTScreenshotEditDlg::OnOK()
 {
 	// TODO: Add your specialized code here and/or call the base class
-	p_Screenshot = o_ScreenshotEditCtrl.DetachScreenshot();
+	p_OutputScreenshot = o_ScreenshotEditCtrl.DetachScreenshot();
 
 	CString sName;
 	o_EditName.GetWindowText(sName);
-	p_Screenshot->SetName(sName);
+	p_OutputScreenshot->SetName(sName);
 	CDialog::OnOK();
 }
 
@@ -224,8 +234,8 @@ void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect()
 
 LTScreenshot* LTScreenshotEditDlg::DetachScreenshot()
 {
-	LTScreenshot* pScreenshot = p_Screenshot;
-	p_Screenshot = NULL;
+	LTScreenshot* pScreenshot = p_OutputScreenshot;
+	p_OutputScreenshot = NULL;
 	return pScreenshot;
 }
 
@@ -242,6 +252,15 @@ void LTScreenshotEditDlg::OnToolRect( bool bPress )
 void LTScreenshotEditDlg::OnToolArrow( bool bPress )
 {
 	o_ScreenshotEditCtrl.ArrowStart();
+}
+
+int LTScreenshotEditDlg::DoModalEx( LTScreenshot* pScreenshot )
+{
+	p_PreLoadScreenshot = pScreenshot;
+	int iRes = DoModal();
+	p_PreLoadScreenshot = NULL;
+
+	return iRes;
 }
 
 // LTDrawToolBar
@@ -474,3 +493,12 @@ bool LTDrawToolBar::PaintBack( LTVirtualButton* pButton, CDC* pDC, CRect rRect )
 
 
 //**************************************************************************************************
+
+BOOL LTDrawToolBar::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (ProcessWndMsg(message, wParam, lParam, pResult))
+		return TRUE;
+
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}

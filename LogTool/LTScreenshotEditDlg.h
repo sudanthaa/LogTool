@@ -53,6 +53,8 @@ public:
 	afx_msg void OnMouseLeave();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+protected:
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 };
 
 // LTScreenshotEditDlg dialog
@@ -66,10 +68,12 @@ public:
 	
 	void	TakeScreenshot();
 	LTScreenshot*	DetachScreenshot();
+	int		DoModalEx(LTScreenshot* pScreenshot);
+
 
 	LTScreenshotEditCtrl o_ScreenshotEditCtrl;
 	LTResizeMan o_Resizer;
-	LTScreenshot*	p_Screenshot;
+	LTScreenshot*	p_OutputScreenshot;
 	LTDrawToolBar*	p_DrawToolbar;
 
 // Dialog Data
@@ -81,6 +85,7 @@ protected:
 	void OnToolPen(bool bPress);
 	void OnToolRect(bool bPress);
 	void OnToolArrow(bool bPress);
+	LTScreenshot*	p_PreLoadScreenshot;
 
 	DECLARE_MESSAGE_MAP()
 public:

@@ -6,7 +6,8 @@
 #define  BTN_STATE_PRESSED	3
 #define  BTN_STATE_DISABLED	4
 
-#define  WM_THMBNAIL_CLOSE		(WM_USER + 1)
+#define  WM_VIRBTN_PRESS		(WM_APP + 1)
+#define  WM_VIRBTN_RELEASE		(WM_VIRBTN_PRESS + 1)
 
 class LTVirtualButton;
 
@@ -72,6 +73,7 @@ public:
 	virtual bool	PaintBack(LTVirtualButton* pButton, CDC* pDC, CRect rRect){ return false; };
 	ButtonType GetType()	{	return e_ButtonType; };
 	void	SetType(ButtonType eType);
+	BOOL	ProcessWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 
 	void	TrackLeave();
 	void	MouseLeave();

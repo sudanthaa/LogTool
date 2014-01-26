@@ -15,7 +15,7 @@
 class LTSshSession;
 
 // LTDlg dialog
-class LTDlg : public CDialog, public LTFieldListener
+class LTDlg : public CDialog, public LTFieldListener, public LTThumbnailsCtrlListener
 {
 // Construction
 public:
@@ -34,6 +34,7 @@ public:
 
 
 	void	OnChangeCombo(LTComboBox* pComboBox, const char* zValue);
+	void	OnEditScreenshot(LTThumbnailsCtrl::Screenshot* pScreenShot);
 
 // Implementation
 protected:

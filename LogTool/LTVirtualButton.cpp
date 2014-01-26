@@ -200,6 +200,27 @@ void LTVirtualButtonOwner::SetType( ButtonType eType )
 }
 
 //**************************************************************************************************
+BOOL LTVirtualButtonOwner::ProcessWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	if (message == WM_VIRBTN_PRESS)
+	{
+		LTVirtualButton* pButton = (LTVirtualButton*)wParam;
+		this->OnPress(pButton);
+
+		return TRUE;
+	}
+	else if (message == WM_VIRBTN_RELEASE)
+	{
+		LTVirtualButton* pButton = (LTVirtualButton*)wParam;
+		this->OnRelease(pButton);
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+//**************************************************************************************************
 LTIconButton::LTIconButton( LTVirtualButtonOwner* pOwner, HICON hIcon[4])
 :LTVirtualButton(pOwner)
 {
@@ -260,7 +281,10 @@ void LTPushButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 	if (bSelfArea)
 	{
 		if (iState == BTN_STATE_PRESSED)
-			pButton->GetOwner()->OnPress(pButton);
+		{
+			pButton->GetOwner()->GetCWnd()->PostMessage(WM_VIRBTN_PRESS, (WPARAM)pButton, 0);
+			//pButton->GetOwner()->OnPress(pButton);
+		}
 
 		pButton->SetState(BTN_STATE_HOT);
 	}
@@ -326,9 +350,11 @@ void LTCheckButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfArea )
 			LTVirtualButtonOwner* pOwener = pButton->GetOwner();
 			LTVirtualButton* pPressed = pOwener->GetPressed();
 			if (pPressed)
-				pOwener->OnRelease(pPressed);
+			{
+				pOwener->GetCWnd()->PostMessage(WM_VIRBTN_RELEASE, (WPARAM)pPressed, 0);
+			}
 
-			pOwener->OnPress(pButton);
+			pOwener->GetCWnd()->PostMessage(WM_VIRBTN_PRESS, (WPARAM)pButton, 0);
 			pOwener->SetPressed(pButton);
 		}
 
@@ -403,20 +429,20 @@ void LTCheckOptionButtonState::OnMouseUp( LTVirtualButton* pButton, bool bSelfAr
 			{
 				if (pPressed == pButton)
 				{
-					pOwener->OnRelease(pButton);
+					pOwener->GetCWnd()->PostMessage(WM_VIRBTN_RELEASE, (WPARAM)pButton, 0);
 					pOwener->SetPressed(NULL);
 					pButton->SetState(BTN_STATE_HOT);
 				}
 				else 
 				{
-					pOwener->OnRelease(pPressed);
-					pOwener->OnPress(pButton);
+					pOwener->GetCWnd()->PostMessage(WM_VIRBTN_RELEASE, (WPARAM)pPressed, 0);
+					pOwener->GetCWnd()->PostMessage(WM_VIRBTN_PRESS, (WPARAM)pButton, 0);
 					pOwener->SetPressed(pButton);
 				}
 			}
 			else
 			{
-				pOwener->OnPress(pButton);
+				pOwener->GetCWnd()->PostMessage(WM_VIRBTN_PRESS, (WPARAM)pButton, 0);
 				pOwener->SetPressed(pButton);
 			}
 		}

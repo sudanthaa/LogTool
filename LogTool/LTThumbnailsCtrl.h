@@ -5,6 +5,8 @@
 
 // LTScreenshotCtrl
 class LTScreenshot;
+class LTThumbnailsCtrlListener;
+
 
 class LTThumbnailsCtrl : public CWnd, public LTVirtualButtonOwner
 {
@@ -14,7 +16,7 @@ public:
 	LTThumbnailsCtrl();
 	virtual ~LTThumbnailsCtrl();
 
-	BOOL	CreateScreenshotCtrl(CWnd* pParent, CRect rArea, int iID);
+	BOOL	CreateScreenshotCtrl(CWnd* pParent, CRect rArea, int iID, LTThumbnailsCtrlListener* pListener = NULL);
 	void	Layout(CRect rClient);
 	void	PaintCtrl(CDC* pDC);
 	void	AddScreenshot(LTScreenshot* pScreenshot);
@@ -64,6 +66,7 @@ public:
 	CRect r_Main;
 	bool  b_LeaveTracking;
 
+	LTThumbnailsCtrlListener* p_CtrlListener;
 	LTVirtualButton* p_PrevButton;
 	LTVirtualButton* p_NextButton;
 
@@ -87,6 +90,14 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseLeave();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+protected:
+	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 };
 
+
+class LTThumbnailsCtrlListener
+{
+public:
+	virtual void OnEditScreenshot(LTThumbnailsCtrl::Screenshot* pScreenShot){};
+};
 

@@ -15,6 +15,7 @@ public:
 
 	BOOL	CreateScreenshotEditCtrl(CWnd* pParent, CRect rRect);
 	void	SetImage(LTBitmapBuffer* pBitmap);
+	void	SetScreenshot(LTScreenshot* pScreenShot);
 	void	AdjustScroolBars(int cx, int cy);
 	void	DrawCtrl(CDC* pDC);
 

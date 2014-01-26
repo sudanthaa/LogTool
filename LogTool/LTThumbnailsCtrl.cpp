@@ -55,8 +55,10 @@ BEGIN_MESSAGE_MAP(LTThumbnailsCtrl, CWnd)
 	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
-BOOL LTThumbnailsCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID )
+BOOL LTThumbnailsCtrl::CreateScreenshotCtrl( CWnd* pParent, CRect rArea, int iID, 
+											LTThumbnailsCtrlListener* pListener )
 {
+	p_CtrlListener = pListener;
 	return Create(NULL, NULL, WS_VISIBLE | WS_CHILD /*| WS_BORDER*/, rArea, pParent, iID);
 }
 
@@ -289,6 +291,27 @@ void LTThumbnailsCtrl::OnPress( LTVirtualButton* pButton )
 			PaintCtrl(&dc);
 		}
 	}
+	else 
+	{
+		for (int ui = 0; ui < (int)a_ScreenShots.size(); ui++)
+		{
+			Screenshot* pScreeshot = a_ScreenShots[ui];
+			if (pButton == pScreeshot->p_CloseButton)
+			{
+				a_ScreenShots.erase(a_ScreenShots.begin() + ui);
+				CRect rClient;
+				GetClientRect(rClient);
+				Layout(rClient);
+				Invalidate();
+				delete pScreeshot;
+			}
+			else if (pButton == pScreeshot->p_EditButton)
+			{
+				if (p_CtrlListener)
+					p_CtrlListener->OnEditScreenshot(pScreeshot);
+			}
+		}
+	}
 }
 
 void LTThumbnailsCtrl::AddScreenshot( LTScreenshot* pScreenshot )
@@ -467,3 +490,11 @@ void LTThumbnailsCtrl::Screenshot::PaintThumbnailImage( CDC* pDC, CRect& rRect)
 	pDC->RestoreDC(i);
 }
 
+
+BOOL LTThumbnailsCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult)
+{
+	// TODO: Add your specialized code here and/or call the base class
+	if (ProcessWndMsg(message, wParam, lParam, pResult))
+		return TRUE;
+	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}

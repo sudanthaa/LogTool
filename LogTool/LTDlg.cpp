@@ -429,6 +429,8 @@ void LTDlg::OnBnClickedButtonTest()
 	TestCurl();
 }
 
+
+
 int LTDlg::TestCurl()
 {
 	CString sUser;
@@ -971,7 +973,7 @@ int LTDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (__super::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	o_ThumbnailsCtrl.CreateScreenshotCtrl(this, CRect(0,0,0,0), 300300);
+	o_ThumbnailsCtrl.CreateScreenshotCtrl(this, CRect(0,0,0,0), 300300, this);
 
 	// TODO:  Add your specialized creation code here
 
@@ -999,6 +1001,21 @@ void LTDlg::OnBnClickedButtonScreenshotNew()
 		LTScreenshot* pScreenshot = oDlg.DetachScreenshot();
 		if (pScreenshot)
 			o_ThumbnailsCtrl.AddScreenshot(pScreenshot);
+	}
+}
+
+//**************************************************************************************************
+void LTDlg::OnEditScreenshot(LTThumbnailsCtrl::Screenshot* pScreenShot)
+{
+	LTScreenshotEditDlg oDlg;
+	BOOL bRes = oDlg.DoModalEx(pScreenShot->p_Screenshot);
+	if (bRes == IDOK)
+	{
+		LTScreenshot* pLtScreenshot = oDlg.DetachScreenshot();
+		ASSERT(pScreenShot->p_Screenshot == pLtScreenshot);
+		o_ThumbnailsCtrl.Invalidate();
+	//	if (pScreenshot)
+	//		o_ThumbnailsCtrl.AddScreenshot(pScreenshot);
 	}
 }
 

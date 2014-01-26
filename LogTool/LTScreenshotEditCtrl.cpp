@@ -219,14 +219,21 @@ void LTScreenshotEditCtrl::AdjustScroolBars( int cx, int cy )
 
 void LTScreenshotEditCtrl::SetImage( LTBitmapBuffer* pBitmap )
 {
+	SetScreenshot(LTScreenshot::Create(pBitmap));
+}
+
+
+void LTScreenshotEditCtrl::SetScreenshot( LTScreenshot* pScreenShot )
+{
 	delete p_Screenshot;
-	p_Screenshot = LTScreenshot::Create(pBitmap);
+	p_Screenshot = pScreenShot;
 
 	CRect rClient;
 	GetClientRect(rClient);
 	AdjustScroolBars(rClient.Width(), rClient.Height());
 	Invalidate();
 }
+
 
 void LTScreenshotEditCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
@@ -378,4 +385,5 @@ LTScreenshot* LTScreenshotEditCtrl::DetachScreenshot()
 	p_Screenshot = NULL;
 	return pSS;
 }
+
 
