@@ -77,7 +77,6 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT_JIRA_URL, o_EditJiraURL);
 	DDX_Control(pDX, IDC_COMBO_LOG_MACHINES, o_ComboLogMachines);
 	DDX_Control(pDX, IDC_COMBO_JIRA_PROJECT, o_ComboJiraProject);
-	DDX_Control(pDX, IDC_STATIC_LOGMAC_IP_VALUE, o_StaticLogEnv);
 	DDX_Control(pDX, IDC_CHECK_JIRA_CREATE_TICKET, o_CheckJiraCreateNew);
 	DDX_Control(pDX, IDC_CHECK_COMMENT_ON_JIRA, o_CheckJiraComment);
 	DDX_Control(pDX, IDC_EDIT_TICKET_ID, o_EditJiraTicket);
@@ -105,6 +104,8 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_CLEAR, o_ButtonScreenshotClear);
 	DDX_Control(pDX, IDC_BUTTON_JIRA_CREDENTIALS, o_ButtonJiraCredentials);
 	DDX_Control(pDX, IDC_BUTTON_JIRA_TICKE_INFO, o_ButtonJiraTicketInfo);
+	DDX_Control(pDX, IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD, o_StaticFrmConfiguredFileUpload);
+	DDX_Control(pDX, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, o_ListConfiguredUploads);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -113,7 +114,6 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_ENV, &LTDlg::OnLvnItemchangedListEnv)
-	ON_BN_CLICKED(IDC_BUTTON_TEST, &LTDlg::OnBnClickedButtonTest)	
 	ON_BN_CLICKED(IDC_BUTTON_ENV_ADD, &LTDlg::OnBnClickedButtonEnvAdd)
 	ON_CBN_KILLFOCUS(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnKillfocusComboJiraProject)
 	ON_CBN_KILLFOCUS(IDC_COMBO_INCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboIncludeFilter)
@@ -181,6 +181,7 @@ BOOL LTDlg::OnInitDialog()
 	o_ComboJiraProject.AddString("JSESURV");
 	o_ComboJiraProject.AddString("LMEXSURV");
 	o_ComboJiraProject.AddString("BMESSURV");
+	o_ComboJiraProject.AddString("SURVRD");
 	int iIndex = o_ComboJiraProject.FindString(-1, LTConfig::o_Inst.GetJiraProjectSet()->Get());
 	if (iIndex < 0)
 		iIndex = 0;
@@ -215,8 +216,6 @@ BOOL LTDlg::OnInitDialog()
 	PopulateComboFromCfg(&o_ComboIncludeFilters, LTConfig::o_Inst.GetIncludeFilterSet());
 	PopulateComboFromCfg(&o_ComboExcludeFilters, LTConfig::o_Inst.GetExcludeFilterSet());
 	CString sDefaultLogMac = LTConfig::o_Inst.GetLogMacSet()->Get();
-	o_StaticLogEnv.SetWindowText(sDefaultLogMac);
-
 
 	//o_ButtonEnvNew.SetIcon(::LoadIcon(NULL, IDI_ERROR));
 	o_ButtonEnvDelete.EnableWindow(FALSE);
@@ -240,6 +239,9 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonJiraCredentials, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonJiraTicketInfo, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_StaticFrmConfiguredFileUpload, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ListConfiguredUploads, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_ComboLogMachines, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonLogMacDelete, LT_RM_VIRTICAL);
@@ -416,138 +418,15 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 
-void LTDlg::OnBnClickedButtonTest()
-{
-	CString s;
-	LTCurlRetunBuffer oBuf;
-	oBuf.GetTicketID(s);
-	return;
-	TestCurl();
-}
-
-int LTDlg::TestCurl()
-{
-	LTJiraCredentials oCred;
-	CString sErr;
-	if (!ProvideJiraCred(&oCred, sErr))
-		return 1;
-
-	LTEnv* pDevEnv = GetSelectedEnv();
-	if (!pDevEnv)
-		return 1;
-
-	CString sEnvName;
-	CString sEnvPath;
-	CString sConnStr;
-	o_ComboLogMachines.GetLBText(o_ComboLogMachines.GetCurSel(), sConnStr);
-
-	if (!LTUtils::DecodePathStringEx(sConnStr, sEnvName, sEnvPath))
-		return 1;
-
-	LTEnv* pLogEnv = LTEnv::FindEnvFQ(sEnvName);
-	if (!pLogEnv)
-		return 1;
-
-	CString sTicketPath;
-	CString sTicketID;
-	oCred.GetFullTicketID(sTicketID);
-	if (sEnvPath.IsEmpty())
-		sTicketPath = sTicketID;
-	else
-		sTicketPath.Format("%s/%s", sEnvPath, oCred.GetFullTicketID());
-
-	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment",  oCred.s_URL, sTicketID);
-
-	CString sAuth;
-	sAuth.Format("%s:%s",  oCred.s_User,  oCred.s_Password);
-
-	CString sXShellFile = sTicketID + "_logs.xsh";
-	CString sVersion = LTUtils::GetProductVersionX();
-
-	CURL* pCurlComment = NULL;
-	pCurlComment = curl_easy_init();
-	if (pCurlComment) 
-	{ 
-		struct curl_slist *chunk = NULL;
-		chunk = curl_slist_append(chunk, "Content-Type: application/json");
-
-		CString sComment;
-		sComment.Format("{ \"body\" : \"Logs uploaded to below location.\\r\\n"
-			"\\r\\n"
-			" _Location_: %s@%s:%s \\r\\n"
-			" _Password_: %s \\r\\n"
-			" _XShell-Link_: [^%s] \\r\\n"
-			" _Uploaded from_: %s@%s\\r\\n"
-			" {color:gray}~_Uploaded via LogTool v%s_~{color} \"\n }",
-			pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath,
-			pLogEnv->s_Password,
-			sXShellFile,
-			pDevEnv->s_EnvUser, pDevEnv->s_IP,
-			sVersion);
-
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
-
-		CURLcode res = curl_easy_perform(pCurlComment);
-		/* Check for errors */ 
-		if (res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-			curl_easy_strerror(res));
+//void LTDlg::OnBnClickedButtonTest()
+//{
+//	CString s;
+//	LTCurlRetunBuffer oBuf;
+//	oBuf.GetTicketID(s);
+//	return;
+//}
 
 
-		curl_easy_cleanup(pCurlComment);
-		curl_slist_free_all(chunk);
-	}
-
-	CString sXShell;
-	const char* zXShellFmt = 
-		"[CONNECTION]\n"
-		"Protocol=SSH\n"
-		"Host=%s\n"
-		"[CONNECTION:AUTHENTICATION]\n"
-		"TelnetLoginPrompt=ogin:\n"
-		"TelnetPasswordPrompt=assword:\n"
-		"UserName=%s\n"
-		"Method=2\n"
-		"UseExpectSend=1\n"
-		"ExpectSend_Count=1\n"
-		"ExpectSend_Send_0=cd %s\n"
-		"ExpectSend_Expect_0=>\n"
-		"ExpectSend_Hide_0=0\n"
-		"[TERMINAL:WINDOW]\n"
-		"FontSize=9\n"
-		"FontFace=Consolas\n";
-
-	//UserKey=id_rsa_1024
-	//Method=1
-
-	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, sTicketPath);
-
-	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile);
-
-	for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
-	{
-		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
-		CString sTmpFileName;
-		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
-
-		CString sFileName;
-		sFileName.Format("%s.jpg", pScreenshot->GetName());
-
-		pScreenshot->Save(sTmpFileName);
-		AttachFileToJira(sTmpFileName, sFileName);
-	}
-
-	
-
-	return 0;
-}
 
 //**************************************************************************************************
 void LTDlg::OnBnClickedButtonEnvAdd()
@@ -632,6 +511,7 @@ void LTDlg::OnBnClickedCheckJiraCreateTicket()
 	LTConfig::o_Inst.b_JiraCreateNew = (iCheck != 0);
 
 	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
+	o_ButtonJiraTicketInfo.EnableWindow(LTConfig::o_Inst.b_JiraCreateNew);
 }
 
 //**************************************************************************************************
@@ -977,72 +857,71 @@ void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 
 	// display a menu created using CreateMenu()
-	HMENU hMenu = ::CreatePopupMenu();
-	if (NULL != hMenu)
-	{
-		// add a few test items
-		::AppendMenu(hMenu, MF_STRING, 1, "Item 1");
-		::AppendMenu(hMenu, MF_STRING, 2, "Item 2");
-		::AppendMenu(hMenu, MF_STRING, 3, "Item 3");
+	//HMENU hMenu = ::CreatePopupMenu();
+	//if (NULL != hMenu)
+	//{
+	//	// add a few test items
+	//	//::AppendMenu(hMenu, MF_STRING, 1, "Item 1");
+	//	//::AppendMenu(hMenu, MF_STRING, 2, "Item 2");
+	//	//::AppendMenu(hMenu, MF_STRING, 3, "Item 3");
 
-		CPoint point(50,10);
-		o_ListEnv.ClientToScreen(&point);
+	//	CPoint point(50,10);
+	//	o_ListEnv.ClientToScreen(&point);
 
-		int sel = ::TrackPopupMenuEx(hMenu, 
-			TPM_CENTERALIGN | TPM_RETURNCMD,
-			point.x,
-			point.y,
-			m_hWnd,
-			NULL);
-		::DestroyMenu(hMenu);
-	}
+	//	int sel = ::TrackPopupMenuEx(hMenu, 
+	//		TPM_CENTERALIGN | TPM_RETURNCMD,
+	//		point.x,
+	//		point.y,
+	//		m_hWnd,
+	//		NULL);
+	//	::DestroyMenu(hMenu);
+	//}
 }
 
 //**************************************************************************************************
 void LTDlg::OnBnClickedButtonUpload()
 {
+	CString sErr;
+	if (UploadLogs(sErr))
+		AfxMessageBox("Logs update successful", MB_OK | MB_ICONINFORMATION);
+	else
+		AfxMessageBox(sErr, MB_OK | MB_ICONWARNING);
+}
 
-	CString sCreated;
-	CreateJiraTicket("SURVRD","CC-System", sCreated, "Test Summary", "Test Description");
-	return;
-	// TODO: Add your control notification handler code here
-
-	/*
-	mykey=`cat ~/.ssh/id_rsa.pub`
-	ssh $env_conn 'cur_key=`grep "'$mykey'" .ssh/authorized_keys ` ; if [ -z "$cur_key" ]; then echo adding key to authorized list; mkdir -p .ssh; echo "'$mykey'" >> .ssh/authorized_keys; else echo key already found authorized; fi'
-	*/
-
-	// Taking the public key from environment
-	//////////////////////////////////////////////////////////////////////////
+//**************************************************************************************************
+bool LTDlg::UploadLogs(CString& sErr)
+{
 	LTEnv* pEnv = GetSelectedEnv();
 	if (!pEnv)
 	{
-		AfxMessageBox("No environment selected");
-		return;
+		sErr = "No environment selected" ;
+		return false;
 	}
 
 	LTSshSession* pSessionEnv = p_ConnectedSession;
-	CString sErr = "";
-
-	//if (!pSessionEnv->Connect(pEnv, sErr))
-	//{
-	//	delete pSessionEnv;
-	//	return;
-	//}
 
 	if (!pSessionEnv)
-		return;
+	{
+		sErr = "No connected sessions. Click refresh.";
+		return false;
+	}
 
+
+	// Taking the public key from environment
+	//////////////////////////////////////////////////////////////////////////
 	std::list<CString> lst;
-	if (!pSessionEnv->Execute("cat .ssh/id_rsa.pub", &lst))
+	if (!pSessionEnv->Execute("cat .ssh/id_rsa.pub", &lst, &sErr))
 	{
 		delete p_ConnectedSession;
 		p_ConnectedSession = NULL;
-		return;
+		return false;
 	}
 
 	if (lst.size() == 0)
-		return;
+	{
+		sErr = "Public key not found in environment";
+		return false;
+	}
 
 	CString sKey = lst.front();
 
@@ -1055,20 +934,28 @@ void LTDlg::OnBnClickedButtonUpload()
 	o_ComboLogMachines.GetLBText(o_ComboLogMachines.GetCurSel(), sConnStr);
 	
 	if (!LTUtils::DecodePathStringEx(sConnStr, sEnvName, sEnvPath))
-		return;
+	{
+		sErr.Format("Log env string decode failed. %s", sConnStr);
+		return false;
+	}
 
 	LTEnv* pLogEnv = LTEnv::FindEnvFQ(sEnvName);
 	if (!pLogEnv)
-		return;
+	{
+		sErr = "Log environment not set";
+		return false;
+	}
 
 	LTSshSession* pSession = new LTSshSession;
 
 	if (!pSession->Connect(pLogEnv, sErr))
 	{
 		delete pSession;
-		return;
+		return false;
 	}
 
+	// Putting your environments public key as a trusted public key in log environment
+	//////////////////////////////////////////////////////////////////////////
 	CString sCmd;
 	sCmd.Format("cur_key=`grep \"%s\" .ssh/authorized_keys ` ; if [ -z \"$cur_key\"  ]; then echo adding key to authorized list; mkdir -p .ssh; echo \"%s\" >> .ssh/authorized_keys; else echo key already found authorized; fi"
 		, sKey, sKey);
@@ -1077,7 +964,6 @@ void LTDlg::OnBnClickedButtonUpload()
 	pSession->Execute(sCmd, &lstOut);
 
 	
-
 
 
 	// Collecting logs
@@ -1121,22 +1007,40 @@ void LTDlg::OnBnClickedButtonUpload()
 	}
 	while(true);
 
+	LTJiraCredentials* pJiraCred = NULL;
+
+	// Creating JiraID, create jira ticket if necessary
+	if (LTConfig::o_Inst.b_JiraCreateNew)
+	{
+		SpawnNewJiraDlg();
+		pJiraCred = new LTJiraCredentials;
+		if (!ProvideJiraCred(pJiraCred, sErr, false))
+		{
+			delete pJiraCred;
+			return false;
+		}
+
+		CString sProject;
+		o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
+		CString sNewJiraTicketID;
+		if (!CreateJiraTicket(sProject, s_JiraIssueType, sNewJiraTicketID,
+			sErr, pJiraCred, s_JiraSummary, s_JiraDescription))
+			return false;
+
+		o_EditJiraTicket.SetWindowText(sNewJiraTicketID);
+	}
+
+	CString sJiraTicketID;
+	GetJiraTicketID(sJiraTicketID);
+
 
 	// Make log location
 	//////////////////////////////////////////////////////////////////////////
-	CString sProject;
-	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
-	CString sJiraNo;
-	o_EditJiraTicket.GetWindowText(sJiraNo);
-	CString sJiraID;
-	sJiraID.Format("%s-%s", sProject, sJiraNo);
-
-
 	CString sTicketPath;
 	if (sEnvPath.GetLength() > 0)
-		sTicketPath.Format("%s/%s", sEnvPath, sJiraID);
+		sTicketPath.Format("%s/%s", sEnvPath, sJiraTicketID);
 	else
-		sTicketPath = sJiraID;
+		sTicketPath = sJiraTicketID;
 
 	CString sTicketDirMkCmd;
 	sTicketDirMkCmd.Format("mkdir -p %s", sTicketPath);
@@ -1166,6 +1070,131 @@ void LTDlg::OnBnClickedButtonUpload()
 
 	// Add Comment on jira
 	//////////////////////////////////////////////////////////////////////////
+	if (LTConfig::o_Inst.b_JiraDoComment)
+	{
+		if (!PutJiraComment(sJiraTicketID, pEnv, pLogEnv, sJiraTicketID, sErr, pJiraCred))
+			return false;
+	}
+
+	return true;
+}
+
+//**************************************************************************************************
+bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEnv, 
+							const char* zTicketPath,CString& sErr, LTJiraCredentials* pCred)
+{
+	LTJiraCredentials* pLocalCred = NULL;
+	if (pCred == NULL)
+	{
+		pLocalCred = new LTJiraCredentials; 
+		pCred = pLocalCred;
+		if (!ProvideJiraCred(pCred, sErr))
+		{
+			delete pLocalCred;
+			pLocalCred = NULL;
+			return false;
+		}
+	}
+
+	CString sAttachmentURL;
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment",  pCred->s_URL, zTiceketID);
+
+	CString sAuth;
+	pCred->GetAuthCode(sAuth);
+
+	CString sXShellFile;
+	sXShellFile.Format("%s_logs.xsh", zTiceketID);
+	CString sVersion = LTUtils::GetProductVersionX();
+
+	bool bSuccess = false;
+
+	CURL* pCurlComment = NULL;
+	pCurlComment = curl_easy_init();
+	if (pCurlComment) 
+	{ 
+		struct curl_slist *chunk = NULL;
+		chunk = curl_slist_append(chunk, "Content-Type: application/json");
+
+		CString sComment;
+		sComment.Format("{ \"body\" : \"Logs uploaded to below location.\\r\\n"
+			"\\r\\n"
+			" _Location_: %s@%s:%s \\r\\n"
+			" _Password_: %s \\r\\n"
+			" _XShell-Link_: [^%s] \\r\\n"
+			" _Uploaded from_: %s@%s\\r\\n"
+			" {color:gray}~_Uploaded via LogTool v%s_~{color} \"\n }",
+			pLogEnv->s_EnvUser, pLogEnv->s_IP, zTicketPath,
+			pLogEnv->s_Password,
+			sXShellFile,
+			pDevEnv->s_EnvUser, pDevEnv->s_IP,
+			sVersion);
+
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
+
+		CURLcode res = curl_easy_perform(pCurlComment);
+		/* Check for errors */ 
+		if (res == CURLE_OK)
+		{
+			bSuccess = true;
+		}
+		else
+		{
+			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
+				__FILE__, __LINE__ , curl_easy_strerror(res));
+		}
+
+		curl_easy_cleanup(pCurlComment);
+		curl_slist_free_all(chunk);
+	}
+
+	CString sXShell;
+	const char* zXShellFmt = 
+		"[CONNECTION]\n"
+		"Protocol=SSH\n"
+		"Host=%s\n"
+		"[CONNECTION:AUTHENTICATION]\n"
+		"TelnetLoginPrompt=ogin:\n"
+		"TelnetPasswordPrompt=assword:\n"
+		"UserName=%s\n"
+		"Method=2\n"
+		"UseExpectSend=1\n"
+		"ExpectSend_Count=1\n"
+		"ExpectSend_Send_0=cd %s\n"
+		"ExpectSend_Expect_0=>\n"
+		"ExpectSend_Hide_0=0\n"
+		"[TERMINAL:WINDOW]\n"
+		"FontSize=9\n"
+		"FontFace=Consolas\n";
+
+	//UserKey=id_rsa_1024
+	//Method=1
+
+	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, zTicketPath);
+	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile, pCred, sErr);
+
+	for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
+	{
+		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
+		CString sTmpFileName;
+		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
+
+		CString sFileName;
+		sFileName.Format("%s.jpg", pScreenshot->GetName());
+
+		pScreenshot->Save(sTmpFileName);
+		AttachFileToJira(sTmpFileName, sFileName, pCred, sErr);
+	}
+
+	delete pLocalCred;
+	pLocalCred = NULL;
+
+	return bSuccess;
 }
 
 //**************************************************************************************************
@@ -1196,35 +1225,56 @@ void LTDlg::OnDestroy()
 }
 
 //**************************************************************************************************
-void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
+bool LTDlg::AttachFileToJira( const char* zFile, const char* zFileName,
+							 LTJiraCredentials* pCred, CString& sErr)
 {
 	CFile oFile;
 	BOOL bRes = oFile.Open(zFile, CFile::modeRead);
+	bool bSuccess = false;
 	if (bRes)
 	{
 		UINT uiFileSize = (UINT) oFile.GetLength();
 		char* pBuff = new char[uiFileSize];
 
 		oFile.Read(pBuff, uiFileSize);
-		AttachFileToJira(pBuff, uiFileSize, zFileName);
-
+		bSuccess = AttachFileToJira(pBuff, uiFileSize, zFileName, pCred, sErr);
 		delete [] pBuff;
 	}
+	else
+	{
+		sErr.Format("File open failed [%s]", zFile);
+	}
+
+	return bSuccess;
 }
 
 //**************************************************************************************************
-void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName )
+bool LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName, 
+							 LTJiraCredentials* pCred, CString& sErr)
 {
-	LTJiraCredentials oJiCred;
-	CString sErr;
-	if (!ProvideJiraCred(&oJiCred, sErr))
-		return;
+	LTJiraCredentials* pLocalCred = NULL;
+	if (!pCred)
+	{
+		pLocalCred = new LTJiraCredentials;
+		if (!ProvideJiraCred(pLocalCred, sErr))
+		{
+			delete pLocalCred;
+			return false;
+		}
+
+		pCred = pLocalCred;
+	}
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", oJiCred.s_URL, oJiCred.s_Project, oJiCred.s_ID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", pCred->s_URL, pCred->s_Project, pCred->s_ID);
 
 	CString sAuth;
-	sAuth.Format("%s:%s", oJiCred.s_User, oJiCred.s_Password);
+	pCred->GetAuthCode(sAuth);
+
+	delete pLocalCred;
+	pLocalCred = NULL;
+
+	bool bSuccess = false;
 
 	CURL* pCurlAttachment = NULL;
 	pCurlAttachment = curl_easy_init();
@@ -1253,29 +1303,56 @@ void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 
 		CURLcode res = curl_easy_perform(pCurlAttachment);
 		/* Check for errors */ 
-		if (res != CURLE_OK)
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-			curl_easy_strerror(res));
+		if (res == CURLE_OK)
+		{
+			bSuccess = true;
+		}
+		else
+		{
+			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
+				__FILE__, __LINE__ , curl_easy_strerror(res));
+		}
 
 		curl_easy_cleanup(pCurlAttachment);
 		curl_slist_free_all(chunk);
 	}
+
+	return bSuccess;
 }
 
 //**************************************************************************************************
-bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CString& sTicket, 
+bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CString& sTicket,
+							 CString& sErr, LTJiraCredentials* pCred,
 							 const char* zSummary, const char* zDescription)
 {
-	LTJiraCredentials oCred;
-	CString sErr;
-	if (!ProvideJiraCred(&oCred, sErr, false))
-		return false;
+
+	//For testing
+	sTicket = "SURVRD-11";
+	return true;
+	//For testing
+
+	LTJiraCredentials* pLocalCred = NULL;
+
+	if (!pCred)
+	{
+		pLocalCred = new LTJiraCredentials;
+		if (!ProvideJiraCred(pLocalCred, sErr, false))
+		{
+			delete pLocalCred;
+			return false;
+		}
+
+		pCred = pLocalCred;
+	}
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/", oCred.s_URL);
+	sAttachmentURL.Format("%s/rest/api/2/issue/", pCred->s_URL);
 
 	CString sAuth;
-	oCred.GetAuthCode(sAuth);
+	pCred->GetAuthCode(sAuth);
+
+	delete pLocalCred;
+	pLocalCred = NULL;
 
 	bool bSuccess = false;
 
@@ -1315,15 +1392,25 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 
 		CURLcode res = curl_easy_perform(pCurlComment);
 		/* Check for errors */ 
-		if (res != CURLE_OK)
+		if (res == CURLE_OK)
+		{
+			oBuff.GetTicketID(sTicket);
+			if (sTicket.IsEmpty())
+			{
+				bSuccess = false;
+				sErr.Format("Ticket creation problem. Ticket is empty");
+			}
+			else
+			{
+				bSuccess = true;
+			}
+		}
+		else
 		{
 			bSuccess = false;
-			fprintf(stderr, "curl_easy_perform() failed: %s\n",
-			curl_easy_strerror(res));
+			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
+				__FILE__, __LINE__ , curl_easy_strerror(res));
 		}
-
-		oBuff.GetTicketID(sTicket);
-		bSuccess &= !sTicket.IsEmpty();
 
 		curl_easy_cleanup(pCurlComment);
 		curl_slist_free_all(chunk);
@@ -1331,8 +1418,6 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 
 	return bSuccess;
 }
-
-
 
 
 
@@ -1344,12 +1429,17 @@ bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWit
 
 	if (!ProvideWinJiraCred(pJiCred->s_URL, pJiCred->s_User, pJiCred->s_Password))
 	{
-		AfxMessageBox("Failed to aquire JIRA credentials");
+		AfxMessageBox("Failed to acquire JIRA credentials");
 		return false;
 	}
 
-
 	int iSel = o_ComboJiraProject.GetCurSel();
+	if (iSel <= -1)
+	{
+		AfxMessageBox("JIRA project not selected.");
+		return false;
+	}
+
 	o_ComboJiraProject.GetLBText(iSel, pJiCred->s_Project);
 
 	if (pJiCred->s_User.IsEmpty())
@@ -1570,7 +1660,7 @@ bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPass
 		ci.cbSize = sizeof(ci);	
 		ci.hbmBanner = NULL; 
 		ci.hwndParent = NULL; 
-		ci.pszCaptionText = L"Writing Secure Code for Windows Vista"; 
+		ci.pszCaptionText = L"Writing Secure Credentials for JIRA"; 
 		ci.pszMessageText = L"Please enter your JIRA username & password";
 
 		if (bHas)
@@ -1615,6 +1705,21 @@ void LTDlg::OnBnClickedButtonJiraTickeInfo()
 {
 	// TODO: Add your control notification handler code here
 
+	SpawnNewJiraDlg();
+
+}
+
+void LTDlg::GetJiraTicketID( CString &sJiraTicketID )
+{
+	CString sProject;
+	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
+	CString sJiraNo;
+	o_EditJiraTicket.GetWindowText(sJiraNo);
+	sJiraTicketID.Format("%s-%s", sProject, sJiraNo);
+}
+
+void LTDlg::SpawnNewJiraDlg()
+{
 	LTNewJIRADlg oDlg;
 	oDlg.s_Description = s_JiraDescription;
 	oDlg.s_Summary = s_JiraSummary;

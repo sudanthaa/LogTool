@@ -481,13 +481,11 @@ void LTDrawToolBar::PaintToolButtonState( int iState, CDC* pDC, CRect rArea,
 
 	//pDC->FillSolidRect(rArea, iColor);
 
-
-	Gdiplus::Image imgBack(L"tool-tile.png");
 	Gdiplus::Graphics oGraphics(pDC->m_hDC);
 
 
-	oGraphics.DrawImage(&imgBack, rTarget, 0, 0, 
-		iHeight, iHeight, Gdiplus::UnitPixel);
+	//oGraphics.DrawImage(&imgBack, rTarget, 0, 0, 
+	//	iHeight, iHeight, Gdiplus::UnitPixel);
 
 	//CRect rAreaEx = rArea;
 	//rAreaEx.right += 1;

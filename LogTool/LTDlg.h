@@ -36,9 +36,12 @@ public:
 
 	void	OnChangeCombo(LTComboBox* pComboBox, const char* zValue);
 	void	OnEditScreenshot(LTThumbnailsCtrl::Screenshot* pScreenShot);
+	void	SpawnNewJiraDlg();
+	void	GetJiraTicketID( CString &sJiraTicketID );
 
 // Implementation
 protected:
+
 	HICON m_hIcon;
 
 	// Generated message map functions
@@ -50,11 +53,15 @@ protected:
 public:
 	bool	LoadEnvFromXShellConfig(void);
 	void	InsertEnvToList( LTEnv* pEnv );
-	int		TestCurl();
-	void	AttachFileToJira(const char* zFile, const char* zFileName);
-	void	AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName );
-	bool	CreateJiraTicket(const char* zProject, const char* zIssueType, CString& sID, const char* zSummary = "", 
-				const char* zDescription = "");
+	bool	AttachFileToJira(const char* zFile, const char* zFileName,
+						LTJiraCredentials* pCred, CString& sErr);
+	bool	AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName,
+					LTJiraCredentials* pCred, CString& sErr);
+	bool	CreateJiraTicket(const char* zProject, const char* zIssueType, CString& sID, 
+				CString& sErr, LTJiraCredentials* pCred,
+				const char* zSummary = "", const char* zDescription = "");
+	bool	PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEnv, const char* zTicketPath,
+				CString& sErr, LTJiraCredentials* pCred = NULL);
 	void	OnPressEnterKey();
 	void	InitResizes();
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
@@ -62,6 +69,7 @@ public:
 	bool	ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr,
 				bool bWithID = true);
 	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword, bool bUpdateAnyway = false);
+	bool	UploadLogs(CString& sErr);
 
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
@@ -77,7 +85,7 @@ protected:
 public:
 	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvAdd();
-	afx_msg void OnBnClickedButtonTest();
+//	afx_msg void OnBnClickedButtonTest();
 	afx_msg void OnCbnKillfocusComboJiraProject();
 	afx_msg void OnCbnKillfocusComboIncludeFilter();
 	afx_msg void OnCbnKillfocusComboExcludeFilter();
@@ -107,6 +115,7 @@ public:
 	afx_msg void OnCbnSelchangeComboJiraProject();
 	afx_msg void OnBnClickedButtonJiraCredentials();
 	afx_msg void OnBnClickedButtonJiraTickeInfo();
+
 
 	CListCtrl o_ListEnv;
 	CStatic o_StaticLogEnv;
@@ -142,6 +151,8 @@ public:
 	CButton o_ButtonJiraCredentials;
 	CButton o_ButtonJiraTicketInfo;
 
+	CStatic o_StaticFrmConfiguredFileUpload;
+	CListCtrl o_ListConfiguredUploads;
 };
 
 

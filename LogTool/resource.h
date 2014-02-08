@@ -21,7 +21,6 @@
 #define IDD_SCREEN_CAPTURE              138
 #define IDD_NEW_JIRA                    139
 #define IDC_LIST_SELECTION              1001
-#define IDC_BUTTON_TEST                 1002
 #define IDC_BUTTON_ENV_ADD              1003
 #define IDC_BUTTON_ENV_EDIT             1004
 #define IDC_STATIC_FRAME_LOG_MACHINE    1005
@@ -34,7 +33,6 @@
 #define IDC_COMBO_EXCLUDE_FILTER        1013
 #define IDC_STATIC_INCLUDE_FILTER       1014
 #define IDC_STATIC_EXCLUDE_FILTER       1015
-#define IDC_STATIC_LOGMAC_IP_VALUE      1019
 #define IDC_BUTTON_LOGMAC_NEW           1020
 #define IDC_BUTTON_LOGMAC_EDIT          1021
 #define IDC_STATIC_JIRA_URL             1022
@@ -102,6 +100,9 @@
 #define IDC_BUTTON_JIRA_CREDENTIALS     1073
 #define IDC_BUTTON3                     1074
 #define IDC_BUTTON_JIRA_TICKE_INFO      1074
+#define IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD 1075
+#define IDC_LIST1                       1076
+#define IDC_LIST_CONFIGURED_UPLOAD_COMMAND 1076
 
 // Next default values for new objects
 // 
@@ -109,7 +110,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1075
+#define _APS_NEXT_CONTROL_VALUE         1077
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
