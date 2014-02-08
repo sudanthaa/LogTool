@@ -143,6 +143,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_CBN_SELCHANGE(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnSelchangeComboJiraProject)
 	ON_BN_CLICKED(IDC_BUTTON_JIRA_CREDENTIALS, &LTDlg::OnBnClickedButtonJiraCredentials)
 	ON_BN_CLICKED(IDC_BUTTON_JIRA_TICKE_INFO, &LTDlg::OnBnClickedButtonJiraTickeInfo)
+	ON_BN_CLICKED(IDC_BUTTON_ATTACH_ALONE, &LTDlg::OnBnClickedButtonAttachAlone)
 END_MESSAGE_MAP()
 
 
@@ -1429,14 +1430,14 @@ bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWit
 
 	if (!ProvideWinJiraCred(pJiCred->s_URL, pJiCred->s_User, pJiCred->s_Password))
 	{
-		AfxMessageBox("Failed to acquire JIRA credentials");
+		sErr = "Failed to acquire JIRA credentials";
 		return false;
 	}
 
 	int iSel = o_ComboJiraProject.GetCurSel();
 	if (iSel <= -1)
 	{
-		AfxMessageBox("JIRA project not selected.");
+		sErr = "JIRA project not selected.";
 		return false;
 	}
 
@@ -1444,25 +1445,25 @@ bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWit
 
 	if (pJiCred->s_User.IsEmpty())
 	{
-		AfxMessageBox("JIRA user name is empty.");
+		sErr = "JIRA user name is empty.";
 		return false;
 	}
 
 	if (pJiCred->s_Password.IsEmpty())
 	{
-		AfxMessageBox("JIRA password is empty.");
+		sErr = "JIRA password is empty.";
 		return false;
 	}
 
 	if (pJiCred->s_URL.IsEmpty())
 	{
-		AfxMessageBox("JIRA URL is empty.");
+		sErr = "JIRA URL is empty.";
 		return false;
 	}
 
 	if (pJiCred->s_Project.IsEmpty())
 	{
-		AfxMessageBox("JIRA project is empty.");
+		sErr = "JIRA project is empty.";
 		return false;
 	}
 
@@ -1470,7 +1471,7 @@ bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWit
 	{
 		if (pJiCred->s_ID.IsEmpty())
 		{
-			AfxMessageBox("JIRA project/ticket-id is not specified");
+			sErr = "JIRA project/ticket-id is not specified";
 			return false;
 		}
 	}
@@ -1731,4 +1732,37 @@ void LTDlg::SpawnNewJiraDlg()
 		s_JiraSummary = oDlg.s_Summary;
 		s_JiraIssueType = oDlg.s_Type;
 	}
+}
+
+void LTDlg::OnBnClickedButtonAttachAlone()
+{
+	// TODO: Add your control notification handler code here
+
+	LTJiraCredentials oCred;
+	CString sErr;
+	if (!ProvideJiraCred(&oCred, sErr))
+		return;
+
+	bool bSuccess = true;
+	
+	for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
+	{
+		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
+		CString sTmpFileName;
+		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
+
+		CString sFileName;
+		sFileName.Format("%s.jpg", pScreenshot->GetName());
+
+		pScreenshot->Save(sTmpFileName);
+		if (!AttachFileToJira(sTmpFileName, sFileName, &oCred, sErr))
+		{
+			AfxMessageBox(sErr, MB_OK | MB_ICONWARNING);
+			bSuccess = false;
+			break;
+		}
+	}
+
+	if (bSuccess)
+		AfxMessageBox("Screenshots successfully attached");
 }

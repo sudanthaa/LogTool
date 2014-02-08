@@ -101,8 +101,9 @@
 #define IDC_BUTTON3                     1074
 #define IDC_BUTTON_JIRA_TICKE_INFO      1074
 #define IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD 1075
-#define IDC_LIST1                       1076
 #define IDC_LIST_CONFIGURED_UPLOAD_COMMAND 1076
+#define IDC_BUTTON2                     1077
+#define IDC_BUTTON_ATTACH_ALONE         1077
 
 // Next default values for new objects
 // 
@@ -110,7 +111,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1077
+#define _APS_NEXT_CONTROL_VALUE         1078
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

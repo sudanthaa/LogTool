@@ -153,6 +153,7 @@ public:
 
 	CStatic o_StaticFrmConfiguredFileUpload;
 	CListCtrl o_ListConfiguredUploads;
+	afx_msg void OnBnClickedButtonAttachAlone();
 };
 
 
