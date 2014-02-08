@@ -39,8 +39,6 @@ void LTNewJIRADlg::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
 
-	o_EditDescription.GetWindowText(s_Description);
-	o_EditSummary.GetWindowText(s_Summary);
 	CDialog::OnClose();
 }
 
@@ -48,14 +46,32 @@ BOOL LTNewJIRADlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
+	o_ComboIssyeType.AddString("CC-System");
 	o_ComboIssyeType.AddString("Delivery-CR");
 	o_ComboIssyeType.AddString("Delivery-ICR");
 	o_ComboIssyeType.AddString("Fault-Bug");
 	o_ComboIssyeType.AddString("Fault-Configuration");
+	o_ComboIssyeType.SetCurSel(0);
 
+	
+	o_EditDescription.SetWindowText(s_Description);
+	o_EditSummary.SetWindowText(s_Summary);
 
 	// TODO:  Add extra initialization here
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void LTNewJIRADlg::OnOK()
+{
+	// TODO: Add your specialized code here and/or call the base class
+
+	o_EditDescription.GetWindowText(s_Description);
+	o_EditSummary.GetWindowText(s_Summary);
+	int iSel = o_ComboIssyeType.GetCurSel();
+	if (iSel > -1)
+		o_ComboIssyeType.GetLBText(iSel, s_Type);
+
+	CDialog::OnOK();
 }

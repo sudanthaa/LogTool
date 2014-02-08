@@ -383,6 +383,7 @@ void LTDrawToolBar::Layout( CRect rRect )
 	CRect rRectButton = rRect;
 	CRect rArrowButton = rRect;
 
+	int iInitWidth =  rRect.Width();
 	int iWidth = rRect.Width() / 3;
 
 	rPenButton.right = iWidth;
@@ -487,9 +488,9 @@ void LTDrawToolBar::PaintToolButtonState( int iState, CDC* pDC, CRect rArea,
 	//oGraphics.DrawImage(&imgBack, rTarget, 0, 0, 
 	//	iHeight, iHeight, Gdiplus::UnitPixel);
 
-	//CRect rAreaEx = rArea;
-	//rAreaEx.right += 1;
-	//DrawThemeParentBackground(pDrawToobalr->m_hWnd, pDC->m_hDC, rAreaEx);
+	CRect rAreaEx = rArea;
+	rAreaEx.right += 1;
+	DrawThemeParentBackground(pDrawToobalr->m_hWnd, pDC->m_hDC, rAreaEx);
 	//DrawThemeBackground(pDrawToobalr->h_Theme, pDC->m_hDC, BP_PUSHBUTTON, iState, rAreaEx, NULL);
 
 	

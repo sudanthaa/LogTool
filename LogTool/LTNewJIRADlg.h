@@ -30,4 +30,6 @@ public:
 	CEdit o_EditDescription;
 	CComboBox o_ComboIssyeType;
 	virtual BOOL OnInitDialog();
+protected:
+	virtual void OnOK();
 };
