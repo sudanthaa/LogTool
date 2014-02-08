@@ -44,14 +44,12 @@
 #define IDC_STATIC_JIRA_ID_DEVIDER      1026
 #define IDC_EDIT_TICKET_ID              1027
 #define IDC_CHECK_JIRA_CREATE_TICKET    1028
-#define IDC_STATIC_JIRA_USER_ID         1029
 #define IDC_CHECK_COMMENT_ON_JIRA       1030
 #define IDC_CHECK_FILTER_SELECT_ALL     1031
 #define IDC_BUTTON_FILE_SELECTION_ALL   1032
 #define IDC_BUTTON_FILE_SELECTION_CLEAR 1033
 #define IDC_COMBO_SELECTION             1034
 #define IDC_STATIC_FILE_SELECTION_SELECTION 1035
-#define IDC_STATIC_JIRA_PASSWORD        1036
 #define IDC_EDIT_JIRA_USER_ID           1037
 #define IDC_BUTTON_LOGMAC_DELETE        1038
 #define IDC_EDIT_JIRA_PASSWORD          1039
@@ -101,6 +99,9 @@
 #define IDC_SLIDER1                     1070
 #define IDC_STATIC_PEN_WIDTH            1071
 #define IDC_STATIC_COLOR_FRAME          1072
+#define IDC_BUTTON_JIRA_CREDENTIALS     1073
+#define IDC_BUTTON3                     1074
+#define IDC_BUTTON_JIRA_TICKE_INFO      1074
 
 // Next default values for new objects
 // 
@@ -108,7 +109,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1073
+#define _APS_NEXT_CONTROL_VALUE         1075
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

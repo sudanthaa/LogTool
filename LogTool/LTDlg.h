@@ -61,12 +61,16 @@ public:
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
 	bool	ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr,
 				bool bWithID = true);
-	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword);
+	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword, bool bUpdateAnyway = false);
 
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
 	LTThumbnailsCtrl o_ThumbnailsCtrl;
 	bool	b_ChangeSkip;
+
+	CString		s_JiraDescription;
+	CString		s_JiraSummary;
+	CString		s_JiraIssueType;
 
 protected:
 	virtual void OnOK();
@@ -79,8 +83,6 @@ public:
 	afx_msg void OnCbnKillfocusComboExcludeFilter();
 	afx_msg void OnEnKillfocusEditTicketId();
 	afx_msg void OnBnClickedCheckJiraCreateTicket();
-	afx_msg void OnEnChangeEditJiraUserId();
-	afx_msg void OnEnChangeEditJiraPassword();
 	afx_msg void OnBnClickedCheckCommentOnJira();
 	afx_msg void OnCbnKillfocusComboSelection();
 	afx_msg void OnBnClickedButtonFileSelectionAll();
@@ -101,12 +103,15 @@ public:
 	afx_msg void OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonUpload();
 	afx_msg void OnDestroy();
+	afx_msg void OnEnChangeEditTicketId();
+	afx_msg void OnCbnSelchangeComboJiraProject();
+	afx_msg void OnBnClickedButtonJiraCredentials();
+	afx_msg void OnBnClickedButtonJiraTickeInfo();
 
 	CListCtrl o_ListEnv;
 	CStatic o_StaticLogEnv;
 	CListCtrl o_ListSelection;
 	CEdit o_EditJiraURL;
-	CEdit o_EditJiraUser;
 	CButton o_CheckJiraCreateNew;
 	CButton o_CheckJiraComment;
 	CEdit o_EditJiraTicket;
@@ -125,20 +130,18 @@ public:
 	CButton o_ButtonEnvEdit;
 	CButton o_ButtonEnvDelete;
 	CButton o_ButtonCancel;
-	CEdit o_EditJiraPassword;
 	CStatic o_StaticJiraURL;
 	CStatic o_StaticJiraTicket;
-	CStatic o_StaticJiraUserID;
-	CStatic o_StaticJiraPassword;
 	CStatic o_StaticJiraTicketSep;
 	CStatic o_StaticScreenshotBoundary;
 	CStatic o_StaticFrmScreenshots;
 	CButton o_ButtonEnvRefresh;
 	CButton o_ButtonUpload;
-	afx_msg void OnEnChangeEditTicketId();
-	afx_msg void OnCbnSelchangeComboJiraProject();
-	CButton o_BtnScreenshotNew;
-	CButton o_BtnScreenshotClear;
+	CButton o_ButtonScreenshotNew;
+	CButton o_ButtonScreenshotClear;
+	CButton o_ButtonJiraCredentials;
+	CButton o_ButtonJiraTicketInfo;
+
 };
 
 

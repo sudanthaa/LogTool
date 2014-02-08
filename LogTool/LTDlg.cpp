@@ -12,6 +12,7 @@
 #include "LTSshSession.h"
 #include "LTScreenshotEditDlg.h"
 #include "LTJiraCredentials.h"
+#include "LTNewJIRADlg.h"
 
 #include <WinCred.h>
 
@@ -22,10 +23,10 @@
 #define new DEBUG_NEW
 #endif
 
-
+// Due to a recursive macro call in curl_easy_setopt(please refer libcurl), having it directly called
+// disturbs VisualAssistXs symbol identification.
 #define  curl_easy_setopt_VA_fix_call    curl_easy_setopt
-// Due to a recursive macro call in curl_easy_setopt, having it directly called
-// diturbs VisallAssistX.
+
 
 // CAboutDlg dialog used for App About
 
@@ -74,7 +75,6 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_ENV, o_ListEnv);
 	DDX_Control(pDX, IDC_LIST_SELECTION, o_ListSelection);
 	DDX_Control(pDX, IDC_EDIT_JIRA_URL, o_EditJiraURL);
-	DDX_Control(pDX, IDC_EDIT_JIRA_USER_ID, o_EditJiraUser);
 	DDX_Control(pDX, IDC_COMBO_LOG_MACHINES, o_ComboLogMachines);
 	DDX_Control(pDX, IDC_COMBO_JIRA_PROJECT, o_ComboJiraProject);
 	DDX_Control(pDX, IDC_STATIC_LOGMAC_IP_VALUE, o_StaticLogEnv);
@@ -94,18 +94,17 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_ENV_EDIT, o_ButtonEnvEdit);
 	DDX_Control(pDX, IDC_BUTTON_ENV_DELETE, o_ButtonEnvDelete);
 	DDX_Control(pDX, IDCANCEL, o_ButtonCancel);
-	DDX_Control(pDX, IDC_EDIT_JIRA_PASSWORD, o_EditJiraPassword);
 	DDX_Control(pDX, IDC_STATIC_JIRA_URL, o_StaticJiraURL);
 	DDX_Control(pDX, IDC_STATIC_JIRA_PROJECT, o_StaticJiraTicket);
-	DDX_Control(pDX, IDC_STATIC_JIRA_USER_ID, o_StaticJiraUserID);
-	DDX_Control(pDX, IDC_STATIC_JIRA_PASSWORD, o_StaticJiraPassword);
 	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
 	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
 	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
 	DDX_Control(pDX, IDC_BUTTON_ENV_REFRESH, o_ButtonEnvRefresh);
 	DDX_Control(pDX, IDC_BUTTON_UPLOAD, o_ButtonUpload);
-	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_NEW, o_BtnScreenshotNew);
-	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_CLEAR, o_BtnScreenshotClear);
+	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_NEW, o_ButtonScreenshotNew);
+	DDX_Control(pDX, IDC_BUTTON_SCREENSHOT_CLEAR, o_ButtonScreenshotClear);
+	DDX_Control(pDX, IDC_BUTTON_JIRA_CREDENTIALS, o_ButtonJiraCredentials);
+	DDX_Control(pDX, IDC_BUTTON_JIRA_TICKE_INFO, o_ButtonJiraTicketInfo);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -121,8 +120,6 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_CBN_KILLFOCUS(IDC_COMBO_EXCLUDE_FILTER, &LTDlg::OnCbnKillfocusComboExcludeFilter)
 	ON_EN_KILLFOCUS(IDC_EDIT_TICKET_ID, &LTDlg::OnEnKillfocusEditTicketId)
 	ON_BN_CLICKED(IDC_CHECK_JIRA_CREATE_TICKET, &LTDlg::OnBnClickedCheckJiraCreateTicket)
-	ON_EN_CHANGE(IDC_EDIT_JIRA_USER_ID, &LTDlg::OnEnChangeEditJiraUserId)
-	ON_EN_CHANGE(IDC_EDIT_JIRA_PASSWORD, &LTDlg::OnEnChangeEditJiraPassword)
 	ON_BN_CLICKED(IDC_CHECK_COMMENT_ON_JIRA, &LTDlg::OnBnClickedCheckCommentOnJira)
 	ON_CBN_KILLFOCUS(IDC_COMBO_SELECTION, &LTDlg::OnCbnKillfocusComboSelection)
 	ON_BN_CLICKED(IDC_BUTTON_FILE_SELECTION_ALL, &LTDlg::OnBnClickedButtonFileSelectionAll)
@@ -144,6 +141,8 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_WM_DESTROY()
 	ON_EN_CHANGE(IDC_EDIT_TICKET_ID, &LTDlg::OnEnChangeEditTicketId)
 	ON_CBN_SELCHANGE(IDC_COMBO_JIRA_PROJECT, &LTDlg::OnCbnSelchangeComboJiraProject)
+	ON_BN_CLICKED(IDC_BUTTON_JIRA_CREDENTIALS, &LTDlg::OnBnClickedButtonJiraCredentials)
+	ON_BN_CLICKED(IDC_BUTTON_JIRA_TICKE_INFO, &LTDlg::OnBnClickedButtonJiraTickeInfo)
 END_MESSAGE_MAP()
 
 
@@ -205,8 +204,6 @@ BOOL LTDlg::OnInitDialog()
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
 
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
-	o_EditJiraUser.SetWindowText(LTConfig::o_Inst.s_JiraUser);
-	o_EditJiraPassword.SetWindowText(LTConfig::o_Inst.s_JiraPassword);
 	o_EditJiraTicket.SetWindowText(LTConfig::o_Inst.s_JiraTicket);
 
 	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
@@ -236,16 +233,13 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_CheckJiraCreateNew, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_EditJiraURL, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_EditJiraUser, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_EditJiraTicket, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_EditJiraPassword, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ComboJiraProject, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticJiraTicket, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticJiraTicketSep, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_StaticJiraUserID, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_StaticJiraPassword, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonJiraCredentials, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonJiraTicketInfo, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_ComboLogMachines, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonLogMacDelete, LT_RM_VIRTICAL);
@@ -263,8 +257,8 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_VIRTICAL);
 
-	o_Resizer.Attach(&o_BtnScreenshotNew, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_BtnScreenshotClear, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonScreenshotNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonScreenshotClear, LT_RM_VIRTICAL);
 
 	o_Resizer.Originate(this);
 
@@ -638,30 +632,6 @@ void LTDlg::OnBnClickedCheckJiraCreateTicket()
 	LTConfig::o_Inst.b_JiraCreateNew = (iCheck != 0);
 
 	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
-}
-
-//**************************************************************************************************
-void LTDlg::OnEnChangeEditJiraUserId()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the __super::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-	o_EditJiraUser.GetWindowText(LTConfig::o_Inst.s_JiraUser);
-}
-
-//**************************************************************************************************
-void LTDlg::OnEnChangeEditJiraPassword()
-{
-	// TODO:  If this is a RICHEDIT control, the control will not
-	// send this notification unless you override the __super::OnInitDialog()
-	// function and call CRichEditCtrl().SetEventMask()
-	// with the ENM_CHANGE flag ORed into the mask.
-
-	// TODO:  Add your control notification handler code here
-	o_EditJiraPassword.GetWindowText(LTConfig::o_Inst.s_JiraPassword);
 }
 
 //**************************************************************************************************
@@ -1346,88 +1316,38 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 		CURLcode res = curl_easy_perform(pCurlComment);
 		/* Check for errors */ 
 		if (res != CURLE_OK)
+		{
+			bSuccess = false;
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			curl_easy_strerror(res));
+		}
 
 		oBuff.GetTicketID(sTicket);
+		bSuccess &= !sTicket.IsEmpty();
 
 		curl_easy_cleanup(pCurlComment);
 		curl_slist_free_all(chunk);
 	}
 
-
 	return bSuccess;
 }
 
 
-//**************************************************************************************************
-bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPassword )
-{
 
-	WCHAR wcURL[200];
-	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, zURL, -1, wcURL, 200);
-
-	// TODO: Add your control notification handler code here
-	PCREDENTIALW cr = {0};
-	bool bHas =  (0 != 	::CredReadW(wcURL, CRED_TYPE_GENERIC, 0, &cr));
-	if (bHas)
-	{
-		DWORD	dwUser = MAX_PATH;
-		DWORD	dwPassword = MAX_PATH;
-		DWORD	dwDomain = MAX_PATH;
-		WCHAR   szUserName[MAX_PATH] = {0};
-		WCHAR   szPassword[MAX_PATH] = {0};
-		WCHAR   szDomain[MAX_PATH] = {0};
-
-		CredUnPackAuthenticationBufferW(0, cr->CredentialBlob, cr->CredentialBlobSize, 
-			szUserName, &dwUser, szDomain, &dwDomain, szPassword, &dwPassword);
-	}
-	else 
-	{
-		CREDUI_INFOW ci = {0}; 
-		ULONG ulAuthPkg = 0; 
-		void *pAuthBuff = NULL; 
-		ULONG cbAuthBuff = 0; 
-		void *pOutAuthBuff = NULL; 
-		ULONG cbOutAuthBuff = 0; 
-		BOOL fSave = FALSE; 
-		DWORD dwFlags = CREDUIWIN_GENERIC|CREDUIWIN_CHECKBOX|CREDUIWIN_ENUMERATE_CURRENT_USER; 
-		ci.cbSize = sizeof(ci);	
-		ci.hbmBanner = NULL; 
-		ci.hwndParent = NULL; 
-		ci.pszCaptionText = L"Writing Secure Code for Windows Vista"; 
-		ci.pszMessageText = L"Please enter your password" ; 
-		DWORD dwErr = CredUIPromptForWindowsCredentialsW( 
-			&ci, 0, &ulAuthPkg, pAuthBuff, cbAuthBuff, 
-			&pOutAuthBuff, &cbOutAuthBuff, &fSave, dwFlags); 
-
-
-		if (fSave)
-		{
-			CREDENTIALW cred = {0};
-			cred.Type = CRED_TYPE_GENERIC;
-			cred.TargetName = wcURL;
-			cred.CredentialBlobSize = cbOutAuthBuff;
-			cred.CredentialBlob = (LPBYTE) pOutAuthBuff;
-			cred.Persist = CRED_PERSIST_ENTERPRISE;
-			cred.UserName = L"sudanthaa";
-			cred.TargetAlias = wcURL;
-
-			BOOL ok = ::CredWriteW(&cred, 0);
-		}
-	}
-
-	return true;
-}
 
 
 //**************************************************************************************************
 bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWithID)
 {
-	o_EditJiraUser.GetWindowText(pJiCred->s_User);
-	o_EditJiraPassword.GetWindowText(pJiCred->s_Password);
 	o_EditJiraURL.GetWindowText(pJiCred->s_URL);
 	o_EditJiraTicket.GetWindowText(pJiCred->s_ID);
+
+	if (!ProvideWinJiraCred(pJiCred->s_URL, pJiCred->s_User, pJiCred->s_Password))
+	{
+		AfxMessageBox("Failed to aquire JIRA credentials");
+		return false;
+	}
+
 
 	int iSel = o_ComboJiraProject.GetCurSel();
 	o_ComboJiraProject.GetLBText(iSel, pJiCred->s_Project);
@@ -1608,4 +1528,102 @@ bool LTCurlRetunBuffer::GetTicketID( CString& sOut )
 	return true;
 }
 //**************************************************************************************************
+void LTDlg::OnBnClickedButtonJiraCredentials()
+{
+	// TODO: Add your control notification handler code here
+	CString sUser;
+	CString sPassword;
+	ProvideWinJiraCred(LTConfig::o_Inst.s_JiraURL, sUser, sPassword, true);
+}
 
+//**************************************************************************************************
+bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPassword, bool bUpdateAnyway)
+{
+	WCHAR wcURL[200];
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, zURL, -1, wcURL, 200);
+
+	DWORD	dwUser = MAX_PATH;
+	DWORD	dwPassword = MAX_PATH;
+	DWORD	dwDomain = MAX_PATH;
+	WCHAR   zwUserName[MAX_PATH] = {0};
+	WCHAR   zwPassword[MAX_PATH] = {0};
+	WCHAR   zwDomain[MAX_PATH] = {0};
+
+	// TODO: Add your control notification handler code here
+	PCREDENTIALW cr = {0};
+	bool bHas =  (0 != 	::CredReadW(wcURL, CRED_TYPE_GENERIC, 0, &cr));
+	if (bHas && !bUpdateAnyway)
+	{
+		CredUnPackAuthenticationBufferW(0, cr->CredentialBlob, cr->CredentialBlobSize, 
+			zwUserName, &dwUser, zwDomain, &dwDomain, zwPassword, &dwPassword);
+	}
+	else 
+	{
+		CREDUI_INFOW ci = {0}; 
+		ULONG ulAuthPkg = 0; 
+		void *pAuthBuff = NULL; 
+		ULONG cbAuthBuff = 0; 
+		void *pOutAuthBuff = NULL; 
+		ULONG cbOutAuthBuff = 0; 
+		BOOL fSave = FALSE;
+		DWORD dwFlags = CREDUIWIN_GENERIC|CREDUIWIN_CHECKBOX|CREDUIWIN_ENUMERATE_CURRENT_USER; 
+		ci.cbSize = sizeof(ci);	
+		ci.hbmBanner = NULL; 
+		ci.hwndParent = NULL; 
+		ci.pszCaptionText = L"Writing Secure Code for Windows Vista"; 
+		ci.pszMessageText = L"Please enter your JIRA username & password";
+
+		if (bHas)
+		{
+			fSave = (cr->Persist != 0);
+			pAuthBuff = cr->CredentialBlob;
+			cbAuthBuff = cr->CredentialBlobSize;
+		}
+
+		DWORD dwErr = CredUIPromptForWindowsCredentialsW( 
+			&ci, 0, &ulAuthPkg, pAuthBuff, cbAuthBuff, 
+			&pOutAuthBuff, &cbOutAuthBuff, &fSave, dwFlags); 
+
+		CredUnPackAuthenticationBufferW(0, pOutAuthBuff, cbOutAuthBuff, 
+			zwUserName, &dwUser, zwDomain, &dwDomain, zwPassword, &dwPassword);
+
+		if (fSave)
+		{
+			CREDENTIALW cred = {0};
+			cred.Type = CRED_TYPE_GENERIC;
+			cred.TargetName = wcURL;
+			cred.CredentialBlobSize = cbOutAuthBuff;
+			cred.CredentialBlob = (LPBYTE) pOutAuthBuff;
+			cred.Persist = CRED_PERSIST_ENTERPRISE;
+			cred.UserName = zwUserName;
+			cred.TargetAlias = wcURL;
+
+			BOOL ok = ::CredWriteW(&cred, 0);
+		}
+	}
+
+	char zUserName[MAX_PATH];
+	char zPassword[MAX_PATH];
+	WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, zwUserName, -1, zUserName, MAX_PATH, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, zwPassword, -1, zPassword, MAX_PATH, NULL, NULL);
+	sUser = zUserName;
+	sPassword = zPassword;
+	return true;
+}
+
+void LTDlg::OnBnClickedButtonJiraTickeInfo()
+{
+	// TODO: Add your control notification handler code here
+
+	LTNewJIRADlg oDlg;
+	oDlg.s_Description = s_JiraDescription;
+	oDlg.s_Summary = s_JiraSummary;
+	oDlg.s_Type = s_JiraIssueType;
+
+	if (IDOK == oDlg.DoModal())
+	{
+		s_JiraDescription = oDlg.s_Description;
+		s_JiraSummary = oDlg.s_Summary;
+		s_JiraIssueType = oDlg.s_Type;
+	}
+}
