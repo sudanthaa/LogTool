@@ -6,6 +6,7 @@
 #include "LTDlg.h"
 
 #include <libssh2.h>
+#include <curl/curl.h>
 #include <GdiPlus.h>
 
 #ifdef _DEBUG
@@ -78,6 +79,7 @@ BOOL LTApp::InitInstance()
 		return FALSE;
 	}
 
+	curl_global_init(CURL_GLOBAL_DEFAULT);
 	LTDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -91,6 +93,8 @@ BOOL LTApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
+
+	curl_global_cleanup();
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
 	libssh2_exit();

@@ -4,6 +4,7 @@
 #include "LTScreenshotEditCtrl.h"
 #include "LTResizeMan.h"
 #include "LTVirtualButton.h"
+#include "LTColorPicker.h"
 #include "afxwin.h"
 
 class LTDrawToolBarListener
@@ -58,7 +59,9 @@ protected:
 };
 
 // LTScreenshotEditDlg dialog
-class LTScreenshotEditDlg : public CDialog, public LTDrawToolBarListener
+class LTScreenshotEditDlg : public CDialog, 
+								public LTDrawToolBarListener, 
+								public LTColorPickerCallback
 {
 	DECLARE_DYNAMIC(LTScreenshotEditDlg)
 
@@ -71,6 +74,7 @@ public:
 	int		DoModalEx(LTScreenshot* pScreenshot);
 
 
+	LTColorPicker o_ColorPicker;
 	LTScreenshotEditCtrl o_ScreenshotEditCtrl;
 	LTResizeMan o_Resizer;
 	LTScreenshot*	p_OutputScreenshot;
@@ -82,9 +86,10 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-	void OnToolPen(bool bPress);
-	void OnToolRect(bool bPress);
-	void OnToolArrow(bool bPress);
+	void	OnToolPen(bool bPress);
+	void	OnToolRect(bool bPress);
+	void	OnToolArrow(bool bPress);
+	void	OnColorChange(COLORREF cr);
 	LTScreenshot*	p_PreLoadScreenshot;
 
 	DECLARE_MESSAGE_MAP()

@@ -15,6 +15,8 @@ LTScreenshotEditCtrl::LTScreenshotEditCtrl()
 	pt_Offset.SetPoint(0,0);
 	e_State = STATE_FREE;
 	h_Theme = 0;
+	cr_Color = RGB(255, 0,0);
+	i_With = 1;
 }
 
 LTScreenshotEditCtrl::~LTScreenshotEditCtrl()
@@ -48,6 +50,7 @@ void LTScreenshotEditCtrl::OnPaint()
 	CPaintDC dc(this); // device context for painting
 	// TODO: Add your message handler code here
 	// Do not call CWnd::OnPaint() for painting messages
+	SetClipForSmall(&dc);
 
 	DrawCtrl(&dc);
 }
@@ -57,25 +60,26 @@ void LTScreenshotEditCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 
 	CClientDC dc(this);
+	SetClipForSmall(&dc);
 
 	if (e_State == STATE_PEN_START)
 	{
 		e_State = STATE_PEN_DRAW;
-		p_ActiveMarking = new LTPenMarking(p_Screenshot);
+		p_ActiveMarking = new LTPenMarking(p_Screenshot, cr_Color, i_With);
 		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
 		SetCapture();
 	}
 	else if (e_State == STATE_RECT_START)
 	{
 		e_State = STATE_RECT_DRAW;
-		p_ActiveMarking = new LTRectMarking(p_Screenshot);
+		p_ActiveMarking = new LTRectMarking(p_Screenshot, cr_Color, i_With);
 		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
 		SetCapture();
 	}
 	else if (e_State == STATE_ARROW_START)
 	{
 		e_State = STATE_ARROW_DRAW;
-		p_ActiveMarking = new LTArrowMarking(p_Screenshot);
+		p_ActiveMarking = new LTArrowMarking(p_Screenshot, cr_Color, i_With);
 		p_ActiveMarking->OnMouseDown(&dc, point, pt_Offset);
 		SetCapture();
 	}
@@ -88,6 +92,7 @@ void LTScreenshotEditCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 
 	CClientDC dc(this);
+	SetClipForSmall(&dc);
 
 	if (e_State == STATE_PEN_DRAW)
 	{
@@ -122,6 +127,8 @@ void LTScreenshotEditCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	// TODO: Add your message handler code here and/or call default
 
 	CClientDC dc(this);
+	SetClipForSmall(&dc);
+
 
 	if (e_State == STATE_PEN_DRAW)
 	{
@@ -384,6 +391,23 @@ LTScreenshot* LTScreenshotEditCtrl::DetachScreenshot()
 	LTScreenshot* pSS = p_Screenshot;
 	p_Screenshot = NULL;
 	return pSS;
+}
+
+void LTScreenshotEditCtrl::SetClipForSmall( CDC* pDC )
+{
+	CRect rClient;
+	GetClientRect(rClient);
+	if (p_Screenshot && (p_Screenshot->Height() < rClient.Height() ||
+		p_Screenshot->Width() < rClient.Width()))
+	{
+		rClient.right = min(rClient.right, p_Screenshot->Width());
+		rClient.bottom = min(rClient.bottom, p_Screenshot->Height());
+
+
+		CRgn rgn;
+		rgn.CreateRectRgnIndirect(rClient);
+		pDC->SelectClipRgn(&rgn);
+	}
 }
 
 

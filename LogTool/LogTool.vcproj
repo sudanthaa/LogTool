@@ -210,6 +210,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTColorPicker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTComboBox.cpp"
 				>
 			</File>
@@ -223,6 +227,10 @@
 			</File>
 			<File
 				RelativePath=".\LTEnv.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LTJiraCredentials.cpp"
 				>
 			</File>
 			<File
@@ -308,6 +316,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTColorPicker.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LTComboBox.h"
 				>
 			</File>
@@ -325,6 +337,10 @@
 			</File>
 			<File
 				RelativePath=".\LTFieldListener.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTJiraCredentials.h"
 				>
 			</File>
 			<File

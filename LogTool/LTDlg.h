@@ -13,6 +13,7 @@
 #include "LTThumbnailsCtrl.h"
 
 class LTSshSession;
+class LTJiraCredentials;
 
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener, public LTThumbnailsCtrlListener
@@ -49,18 +50,18 @@ protected:
 public:
 	bool	LoadEnvFromXShellConfig(void);
 	void	InsertEnvToList( LTEnv* pEnv );
-	int		TestCall();
 	int		TestCurl();
 	void	AttachFileToJira(const char* zFile, const char* zFileName);
 	void	AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName );
-	CString	CreateJiraTicket(const char* zProject, const char* zIssueType, const char* zSummary = "", 
+	bool	CreateJiraTicket(const char* zProject, const char* zIssueType, CString& sID, const char* zSummary = "", 
 				const char* zDescription = "");
 	void	OnPressEnterKey();
 	void	InitResizes();
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
-	bool	ProvideJiraCred(CString& sUser, CString& sPassword, CString& sProject, CString& sURL, CString& sID,
+	bool	ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr,
 				bool bWithID = true);
+	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword);
 
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
@@ -70,7 +71,6 @@ public:
 protected:
 	virtual void OnOK();
 public:
-	CComboBox o_ComboJiraProject;
 	afx_msg void OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonEnvAdd();
 	afx_msg void OnBnClickedButtonTest();
@@ -113,6 +113,7 @@ public:
 	CComboBox o_ComboLogMachines;
 	CComboBox o_ComboIncludeFilters;
 	CComboBox o_ComboExcludeFilters;
+	CComboBox o_ComboJiraProject;
 	CStatic o_StaticFrmFiles;
 	CStatic o_StaticFrmJira;
 	CStatic o_StaticFrmEnvionment;
@@ -138,4 +139,33 @@ public:
 	afx_msg void OnCbnSelchangeComboJiraProject();
 	CButton o_BtnScreenshotNew;
 	CButton o_BtnScreenshotClear;
+};
+
+
+class LTCurlRetunBuffer
+{
+public:
+	LTCurlRetunBuffer(int iLimit = 10000)
+	{
+		i_Len = 0;
+		i_Limit = iLimit;
+		p_Data = new char[i_Limit];
+		*p_Data = 0;
+	}
+
+	~LTCurlRetunBuffer()
+	{
+		delete [] p_Data;
+		p_Data = NULL;
+	}
+
+	bool	GetTicketID(CString& sOut);
+	void	Append(int iLen, char* pData);
+	bool	HasMoreSpace(int iLen);
+	static size_t _WritFunc(void *ptr, size_t size, size_t nmemb, LTCurlRetunBuffer* s);
+
+protected:
+	char* p_Data;
+	int i_Len;
+	int i_Limit;
 };

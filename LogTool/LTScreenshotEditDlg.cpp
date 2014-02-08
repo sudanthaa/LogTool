@@ -86,12 +86,19 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	ScreenToClient(rDTEdit);
 	p_DrawToolbar->MoveWindow(rDTEdit);
 
+	CRect rCPEdit;
+	CWnd* pCPEdit = GetDlgItem(IDC_STATIC_COLOR_FRAME);
+	pCPEdit->GetWindowRect(rCPEdit);
+	ScreenToClient(rCPEdit);
+	o_ColorPicker.MoveWindow(rCPEdit);
+
 	o_Resizer.Attach(&o_ScreenshotEditCtrl, LT_RM_BOTTMRIGHT);
 	o_Resizer.Attach(&o_BtnOK, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnCancel, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnTake, LT_RM_HORIZONTAL);
 	o_Resizer.Attach(&o_EditName, LT_RM_HORIZONTAL);
 	o_Resizer.Attach(p_DrawToolbar, LT_RM_ALL);
+	o_Resizer.Attach(&o_ColorPicker, LT_RM_ALL);
 	o_Resizer.Originate(this);
 
 
@@ -173,6 +180,8 @@ int LTScreenshotEditDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CRect rClient(0,0,0,0);
 	o_ScreenshotEditCtrl.CreateScreenshotEditCtrl(this, rClient);
+	o_ColorPicker.Create(NULL, NULL, WS_CHILD | WS_VISIBLE, rClient, this, 100112);
+	o_ColorPicker.SetCallback(this);
 
 	p_DrawToolbar = new LTDrawToolBar;
 	p_DrawToolbar->SetListener(this);
@@ -261,6 +270,11 @@ int LTScreenshotEditDlg::DoModalEx( LTScreenshot* pScreenshot )
 	p_PreLoadScreenshot = NULL;
 
 	return iRes;
+}
+
+void LTScreenshotEditDlg::OnColorChange( COLORREF cr )
+{
+	o_ScreenshotEditCtrl.SetColor(cr);
 }
 
 // LTDrawToolBar

@@ -11,6 +11,7 @@
 #include "LTConfig.h"
 #include "LTSshSession.h"
 #include "LTScreenshotEditDlg.h"
+#include "LTJiraCredentials.h"
 
 #include <WinCred.h>
 
@@ -21,6 +22,10 @@
 #define new DEBUG_NEW
 #endif
 
+
+#define  curl_easy_setopt_VA_fix_call    curl_easy_setopt
+// Due to a recursive macro call in curl_easy_setopt, having it directly called
+// diturbs VisallAssistX.
 
 // CAboutDlg dialog used for App About
 
@@ -416,29 +421,21 @@ void LTDlg::OnLvnItemchangedListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
-//void LTDlg::OnHdnItemclickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
-//{
-//	LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
-//	// TODO: Add your control notification handler code here
-//	*pResult = 0;
-//}
 
 void LTDlg::OnBnClickedButtonTest()
 {
-	//TestCall();
+	CString s;
+	LTCurlRetunBuffer oBuf;
+	oBuf.GetTicketID(s);
+	return;
 	TestCurl();
 }
 
-
-
 int LTDlg::TestCurl()
 {
-	CString sUser;
-	CString sURL;
-	CString sProject;
-	CString sPassword;
-	CString sID;
-	if (!ProvideJiraCred(sUser, sPassword, sProject, sURL, sID))
+	LTJiraCredentials oCred;
+	CString sErr;
+	if (!ProvideJiraCred(&oCred, sErr))
 		return 1;
 
 	LTEnv* pDevEnv = GetSelectedEnv();
@@ -457,25 +454,21 @@ int LTDlg::TestCurl()
 	if (!pLogEnv)
 		return 1;
 
-	CString sTicketID;
-	sTicketID.Format("%s-%s", sProject, sID);
-
 	CString sTicketPath;
+	CString sTicketID;
+	oCred.GetFullTicketID(sTicketID);
 	if (sEnvPath.IsEmpty())
 		sTicketPath = sTicketID;
 	else
-		sTicketPath.Format("%s/%s", sEnvPath, sTicketID);
+		sTicketPath.Format("%s/%s", sEnvPath, oCred.GetFullTicketID());
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment", sURL, sTicketID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment",  oCred.s_URL, sTicketID);
 
 	CString sAuth;
-	sAuth.Format("%s:%s", sUser, sPassword);
+	sAuth.Format("%s:%s",  oCred.s_User,  oCred.s_Password);
 
 	CString sXShellFile = sTicketID + "_logs.xsh";
-
-	curl_global_init(CURL_GLOBAL_DEFAULT);
-
 	CString sVersion = LTUtils::GetProductVersionX();
 
 	CURL* pCurlComment = NULL;
@@ -499,19 +492,20 @@ int LTDlg::TestCurl()
 			pDevEnv->s_EnvUser, pDevEnv->s_IP,
 			sVersion);
 
-		curl_easy_setopt(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
-		curl_easy_setopt(pCurlComment, CURLOPT_POST, 1);	
-		curl_easy_setopt(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
-		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
-		curl_easy_setopt(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
-		curl_easy_setopt(pCurlComment, CURLOPT_HTTPHEADER, chunk);
-		curl_easy_setopt(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
 
 		CURLcode res = curl_easy_perform(pCurlComment);
 		/* Check for errors */ 
 		if (res != CURLE_OK)
 			fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			curl_easy_strerror(res));
+
 
 		curl_easy_cleanup(pCurlComment);
 		curl_slist_free_all(chunk);
@@ -556,78 +550,7 @@ int LTDlg::TestCurl()
 		AttachFileToJira(sTmpFileName, sFileName);
 	}
 
-	curl_global_cleanup();
-
-	return 0;
-}
-
-//**************************************************************************************************
-int LTDlg::TestCall()
-{
-	CREDUI_INFO info = { sizeof (CREDUI_INFO) };
-	info.hwndParent = GetSafeHwnd();
-
-	info.pszCaptionText = "Title";
-	info.pszMessageText = "Message";
-
-	//CBitmap bitmap;
-	//VERIFY(bitmap.LoadBitmap(IDB_PROMPT_BITMAP));
-	//info.hbmBanner = bitmap;
-	info.hbmBanner = 0;
-
-	CString target = "https://jira.millenniumit.com";
-	const DWORD errorCode = 0;
-
-	char userName[CREDUI_MAX_USERNAME_LENGTH + 1] = { 0 };
-
-	strcpy_s(userName,
-		_countof(userName),
-		"sudantha");
-
-	char password[CREDUI_MAX_PASSWORD_LENGTH + 1] = { 0 };
-
-	BOOL saveChecked = false;
-
-	DWORD flags = CREDUI_FLAGS_PERSIST | CREDUI_FLAGS_KEEP_USERNAME;
-
-	DWORD result = ::CredUIPromptForCredentials(&info, target, 0, // reserved
-		errorCode, userName, _countof(userName), password, _countof(password),
-		&saveChecked, flags);
-
-	switch (result)
-	{
-	case NO_ERROR:
-		{
-			// User chose OK...
-			break;
-		}
-	case ERROR_CANCELLED:
-		{
-			// User chose Cancel...
-			break;
-		}
-	default:
-		{
-			// Handle all other errors...
-		}
-	}
-
-	::SecureZeroMemory(password,
-		sizeof (password));
-
-	return 0;
-
-
-	LTSshSession* pSession = new LTSshSession;
-	LTEnv* pEnv = LTEnv::FindEnv("survdev11");
-
-	if (!pEnv)
-		return 0;
-
-	CString sErr = "";
-	pSession->Connect(pEnv, sErr);
-	pSession->Execute("ls -1 logs/Surv* corefiles/*");
-	TRACE("===========================\n");
+	
 
 	return 0;
 }
@@ -640,9 +563,8 @@ void LTDlg::OnBnClickedButtonEnvAdd()
 	oDlg.SetDlg(this);
 	oDlg.DoModal();
 }
-
 //**************************************************************************************************
-void LTDlg::AddLogEnv( const char* zUser, const char* zBaseLocation /*= ""*/ )
+void LTDlg::AddLogEnv(const char* zUser, const char* zBaseLocation )
 {
 	CString sNew;
 	sNew.Format("%s:%s", zUser, zBaseLocation);
@@ -1109,6 +1031,10 @@ void LTDlg::OnNMRClickListEnv(NMHDR *pNMHDR, LRESULT *pResult)
 //**************************************************************************************************
 void LTDlg::OnBnClickedButtonUpload()
 {
+
+	CString sCreated;
+	CreateJiraTicket("SURVRD","CC-System", sCreated, "Test Summary", "Test Description");
+	return;
 	// TODO: Add your control notification handler code here
 
 	/*
@@ -1319,19 +1245,16 @@ void LTDlg::AttachFileToJira( const char* zFile, const char* zFileName )
 //**************************************************************************************************
 void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName )
 {
-	CString sUser;
-	CString sURL;
-	CString sProject;
-	CString sPassword;
-	CString sID;
-	if (!ProvideJiraCred(sUser, sPassword, sProject, sURL, sID))
+	LTJiraCredentials oJiCred;
+	CString sErr;
+	if (!ProvideJiraCred(&oJiCred, sErr))
 		return;
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", sURL, sProject, sID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", oJiCred.s_URL, oJiCred.s_Project, oJiCred.s_ID);
 
 	CString sAuth;
-	sAuth.Format("%s:%s", sUser, sPassword);
+	sAuth.Format("%s:%s", oJiCred.s_User, oJiCred.s_Password);
 
 	CURL* pCurlAttachment = NULL;
 	pCurlAttachment = curl_easy_init();
@@ -1351,12 +1274,12 @@ void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 			CURLFORM_BUFFERLENGTH, iBufferSize,
 			CURLFORM_END);
 
-		curl_easy_setopt(pCurlAttachment, CURLOPT_URL, sAttachmentURL.GetBuffer());
-		curl_easy_setopt(pCurlAttachment, CURLOPT_POST, 1);	
-		curl_easy_setopt(pCurlAttachment, CURLOPT_USERPWD, sAuth.GetBuffer());
-		curl_easy_setopt(pCurlAttachment, CURLOPT_HTTPHEADER, chunk);
-		curl_easy_setopt(pCurlAttachment, CURLOPT_HTTPPOST, formpost);
-		curl_easy_setopt(pCurlAttachment, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_POST, 1);	
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HTTPPOST, formpost);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_SSL_VERIFYPEER, 0);
 
 		CURLcode res = curl_easy_perform(pCurlAttachment);
 		/* Check for errors */ 
@@ -1370,43 +1293,164 @@ void LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 }
 
 //**************************************************************************************************
-CString LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, const char* zSummary, 
-								const char* zDescription)
+bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CString& sTicket, 
+							 const char* zSummary, const char* zDescription)
 {
-	return "";
+	LTJiraCredentials oCred;
+	CString sErr;
+	if (!ProvideJiraCred(&oCred, sErr, false))
+		return false;
+
+	CString sAttachmentURL;
+	sAttachmentURL.Format("%s/rest/api/2/issue/", oCred.s_URL);
+
+	CString sAuth;
+	oCred.GetAuthCode(sAuth);
+
+	bool bSuccess = false;
+
+	CURL* pCurlComment = NULL;
+	pCurlComment = curl_easy_init();
+	if (pCurlComment) 
+	{ 
+		LTCurlRetunBuffer oBuff;
+
+		struct curl_slist *chunk = NULL;
+		chunk = curl_slist_append(chunk, "Content-Type: application/json");
+
+		CString sComment;
+		sComment.Format("{\n"
+			"  \"fields\": {\n"
+			"    \"project\": {\n"
+			"      \"key\": \"%s\"\n"
+			"    },\n"
+			"    \"summary\": \"%s\",\n"
+			"    \"description\": \"%s\",\n"
+			"    \"issuetype\": {\n"
+			"      \"name\": \"%s\"\n"
+			"    }\n"
+			"  }\n"
+			"}\n"
+			,zProject, zSummary, zDescription, zIssueType);
+
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEDATA, &oBuff);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEFUNCTION, LTCurlRetunBuffer::_WritFunc);
+
+		CURLcode res = curl_easy_perform(pCurlComment);
+		/* Check for errors */ 
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+			curl_easy_strerror(res));
+
+		oBuff.GetTicketID(sTicket);
+
+		curl_easy_cleanup(pCurlComment);
+		curl_slist_free_all(chunk);
+	}
+
+
+	return bSuccess;
 }
 
+
 //**************************************************************************************************
-bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProject, 
-								CString& sURL, CString& sID, bool bWithID)
+bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPassword )
 {
-	o_EditJiraUser.GetWindowText(sUser);
-	o_EditJiraPassword.GetWindowText(sPassword);
-	o_EditJiraURL.GetWindowText(sURL);
-	o_EditJiraTicket.GetWindowText(sID);
+
+	WCHAR wcURL[200];
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, zURL, -1, wcURL, 200);
+
+	// TODO: Add your control notification handler code here
+	PCREDENTIALW cr = {0};
+	bool bHas =  (0 != 	::CredReadW(wcURL, CRED_TYPE_GENERIC, 0, &cr));
+	if (bHas)
+	{
+		DWORD	dwUser = MAX_PATH;
+		DWORD	dwPassword = MAX_PATH;
+		DWORD	dwDomain = MAX_PATH;
+		WCHAR   szUserName[MAX_PATH] = {0};
+		WCHAR   szPassword[MAX_PATH] = {0};
+		WCHAR   szDomain[MAX_PATH] = {0};
+
+		CredUnPackAuthenticationBufferW(0, cr->CredentialBlob, cr->CredentialBlobSize, 
+			szUserName, &dwUser, szDomain, &dwDomain, szPassword, &dwPassword);
+	}
+	else 
+	{
+		CREDUI_INFOW ci = {0}; 
+		ULONG ulAuthPkg = 0; 
+		void *pAuthBuff = NULL; 
+		ULONG cbAuthBuff = 0; 
+		void *pOutAuthBuff = NULL; 
+		ULONG cbOutAuthBuff = 0; 
+		BOOL fSave = FALSE; 
+		DWORD dwFlags = CREDUIWIN_GENERIC|CREDUIWIN_CHECKBOX|CREDUIWIN_ENUMERATE_CURRENT_USER; 
+		ci.cbSize = sizeof(ci);	
+		ci.hbmBanner = NULL; 
+		ci.hwndParent = NULL; 
+		ci.pszCaptionText = L"Writing Secure Code for Windows Vista"; 
+		ci.pszMessageText = L"Please enter your password" ; 
+		DWORD dwErr = CredUIPromptForWindowsCredentialsW( 
+			&ci, 0, &ulAuthPkg, pAuthBuff, cbAuthBuff, 
+			&pOutAuthBuff, &cbOutAuthBuff, &fSave, dwFlags); 
+
+
+		if (fSave)
+		{
+			CREDENTIALW cred = {0};
+			cred.Type = CRED_TYPE_GENERIC;
+			cred.TargetName = wcURL;
+			cred.CredentialBlobSize = cbOutAuthBuff;
+			cred.CredentialBlob = (LPBYTE) pOutAuthBuff;
+			cred.Persist = CRED_PERSIST_ENTERPRISE;
+			cred.UserName = L"sudanthaa";
+			cred.TargetAlias = wcURL;
+
+			BOOL ok = ::CredWriteW(&cred, 0);
+		}
+	}
+
+	return true;
+}
+
+
+//**************************************************************************************************
+bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWithID)
+{
+	o_EditJiraUser.GetWindowText(pJiCred->s_User);
+	o_EditJiraPassword.GetWindowText(pJiCred->s_Password);
+	o_EditJiraURL.GetWindowText(pJiCred->s_URL);
+	o_EditJiraTicket.GetWindowText(pJiCred->s_ID);
 
 	int iSel = o_ComboJiraProject.GetCurSel();
-	o_ComboJiraProject.GetLBText(iSel, sProject);
+	o_ComboJiraProject.GetLBText(iSel, pJiCred->s_Project);
 
-	if (sUser.IsEmpty())
+	if (pJiCred->s_User.IsEmpty())
 	{
 		AfxMessageBox("JIRA user name is empty.");
 		return false;
 	}
 
-	if (sPassword.IsEmpty())
+	if (pJiCred->s_Password.IsEmpty())
 	{
 		AfxMessageBox("JIRA password is empty.");
 		return false;
 	}
 
-	if (sURL.IsEmpty())
+	if (pJiCred->s_URL.IsEmpty())
 	{
 		AfxMessageBox("JIRA URL is empty.");
 		return false;
 	}
 
-	if (sProject.IsEmpty())
+	if (pJiCred->s_Project.IsEmpty())
 	{
 		AfxMessageBox("JIRA project is empty.");
 		return false;
@@ -1414,7 +1458,7 @@ bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProje
 
 	if (bWithID)
 	{
-		if (sID.IsEmpty())
+		if (pJiCred->s_ID.IsEmpty())
 		{
 			AfxMessageBox("JIRA project/ticket-id is not specified");
 			return false;
@@ -1423,25 +1467,6 @@ bool LTDlg::ProvideJiraCred( CString& sUser, CString& sPassword, CString& sProje
 
 	return true;
 }
-
-        //f = open(issueDescFile,'w')
-        //f.write('{\n')
-        //f.write('  "fields": {\n')
-        //f.write('    "project": {\n')
-        //f.write('      "key": "%s"\n' % selProjectKey)
-        //f.write('    },\n')
-        //f.write('    "summary": "%s",\n' % issueSummary)
-        //f.write('    "description": "",\n')
-        //f.write('    "issuetype": {\n')
-        //f.write('      "name": "%s"\n' % issueType)
-        //f.write('    }\n')
-        //f.write('  }\n')
-        //f.write('}\n')
-        //f.close()
-
-        //prepareJIRACredentials()
-
-        //createCmd='curl -D- -u %s:%s -X POST --data @%s -H "Content-Type: application/json" %s/issue/' % (jiraUser, jiraPassword, issueDescFile, jiraRESTURL)
 
 //**************************************************************************************************
 bool SkipChar(CString& sVal)
@@ -1528,5 +1553,59 @@ void LTDlg::OnCbnSelchangeComboJiraProject()
 	LTConfig::o_Inst.GetJiraProjectSet()->Set(sProject);
 }
 
+//**************************************************************************************************
+void LTCurlRetunBuffer::Append( int iLen, char* pData)
+{
+	if (!HasMoreSpace(iLen))
+		return;
+
+	memcpy(p_Data + i_Len, pData, iLen);
+	i_Len += iLen;	
+	p_Data[(i_Len < i_Limit) ? i_Len : i_Limit - 1] = 0;
+}
+
+//**************************************************************************************************
+size_t LTCurlRetunBuffer::_WritFunc( void* ptr, size_t size, size_t nmemb, LTCurlRetunBuffer* pBuff )
+{
+	int iNewLen = size * nmemb;
+	pBuff->Append(iNewLen, (char*)ptr);
+	return iNewLen;
+}
+
+//**************************************************************************************************
+bool LTCurlRetunBuffer::HasMoreSpace( int iLen )
+{
+	return( i_Len + iLen) <= i_Limit;
+}
+
+#define KEY_GET_TAG  "\"key\":\""
+//**************************************************************************************************
+bool LTCurlRetunBuffer::GetTicketID( CString& sOut )
+{
+	/*
+	{
+	"id":"39000",
+	"key":"TEST-101",
+	"self":"http://localhost:8090/rest/api/2/issue/39000"
+	}
+	*/
+
+	char* pzStart = strstr(p_Data, KEY_GET_TAG);
+	if (!pzStart)
+		return false;
+
+	char* pzEnd =  strstr(pzStart + sizeof(KEY_GET_TAG), "\"");
+	if (!pzEnd)
+		return false;
+
+	char zBuff[30];
+	*zBuff = 0;
+
+	strncpy_s(zBuff, 30, pzStart + sizeof(KEY_GET_TAG) - 1,  
+		(pzEnd - pzStart - sizeof(KEY_GET_TAG) + 1));
+
+	sOut = zBuff;
+	return true;
+}
 //**************************************************************************************************
 

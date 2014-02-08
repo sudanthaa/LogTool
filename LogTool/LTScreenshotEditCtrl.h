@@ -18,6 +18,8 @@ public:
 	void	SetScreenshot(LTScreenshot* pScreenShot);
 	void	AdjustScroolBars(int cx, int cy);
 	void	DrawCtrl(CDC* pDC);
+	void	SetColor(COLORREF cr){ cr_Color = cr; };
+	void	SetWidth(int iWidth) { i_With = iWidth;};
 
 	void	PenStart();
 	void	RectStart();
@@ -27,6 +29,8 @@ public:
 	LTScreenshot* DetachScreenshot();
 
 protected:
+	void	SetClipForSmall( CDC* dc );
+
 	LTScreenshot* p_Screenshot;
 	LTScreenshotMarking* p_ActiveMarking;
 	CPoint  pt_Offset;
@@ -43,6 +47,8 @@ protected:
 		STATE_ARROW_DRAW,
 	};
 
+	COLORREF cr_Color;
+	int		i_With;
 	State	e_State;
 	HTHEME	h_Theme;
 
