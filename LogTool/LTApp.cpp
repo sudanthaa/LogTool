@@ -58,6 +58,7 @@ BOOL LTApp::InitInstance()
 	}
 
 	AfxEnableControlContainer();
+	AfxInitRichEdit2();
 
 	// Standard initialization
 	// If you are not using these features and wish to reduce the size

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <vector>
 
 
 class LTConfig
@@ -27,6 +28,19 @@ public:
 		CString s_CfgName;
 	};
 
+	class CustomAction
+	{
+	public:
+		CustomAction(const char* zName = "", const char* zCommand = "");
+		~CustomAction();
+	
+		void	Save(const char* zIniFile, UINT uiIndex);
+		void	Load(const char* zIniFile, UINT uiIndex);
+
+		CString	s_Command;
+		CString s_Name;
+	};
+
 	void	Save();
 	void	Load();
 	
@@ -41,12 +55,14 @@ public:
 	StringSet*	GetLogMacSet()			{	return &o_LogMacs; };
 	StringSet*	GetJiraProjectSet()		{	return &o_JiraProjects; };
 
+	UINT	GetCustomActionCount()	{	return a_CustomActions.size(); };
+	CustomAction*	GetCustomActionAt(UINT ui)	{ return a_CustomActions[ui]; };
+	void	AddCustomAction(CustomAction* pCustomAction);
+
 	static LTConfig	o_Inst;
 
 	CString	 s_JiraURL;
-	CString	 s_JiraUser;
 	CString	 s_JiraTicket;
-	CString	 s_JiraPassword;
 
 	bool	b_JiraDoComment;
 	bool	b_JiraCreateNew;
@@ -62,4 +78,5 @@ protected:
 	StringSet	o_DisplayFilterExcludes;
 	StringSet	o_SelectionFilters;
 	StringSet	o_LogMacs;
+	std::vector<CustomAction*>	a_CustomActions;
 };

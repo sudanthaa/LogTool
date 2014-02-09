@@ -4,6 +4,9 @@
 
 LTConfig LTConfig::o_Inst;
 
+#define  LT_CFG_GROUP_CUSTOM_ACTION "CUSTOM_ACTION"
+#define  LT_MAX_CUSTOM_ACTION_CMD_LEM	20000
+
 LTConfig::LTConfig(void)
 :o_JiraProjects("JIRA-PROJECT",10)
 ,o_DisplayFilterIncludes("DISPLAY-INCLUDE-FILTER", 10)
@@ -20,7 +23,6 @@ LTConfig::LTConfig(void)
 	DWORD dwUserLen = UNLEN + 1;
 
 	GetUserName(zUserName, &dwUserLen);
-	s_JiraUser = zUserName;
 
 	CString sUserAppFolder;
 	LTUtils::GetUserAppFolder(sUserAppFolder);
@@ -44,12 +46,17 @@ void LTConfig::Save()
 	o_SelectionFilters.Save(sIniFile);
 	o_LogMacs.Save(sIniFile);
 
-	WritePrivateProfileString("MAIN","JIRA-USER", s_JiraUser, sIniFile);
 	WritePrivateProfileString("MAIN","JIRA-URL", s_JiraURL, sIniFile);
-	WritePrivateProfileString("MAIN","JIRA-PASSWORD", s_JiraPassword, sIniFile);
 	WritePrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicket, sIniFile);
 	_SaveBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew , sIniFile);
 	_SaveBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
+
+
+	CString sVal;
+	sVal.Format("%u", a_CustomActions.size());
+	WritePrivateProfileString(LT_CFG_GROUP_CUSTOM_ACTION, "COUNT", sVal, sIniFile);
+	for (UINT ui = 0; ui < a_CustomActions.size(); ui++)
+		a_CustomActions[ui]->Save(sIniFile, ui);
 }
 
 void LTConfig::Load()
@@ -57,9 +64,7 @@ void LTConfig::Load()
 	CString sIniFile = LTUtils::GetAppIniFile();
 
 	char zBuff[100];
-	GetPrivateProfileString("MAIN","JIRA-USER", s_JiraUser, zBuff, 100, sIniFile); s_JiraUser = zBuff;
 	GetPrivateProfileString("MAIN","JIRA-URL", s_JiraURL, zBuff, 100, sIniFile); s_JiraURL = zBuff;
-	GetPrivateProfileString("MAIN","JIRA-PASSWORD", s_JiraPassword, zBuff, 100, sIniFile); s_JiraPassword = zBuff;
 	GetPrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicket, zBuff, 100, sIniFile); s_JiraTicket = zBuff;
 	_LoadBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew, sIniFile);
 	_LoadBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
@@ -69,6 +74,15 @@ void LTConfig::Load()
 	o_DisplayFilterExcludes.Load(sIniFile);
 	o_SelectionFilters.Load(sIniFile);
 	o_LogMacs.Load(sIniFile);
+
+
+	UINT uiCount = GetPrivateProfileInt(LT_CFG_GROUP_CUSTOM_ACTION, "COUNT", 0, sIniFile);
+	for (UINT ui = 0; ui < uiCount; ui++)
+	{
+		CustomAction* pCustomAction = new CustomAction;
+		pCustomAction->Load(sIniFile, ui);
+		a_CustomActions.push_back(pCustomAction);
+	}
 }
 
 void LTConfig::OnPostLoad()
@@ -78,6 +92,12 @@ void LTConfig::OnPostLoad()
 
 	if (o_DisplayFilterExcludes.GetCount() == 0)
 		o_DisplayFilterExcludes.Set("logs/SSM*");
+
+	if (a_CustomActions.size() == 0)
+	{
+		a_CustomActions.push_back(new CustomAction("ca1","ls"));
+		a_CustomActions.push_back(new CustomAction("ca2","pwd"));
+	}
 }
 
 void LTConfig::_SaveBool( const char* zGroup, const char* zParam, bool bVar, const char* zIni )
@@ -92,7 +112,10 @@ void LTConfig::_LoadBool( const char* zGroup, const char* zParam, bool& bVar, co
 	bVar = (strcmp(zBuff, "TRUE") == 0);
 }
 
-
+void LTConfig::AddCustomAction( CustomAction* pCustomAction )
+{
+	a_CustomActions.push_back(pCustomAction);
+}
 
 void LTConfig::StringSet::Set( const char* zValue )
 {	
@@ -128,7 +151,7 @@ void LTConfig::StringSet::Save( const char* zIniFile )
 void LTConfig::StringSet::Load( const char* zIniFile )
 {
 	char zBuff[100];
-	GetPrivateProfileString(s_CfgName,"COUNT","0",zBuff,100, zIniFile);
+	GetPrivateProfileString(s_CfgName, "COUNT", "0", zBuff, 100, zIniFile);
 
 	int iCount = atoi(zBuff);
 	for (int i = 0; i < iCount; i++)
@@ -159,4 +182,44 @@ LTConfig::StringSet::StringSet(const char* zCfgName, int iMaxCount )
 {
 	s_CfgName = zCfgName;
 	i_MaxCount = iMaxCount;
+}
+
+void LTConfig::CustomAction::Save( const char* zIniFile, UINT uiIndex )
+{
+	CString sName;
+	CString sCommand;
+	sName.Format("NAME_%u", uiIndex);
+	sCommand.Format("COMMAND_%d", uiIndex);
+
+	WritePrivateProfileString(LT_CFG_GROUP_CUSTOM_ACTION, sName, s_Name, zIniFile);
+	WritePrivateProfileString(LT_CFG_GROUP_CUSTOM_ACTION, sCommand, s_Command, zIniFile);
+}
+
+void LTConfig::CustomAction::Load( const char* zIniFile, UINT uiIndex )
+{
+	CString sName;
+	CString sCommand;
+	sName.Format("NAME_%u", uiIndex);
+	sCommand.Format("COMMAND_%d", uiIndex);
+
+	int iCmdBuffLen = LT_MAX_CUSTOM_ACTION_CMD_LEM;
+	char zNameBuff[200];
+	char* pCmdBuff = new char[iCmdBuffLen];
+	GetPrivateProfileString(LT_CFG_GROUP_CUSTOM_ACTION, sName, s_Name, zNameBuff, 200, zIniFile);
+	GetPrivateProfileString(LT_CFG_GROUP_CUSTOM_ACTION, sCommand, s_Command, pCmdBuff, iCmdBuffLen, zIniFile); 
+	s_Name = zNameBuff;
+	s_Command = pCmdBuff;
+	delete [] pCmdBuff;
+	pCmdBuff = NULL;
+}
+
+LTConfig::CustomAction::CustomAction( const char* zName /*= ""*/, const char* zCommand /*= ""*/ )
+{
+	s_Name = zName;
+	s_Command = zCommand;
+}
+
+LTConfig::CustomAction::~CustomAction()
+{
+
 }

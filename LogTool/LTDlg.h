@@ -70,6 +70,8 @@ public:
 				bool bWithID = true);
 	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword, bool bUpdateAnyway = false);
 	bool	UploadLogs(CString& sErr);
+	void	AddCustomAction(const char* zName, const char* zCommand);
+	void	UpdateCustomAction(LTConfig::CustomAction* pAction);
 
 	LTSshSession* p_ConnectedSession;
 	LTResizeMan o_Resizer;
@@ -154,6 +156,8 @@ public:
 	CStatic o_StaticFrmConfiguredFileUpload;
 	CListCtrl o_ListConfiguredUploads;
 	afx_msg void OnBnClickedButtonAttachAlone();
+	afx_msg void OnBnClickedButtonCfgactionNew();
+	afx_msg void OnBnClickedButtonCfgactionEdit();
 };
 
 

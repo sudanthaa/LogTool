@@ -222,6 +222,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTConfigActionDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTDlg.cpp"
 				>
 			</File>
@@ -325,6 +329,10 @@
 			</File>
 			<File
 				RelativePath=".\LTConfig.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTConfigActionDlg.h"
 				>
 			</File>
 			<File

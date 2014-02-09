@@ -13,6 +13,7 @@
 #include "LTScreenshotEditDlg.h"
 #include "LTJiraCredentials.h"
 #include "LTNewJIRADlg.h"
+#include "LTConfigActionDlg.h"
 
 #include <WinCred.h>
 
@@ -144,6 +145,8 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_JIRA_CREDENTIALS, &LTDlg::OnBnClickedButtonJiraCredentials)
 	ON_BN_CLICKED(IDC_BUTTON_JIRA_TICKE_INFO, &LTDlg::OnBnClickedButtonJiraTickeInfo)
 	ON_BN_CLICKED(IDC_BUTTON_ATTACH_ALONE, &LTDlg::OnBnClickedButtonAttachAlone)
+	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_NEW, &LTDlg::OnBnClickedButtonCfgactionNew)
+	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_EDIT, &LTDlg::OnBnClickedButtonCfgactionEdit)
 END_MESSAGE_MAP()
 
 
@@ -204,6 +207,15 @@ BOOL LTDlg::OnInitDialog()
 
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
+
+	o_ListConfiguredUploads.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
+	for (UINT ui = 0; ui < LTConfig::o_Inst.GetCustomActionCount(); ui++)
+	{
+		LTConfig::CustomAction* pCustomAction = LTConfig::o_Inst.GetCustomActionAt(ui);
+		o_ListConfiguredUploads.InsertItem(LVIF_TEXT | LVIF_STATE, ui, pCustomAction->s_Name, 
+			0, LVIS_SELECTED, 0, 0);
+		o_ListConfiguredUploads.SetItemData(ui, (DWORD_PTR)pCustomAction);
+	}
 
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
 	o_EditJiraTicket.SetWindowText(LTConfig::o_Inst.s_JiraTicket);
@@ -1765,4 +1777,57 @@ void LTDlg::OnBnClickedButtonAttachAlone()
 
 	if (bSuccess)
 		AfxMessageBox("Screenshots successfully attached");
+}
+
+void LTDlg::OnBnClickedButtonCfgactionNew()
+{
+	// TODO: Add your control notification handler code here
+	LTConfigActionDlg oDlg;
+	oDlg.SetDlg(this);
+	oDlg.DoModal();
+}
+
+void LTDlg::OnBnClickedButtonCfgactionEdit()
+{
+	// TODO: Add your control notification handler code here
+
+	POSITION pos = o_ListConfiguredUploads.GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListConfiguredUploads.GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTConfig::CustomAction* pCustomAction = 
+				(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(nItem);
+			LTConfigActionDlg oDlg;
+			oDlg.SetDlg(this);
+			oDlg.SetEditMode(pCustomAction);
+			oDlg.DoModal();
+		}
+	}
+}
+
+void LTDlg::AddCustomAction( const char* zName, const char* zCommand )
+{
+	LTConfig::CustomAction* pCustomAction = new LTConfig::CustomAction;
+	pCustomAction->s_Name = zName;
+	pCustomAction->s_Command = zCommand;
+
+	LTConfig::o_Inst.AddCustomAction(pCustomAction);
+	UINT ui = o_ListConfiguredUploads.GetItemCount();
+	o_ListConfiguredUploads.InsertItem(LVIF_TEXT | LVIF_STATE, ui, 
+		pCustomAction->s_Name, 0, LVIS_SELECTED, 0, 0);
+	o_ListConfiguredUploads.SetItemData(ui, (DWORD_PTR)pCustomAction);
+}
+
+void LTDlg::UpdateCustomAction( LTConfig::CustomAction* pAction )
+{
+	// Nothing to do
+	for (UINT ui = 0; ui < (UINT)o_ListConfiguredUploads.GetItemCount(); ui++)
+	{
+		LTConfig::CustomAction* pCustomActionEx = 
+			(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(ui);
+		if (pCustomActionEx == pAction)
+			o_ListConfiguredUploads.SetItemText(ui, 0, pAction->s_Name);
+	}
 }
