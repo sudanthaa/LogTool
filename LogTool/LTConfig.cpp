@@ -95,8 +95,9 @@ void LTConfig::OnPostLoad()
 
 	if (a_CustomActions.size() == 0)
 	{
-		a_CustomActions.push_back(new CustomAction("ca1","ls"));
-		a_CustomActions.push_back(new CustomAction("ca2","pwd"));
+		a_CustomActions.push_back(new CustomAction("Nora","tar -zcvf nora.tar.gz; scp nora.tar.gz $logenvsshcon:$logenvpath"));
+		a_CustomActions.push_back(new CustomAction("LastPageNora","cd nora1; lst=`ls -1 | sort -g | tail -1`; tar -zcvf lastnora.tar.gz nora?/$lst nora1/Configs; scp lastnora.tar.gz $logenvsshcon:$logenvpath"));
+		a_CustomActions.push_back(new CustomAction("RptDump","rptdump c rptdump.tar.gz; scp rptdump.tar.gz $logenvsshcon:$logenvpath"));
 	}
 }
 
@@ -115,6 +116,21 @@ void LTConfig::_LoadBool( const char* zGroup, const char* zParam, bool& bVar, co
 void LTConfig::AddCustomAction( CustomAction* pCustomAction )
 {
 	a_CustomActions.push_back(pCustomAction);
+}
+
+void LTConfig::RemoveCustomAction( CustomAction* pCustomAction )
+{
+	std::vector<CustomAction*>::iterator itr = a_CustomActions.begin();
+	for (;itr != a_CustomActions.end(); itr++)
+	{
+		CustomAction* pCustomActionEx = *itr;
+		if (pCustomActionEx == pCustomAction)
+		{
+			a_CustomActions.erase(itr);
+			delete pCustomAction;
+			break;
+		}
+	}
 }
 
 void LTConfig::StringSet::Set( const char* zValue )

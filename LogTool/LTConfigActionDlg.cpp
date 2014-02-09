@@ -31,6 +31,7 @@ void LTConfigActionDlg::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(LTConfigActionDlg, CDialog)
+	ON_STN_CLICKED(IDC_STATIC_CONFIGURED_COMMAND, &LTConfigActionDlg::OnStnClickedStaticConfiguredCommand)
 END_MESSAGE_MAP()
 
 
@@ -47,14 +48,11 @@ BOOL LTConfigActionDlg::OnInitDialog()
 	o_RichTextDescription.SetWindowText("{\\rtf1\\ansi\\deff0"
 	"{\\colortbl;\\red100\\green100\\blue100;\\red0\\green0\\blue0;}"
 	"\\cf1"
-	"Input the shell command to execute the desired action. May use any \\line "
-	"command that is available in your environment. The shell variables \\line"
-	"\\cf2\\b $logenvuser $logenvip $logenvpath $logenvsshcon \\b0\\cf1 are available \\line "
-	"for use. To copy anything into log environment, use scp. \\line"
+	"Input the shell command to execute the desired action. May use any command that is \\line available in your environment. Below shell variables are available for use.\\line"
+	"\\cf2\\b $logenvuser $logenvip $logenvpath $logenvsshcon \\b0\\cf1 \\line"
+	" To copy files into log environment, use scp. \\line"
 	"\\i eg:\\i0 \\line\\b  scp nora.tar.gz $logenvsshcon:$logenvpath \\b0\\line\\line"
-	" Multiple commands has to be separate them with a semi-colon. This string \\line"
-	" will be executed as it is through ssh. So any command that works in \\line"
-	" environment will work.}");
+	" Multiple commands has to be separated with a semi-colon. The command string will be \\line executed as it is through ssh. So any command that works in environment will work.}");
 
 	if (p_InitAction)
 	{
@@ -92,4 +90,9 @@ void LTConfigActionDlg::OnOK()
 	}
 
 	CDialog::OnOK();
+}
+
+void LTConfigActionDlg::OnStnClickedStaticConfiguredCommand()
+{
+	// TODO: Add your control notification handler code here
 }

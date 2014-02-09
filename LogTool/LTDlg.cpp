@@ -147,6 +147,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_ATTACH_ALONE, &LTDlg::OnBnClickedButtonAttachAlone)
 	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_NEW, &LTDlg::OnBnClickedButtonCfgactionNew)
 	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_EDIT, &LTDlg::OnBnClickedButtonCfgactionEdit)
+	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_DELETE, &LTDlg::OnBnClickedButtonCfgactionDelete)
 END_MESSAGE_MAP()
 
 
@@ -1829,5 +1830,22 @@ void LTDlg::UpdateCustomAction( LTConfig::CustomAction* pAction )
 			(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(ui);
 		if (pCustomActionEx == pAction)
 			o_ListConfiguredUploads.SetItemText(ui, 0, pAction->s_Name);
+	}
+}
+
+void LTDlg::OnBnClickedButtonCfgactionDelete()
+{
+	POSITION pos = o_ListConfiguredUploads.GetFirstSelectedItemPosition();
+	if (pos)
+	{
+		int nItem = o_ListConfiguredUploads.GetNextSelectedItem(pos);
+		if (nItem > -1)
+		{
+			LTConfig::CustomAction* pCustomAction = 
+				(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(nItem);
+
+			o_ListConfiguredUploads.DeleteItem(nItem);
+			LTConfig::o_Inst.RemoveCustomAction(pCustomAction);
+		}
 	}
 }

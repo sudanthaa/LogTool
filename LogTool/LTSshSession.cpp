@@ -126,22 +126,21 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 
     if (auth_pw & 1) {
         /* We could authenticate via password */ 
-        if (libssh2_userauth_password(p_Session, p_Env->s_EnvUser, p_Env->s_Password)) {
-
-            TRACE( "\tAuthentication by password failed!\n");
+        if (libssh2_userauth_password(p_Session, p_Env->s_EnvUser, p_Env->s_Password))
+		{
+            sErr = "Authentication by password failed!\n";
             goto shutdown;
         } else {
             TRACE( "\tAuthentication by password succeeded.\n");
         }
     } else if (auth_pw & 2) {
         /* Or via keyboard-interactive */ 
-        if (libssh2_userauth_keyboard_interactive(p_Session, p_Env->s_EnvUser, &KeyboadCallback) ) {
-            TRACE(
-                "\tAuthentication by keyboard-interactive failed!\n");
-            goto shutdown;
+        if (libssh2_userauth_keyboard_interactive(p_Session, p_Env->s_EnvUser, &KeyboadCallback) ) 
+		{
+			sErr = "Authentication by keyboard-interactive failed!";
+			goto shutdown;
         } else {
-            TRACE(
-                "\tAuthentication by keyboard-interactive succeeded.\n");
+            TRACE("\tAuthentication by keyboard-interactive succeeded.\n");
         }
     } else if (auth_pw & 4) {
         /* Or by public key */
@@ -154,20 +153,19 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 
 		CString sPrivFile;
 		CString sPubFile;
-
 		sPrivFile.Format("%s%s.ssh\\id_rsa", zHomeDrive, zHomePath);
 		sPubFile.Format("%s%s.ssh\\id_rsa.pub", zHomeDrive, zHomePath);
 
         if (libssh2_userauth_publickey_fromfile(p_Session, 
 				p_Env->s_EnvUser, sPubFile, sPrivFile, "")) 
 		{
-            TRACE( "\tAuthentication by public key failed!\n");
+			sErr = "Authentication by public key failed!";
             goto shutdown;
         } else {
             TRACE( "\tAuthentication by public key succeeded.\n");
         }
     } else {
-        TRACE( "No supported authentication methods found!\n");
+        sErr = "No supported authentication methods found!";
         goto shutdown;
     }
 
@@ -186,9 +184,7 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 #endif
 
 	i_Socket = -1;
-
-    TRACE( "all done!\n");
-    return 0;
+    return false;
 }
 
 static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
@@ -230,9 +226,10 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CS
 	LIBSSH2_CHANNEL*	pChannel;
 
 	/* Request a shell */ 
-	if (!(pChannel = libssh2_channel_open_session(p_Session))) {
-
-		TRACE( "Unable to open a session\n");
+	if (!(pChannel = libssh2_channel_open_session(p_Session))) 
+	{
+		if (pErr)
+			pErr->Format("Unable to open a session");
 		return false;
 	}
 
@@ -244,7 +241,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CS
 	if ( rc != 0 )
     {
 		if (pErr)
-			pErr->Format("socket error.");
+			pErr->Format("Socket error.");
         return false;
     }
 

@@ -58,6 +58,7 @@ public:
 	UINT	GetCustomActionCount()	{	return a_CustomActions.size(); };
 	CustomAction*	GetCustomActionAt(UINT ui)	{ return a_CustomActions[ui]; };
 	void	AddCustomAction(CustomAction* pCustomAction);
+	void	RemoveCustomAction(CustomAction* pCustomAction);
 
 	static LTConfig	o_Inst;
 

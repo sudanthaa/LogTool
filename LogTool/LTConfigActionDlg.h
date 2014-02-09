@@ -35,4 +35,6 @@ public:
 	CEdit o_EditActionName;
 protected:
 	virtual void OnOK();
+public:
+	afx_msg void OnStnClickedStaticConfiguredCommand();
 };

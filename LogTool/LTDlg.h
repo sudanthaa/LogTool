@@ -158,6 +158,7 @@ public:
 	afx_msg void OnBnClickedButtonAttachAlone();
 	afx_msg void OnBnClickedButtonCfgactionNew();
 	afx_msg void OnBnClickedButtonCfgactionEdit();
+	afx_msg void OnBnClickedButtonCfgactionDelete();
 };
 
 
