@@ -59,3 +59,9 @@ void LTColorPicker::OnLButtonDown(UINT nFlags, CPoint point)
 
 	CWnd::OnLButtonDown(nFlags, point);
 }
+
+void LTColorPicker::SetColor( COLORREF cr )
+{
+	cr_Val = cr;
+	Invalidate();
+}

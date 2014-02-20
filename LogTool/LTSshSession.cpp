@@ -79,9 +79,9 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
     sin.sin_port = htons(DEFAULT_SSH_PORT);
     sin.sin_addr.s_addr = hostaddr;
     if (connect(i_Socket, (struct sockaddr*)(&sin),
-                sizeof(struct sockaddr_in)) != 0) {
-        TRACE( "failed to connect!\n");
-		sErr = "failed to connect!";
+                sizeof(struct sockaddr_in)) != 0) 
+	{
+		sErr.Format("Failed to connect. ip=%s", p_Env->s_IP);
         return false;
     }
  
@@ -92,7 +92,7 @@ bool LTSshSession::Connect( LTEnv* pEnv, CString& sErr)
 
     if (libssh2_session_handshake(p_Session, i_Socket)) 
 	{
-        TRACE( "Failure establishing SSH session\n");
+		sErr = "Failure establishing SSH session";
         return false;
     }
  

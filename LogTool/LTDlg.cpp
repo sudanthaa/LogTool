@@ -20,6 +20,9 @@
 #include <libssh2.h>
 #include <curl/curl.h>
 
+#define LOGIN_ERR_MSG  "If Login is failed once due to authentication failure, jira may have temporarily halted the REST-API connection for your account. \n" \
+						"Login once to jira via web will revert this. Check whether you have entered the correct username/password in LogTool before continuing"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -27,6 +30,7 @@
 // Due to a recursive macro call in curl_easy_setopt(please refer libcurl), having it directly called
 // disturbs VisualAssistXs symbol identification.
 #define  curl_easy_setopt_VA_fix_call    curl_easy_setopt
+#define  SI __FILE__, __LINE__
 
 
 // CAboutDlg dialog used for App About
@@ -106,7 +110,11 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_JIRA_CREDENTIALS, o_ButtonJiraCredentials);
 	DDX_Control(pDX, IDC_BUTTON_JIRA_TICKE_INFO, o_ButtonJiraTicketInfo);
 	DDX_Control(pDX, IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD, o_StaticFrmConfiguredFileUpload);
-	DDX_Control(pDX, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, o_ListConfiguredUploads);
+	DDX_Control(pDX, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, o_ListConfiguredActions);
+	DDX_Control(pDX, IDC_BUTTON_CFGACTION_NEW, o_ButtonCfgActionNew);
+	DDX_Control(pDX, IDC_BUTTON_CFGACTION_EDIT, o_ButtonCfgActionEdit);
+	DDX_Control(pDX, IDC_BUTTON_CFGACTION_DELETE, o_ButtonCfgActionDelete);
+	DDX_Control(pDX, IDC_BUTTON_ATTACH_ALONE, o_ButtonSceenshotAttach);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -148,6 +156,9 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_NEW, &LTDlg::OnBnClickedButtonCfgactionNew)
 	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_EDIT, &LTDlg::OnBnClickedButtonCfgactionEdit)
 	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_DELETE, &LTDlg::OnBnClickedButtonCfgactionDelete)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, &LTDlg::OnLvnItemchangedListConfiguredUploadCommand)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, &LTDlg::OnNMKillfocusListConfiguredUploadCommand)
+	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_ENV, &LTDlg::OnNMKillfocusListEnv)
 END_MESSAGE_MAP()
 
 
@@ -192,7 +203,6 @@ BOOL LTDlg::OnInitDialog()
 		iIndex = 0;
 	o_ComboJiraProject.SetCurSel(iIndex);
 
-
 	// TODO: Add extra initialization here
 	o_ListEnv.SetExtendedStyle(o_ListEnv.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	o_ListEnv.InsertColumn(0,CString("Env"), LVCFMT_LEFT,75);
@@ -209,13 +219,13 @@ BOOL LTDlg::OnInitDialog()
 	o_ListSelection.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	o_ListSelection.InsertColumn(0, CString("Selection"), LVCFMT_LEFT,75);
 
-	o_ListConfiguredUploads.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
+	o_ListConfiguredActions.SetExtendedStyle(o_ListSelection.GetExtendedStyle() | LVS_EX_CHECKBOXES);
 	for (UINT ui = 0; ui < LTConfig::o_Inst.GetCustomActionCount(); ui++)
 	{
 		LTConfig::CustomAction* pCustomAction = LTConfig::o_Inst.GetCustomActionAt(ui);
-		o_ListConfiguredUploads.InsertItem(LVIF_TEXT | LVIF_STATE, ui, pCustomAction->s_Name, 
+		o_ListConfiguredActions.InsertItem(LVIF_TEXT | LVIF_STATE, ui, pCustomAction->s_Name, 
 			0, LVIS_SELECTED, 0, 0);
-		o_ListConfiguredUploads.SetItemData(ui, (DWORD_PTR)pCustomAction);
+		o_ListConfiguredActions.SetItemData(ui, (DWORD_PTR)pCustomAction);
 	}
 
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
@@ -225,6 +235,7 @@ BOOL LTDlg::OnInitDialog()
 	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
 
 	o_EditJiraTicket.EnableWindow(!LTConfig::o_Inst.b_JiraCreateNew);
+	o_ButtonJiraTicketInfo.EnableWindow(LTConfig::o_Inst.b_JiraCreateNew);
 
 	PopulateComboFromCfg(&o_ComboLogMachines, LTConfig::o_Inst.GetLogMacSet());
 	PopulateComboFromCfg(&o_ComboIncludeFilters, LTConfig::o_Inst.GetIncludeFilterSet());
@@ -235,6 +246,9 @@ BOOL LTDlg::OnInitDialog()
 	o_ButtonEnvDelete.EnableWindow(FALSE);
 	o_ButtonEnvEdit.EnableWindow(FALSE);
 	o_ButtonEnvRefresh.EnableWindow(FALSE);
+
+	o_ButtonCfgActionEdit.EnableWindow(FALSE);
+	o_ButtonCfgActionDelete.EnableWindow(FALSE);
 	//o_ListSelection.SetItemText(0, 0, "Selection");
 
 	o_Resizer.Attach(&o_ListSelection, LT_RM_BOTTMRIGHT);
@@ -242,7 +256,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonCancel, LT_RM_ALL);
 	o_Resizer.Attach(&o_ButtonUpload, LT_RM_ALL);
 
-	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_StaticFrmJira, LT_RM_BOTTMRIGHT | LT_RM_TOP);
 	o_Resizer.Attach(&o_CheckJiraComment, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_CheckJiraCreateNew, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_EditJiraURL, LT_RM_VIRTICAL);
@@ -255,7 +269,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonJiraTicketInfo, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_StaticFrmConfiguredFileUpload, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_ListConfiguredUploads, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ListConfiguredActions, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_ComboLogMachines, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonLogMacDelete, LT_RM_VIRTICAL);
@@ -270,8 +284,14 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonEnvRefresh, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticFrmEnvionment, LT_RM_BOTTOM);
 
-	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_ButtonCfgActionNew, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonCfgActionEdit, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonCfgActionDelete, LT_RM_VIRTICAL);
+
+	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_BOTTMRIGHT | LT_RM_TOP);
+	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_BOTTMRIGHT | LT_RM_TOP);
+	o_Resizer.Attach(&o_ButtonSceenshotAttach, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_ButtonScreenshotNew, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonScreenshotClear, LT_RM_VIRTICAL);
@@ -1082,6 +1102,33 @@ bool LTDlg::UploadLogs(CString& sErr)
 	pSessionEnv->Execute(sCleanDirCmd);
 
 
+	// Execute custom commands.
+	//////////////////////////////////////////////////////////////////////////
+	LST_CA lstActions;
+	GetCustomActionsList(lstActions);
+
+	CString sSSHConnStr;
+	sSSHConnStr.Format("%s@%s", pLogEnv->s_EnvUser, pLogEnv->s_IP);
+
+	for (LST_CA::iterator itr = lstActions.begin(); itr != lstActions.end(); itr++)
+	{
+		LTConfig::CustomAction* pAction = *itr;
+		CString sFullCommand;
+		sFullCommand.Format("logenvuser=%s;"
+							"logenvip=%s;"
+							"logenvpath=%s;"
+							"logenvsshcon=%s;"
+							"%s", pLogEnv->s_EnvUser, pLogEnv->s_IP,
+							sTicketPath, sSSHConnStr, pAction->s_Command);
+
+		std::list<CString> lst;
+		CString sErr;
+		pSessionEnv->Execute(sFullCommand,  &lst, &sErr);
+	}
+
+
+
+
 	// Add Comment on jira
 	//////////////////////////////////////////////////////////////////////////
 	if (LTConfig::o_Inst.b_JiraDoComment)
@@ -1124,6 +1171,9 @@ bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEn
 
 	CURL* pCurlComment = NULL;
 	pCurlComment = curl_easy_init();
+	LTCurlRetunBuffer oBuff;
+	LTCurlRetunBuffer oHeaderBuff;
+
 	if (pCurlComment) 
 	{ 
 		struct curl_slist *chunk = NULL;
@@ -1150,17 +1200,38 @@ bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEn
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEDATA, &oBuff);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEFUNCTION, LTCurlRetunBuffer::_WritFunc);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERDATA,  &oHeaderBuff);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERFUNCTION, LTCurlRetunBuffer::_WritFunc);
 
 		CURLcode res = curl_easy_perform(pCurlComment);
 		/* Check for errors */ 
 		if (res == CURLE_OK)
 		{
 			bSuccess = true;
+
+			LTHTTPResponse* pResponse = LTHTTPResponse::Create(oHeaderBuff.GetFullOutput());
+			if (pResponse)
+			{
+				LTHTTPResponse::ReturnCodeType eCode = pResponse->GetReturnCodeType();
+				if (eCode != LTHTTPResponse::RCT_OK)
+				{
+					bSuccess = false;
+					if (eCode == LTHTTPResponse::RCT_ERROR)
+					{
+						CString sLoginReason = pResponse->GetAttribute("X-Seraph-LoginReason");
+						CString sLoginDeniedReason  = pResponse->GetAttribute("X-Authentication-Denied-Reason");
+						sErr.Format("%s:%d: %s:%s\n%s", pResponse->s_Msg, pResponse->i_ReturnCode, 
+							sLoginReason, sLoginDeniedReason, LOGIN_ERR_MSG);
+					}
+				}
+			}
 		}
 		else
 		{
 			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
-				__FILE__, __LINE__ , curl_easy_strerror(res));
+				SI , curl_easy_strerror(res));
 		}
 
 		curl_easy_cleanup(pCurlComment);
@@ -1176,7 +1247,9 @@ bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEn
 		"TelnetLoginPrompt=ogin:\n"
 		"TelnetPasswordPrompt=assword:\n"
 		"UserName=%s\n"
-		"Method=2\n"
+		//"Method=2\n"
+		"Method=1\n"
+		"UserKey=survlog_trustkey\n"
 		"UseExpectSend=1\n"
 		"ExpectSend_Count=1\n"
 		"ExpectSend_Send_0=cd %s\n"
@@ -1186,9 +1259,6 @@ bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEn
 		"FontSize=9\n"
 		"FontFace=Consolas\n";
 
-	//UserKey=id_rsa_1024
-	//Method=1
-
 	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, zTicketPath);
 	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile, pCred, sErr);
 
@@ -1196,7 +1266,7 @@ bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEn
 	{
 		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
 		CString sTmpFileName;
-		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
+		sTmpFileName.Format("%s\\ss_%lu.jpg", LTUtils::GetTempPath(), time(NULL));
 
 		CString sFileName;
 		sFileName.Format("%s.jpg", pScreenshot->GetName());
@@ -1292,6 +1362,8 @@ bool LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 
 	CURL* pCurlAttachment = NULL;
 	pCurlAttachment = curl_easy_init();
+	LTCurlRetunBuffer oBuff;
+	LTCurlRetunBuffer oHeaderBuff;
 	if (pCurlAttachment) 
 	{ 
 		struct curl_slist *chunk = NULL;
@@ -1314,17 +1386,40 @@ bool LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HTTPHEADER, chunk);
 		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HTTPPOST, formpost);
 		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_SSL_VERIFYPEER, 0);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_WRITEDATA, &oBuff);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_WRITEFUNCTION, LTCurlRetunBuffer::_WritFunc);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HEADERDATA, &oHeaderBuff);
+		curl_easy_setopt_VA_fix_call(pCurlAttachment, CURLOPT_HEADERFUNCTION, LTCurlRetunBuffer::_WritFunc);
 
 		CURLcode res = curl_easy_perform(pCurlAttachment);
 		/* Check for errors */ 
 		if (res == CURLE_OK)
 		{
 			bSuccess = true;
+			TRACE("%s\n", oBuff.GetFullOutput());
+			TRACE("\n\n%s\n", oHeaderBuff.GetFullOutput());
+
+			LTHTTPResponse* pResponse = LTHTTPResponse::Create(oHeaderBuff.GetFullOutput());
+			if (pResponse)
+			{
+				LTHTTPResponse::ReturnCodeType eCode = pResponse->GetReturnCodeType();
+				if (eCode != LTHTTPResponse::RCT_OK)
+				{
+					bSuccess = false;
+					if (eCode == LTHTTPResponse::RCT_ERROR)
+					{
+						CString sLoginReason = pResponse->GetAttribute("X-Seraph-LoginReason");
+						CString sLoginDeniedReason  = pResponse->GetAttribute("X-Authentication-Denied-Reason");
+						sErr.Format("%s:%d: %s:%s\n%s", pResponse->s_Msg, pResponse->i_ReturnCode, 
+							sLoginReason, sLoginDeniedReason, LOGIN_ERR_MSG);
+					}
+				}
+			}
 		}
 		else
 		{
 			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
-				__FILE__, __LINE__ , curl_easy_strerror(res));
+				SI , curl_easy_strerror(res));
 		}
 
 		curl_easy_cleanup(pCurlAttachment);
@@ -1339,12 +1434,6 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 							 CString& sErr, LTJiraCredentials* pCred,
 							 const char* zSummary, const char* zDescription)
 {
-
-	//For testing
-	sTicket = "SURVRD-11";
-	return true;
-	//For testing
-
 	LTJiraCredentials* pLocalCred = NULL;
 
 	if (!pCred)
@@ -1375,6 +1464,7 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 	if (pCurlComment) 
 	{ 
 		LTCurlRetunBuffer oBuff;
+		LTCurlRetunBuffer oHeaderBuff;
 
 		struct curl_slist *chunk = NULL;
 		chunk = curl_slist_append(chunk, "Content-Type: application/json");
@@ -1403,27 +1493,49 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEDATA, &oBuff);
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEFUNCTION, LTCurlRetunBuffer::_WritFunc);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERDATA,  &oHeaderBuff);
+		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERFUNCTION, LTCurlRetunBuffer::_WritFunc);
 
 		CURLcode res = curl_easy_perform(pCurlComment);
 		/* Check for errors */ 
 		if (res == CURLE_OK)
 		{
-			oBuff.GetTicketID(sTicket);
-			if (sTicket.IsEmpty())
+
+			LTHTTPResponse* pResponse = LTHTTPResponse::Create(oHeaderBuff.GetFullOutput());
+			if (pResponse)
 			{
-				bSuccess = false;
-				sErr.Format("Ticket creation problem. Ticket is empty");
-			}
-			else
-			{
-				bSuccess = true;
+				LTHTTPResponse::ReturnCodeType eCode = pResponse->GetReturnCodeType();
+				if (eCode != LTHTTPResponse::RCT_OK)
+				{
+					bSuccess = false;
+					if (eCode == LTHTTPResponse::RCT_ERROR)
+					{
+						CString sLoginReason = pResponse->GetAttribute("X-Seraph-LoginReason");
+						CString sLoginDeniedReason  = pResponse->GetAttribute("X-Authentication-Denied-Reason");
+						sErr.Format("%s:%d: %s:%s\n%s", pResponse->s_Msg, pResponse->i_ReturnCode, 
+							sLoginReason, sLoginDeniedReason, LOGIN_ERR_MSG);
+					}
+				}
+				else
+				{
+					oBuff.GetTicketID(sTicket);
+					if (sTicket.IsEmpty())
+					{
+						bSuccess = false;
+						sErr.Format("Ticket creation problem. Ticket-ID is empty");
+					}
+					else
+					{
+						bSuccess = true;
+					}
+				}
 			}
 		}
 		else
 		{
 			bSuccess = false;
 			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
-				__FILE__, __LINE__ , curl_easy_strerror(res));
+				SI , curl_easy_strerror(res));
 		}
 
 		curl_easy_cleanup(pCurlComment);
@@ -1762,7 +1874,7 @@ void LTDlg::OnBnClickedButtonAttachAlone()
 	{
 		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
 		CString sTmpFileName;
-		sTmpFileName.Format("ss_%lu.jpg", time(NULL));
+		sTmpFileName.Format("%s\\ss_%lu.jpg", LTUtils::GetTempPath(), time(NULL));
 
 		CString sFileName;
 		sFileName.Format("%s.jpg", pScreenshot->GetName());
@@ -1792,14 +1904,14 @@ void LTDlg::OnBnClickedButtonCfgactionEdit()
 {
 	// TODO: Add your control notification handler code here
 
-	POSITION pos = o_ListConfiguredUploads.GetFirstSelectedItemPosition();
+	POSITION pos = o_ListConfiguredActions.GetFirstSelectedItemPosition();
 	if (pos)
 	{
-		int nItem = o_ListConfiguredUploads.GetNextSelectedItem(pos);
+		int nItem = o_ListConfiguredActions.GetNextSelectedItem(pos);
 		if (nItem > -1)
 		{
 			LTConfig::CustomAction* pCustomAction = 
-				(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(nItem);
+				(LTConfig::CustomAction*)o_ListConfiguredActions.GetItemData(nItem);
 			LTConfigActionDlg oDlg;
 			oDlg.SetDlg(this);
 			oDlg.SetEditMode(pCustomAction);
@@ -1815,37 +1927,188 @@ void LTDlg::AddCustomAction( const char* zName, const char* zCommand )
 	pCustomAction->s_Command = zCommand;
 
 	LTConfig::o_Inst.AddCustomAction(pCustomAction);
-	UINT ui = o_ListConfiguredUploads.GetItemCount();
-	o_ListConfiguredUploads.InsertItem(LVIF_TEXT | LVIF_STATE, ui, 
+	UINT ui = o_ListConfiguredActions.GetItemCount();
+	o_ListConfiguredActions.InsertItem(LVIF_TEXT | LVIF_STATE, ui, 
 		pCustomAction->s_Name, 0, LVIS_SELECTED, 0, 0);
-	o_ListConfiguredUploads.SetItemData(ui, (DWORD_PTR)pCustomAction);
+	o_ListConfiguredActions.SetItemData(ui, (DWORD_PTR)pCustomAction);
 }
 
 void LTDlg::UpdateCustomAction( LTConfig::CustomAction* pAction )
 {
 	// Nothing to do
-	for (UINT ui = 0; ui < (UINT)o_ListConfiguredUploads.GetItemCount(); ui++)
+	for (UINT ui = 0; ui < (UINT)o_ListConfiguredActions.GetItemCount(); ui++)
 	{
 		LTConfig::CustomAction* pCustomActionEx = 
-			(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(ui);
+			(LTConfig::CustomAction*)o_ListConfiguredActions.GetItemData(ui);
 		if (pCustomActionEx == pAction)
-			o_ListConfiguredUploads.SetItemText(ui, 0, pAction->s_Name);
+			o_ListConfiguredActions.SetItemText(ui, 0, pAction->s_Name);
 	}
 }
 
 void LTDlg::OnBnClickedButtonCfgactionDelete()
 {
-	POSITION pos = o_ListConfiguredUploads.GetFirstSelectedItemPosition();
+	POSITION pos = o_ListConfiguredActions.GetFirstSelectedItemPosition();
 	if (pos)
 	{
-		int nItem = o_ListConfiguredUploads.GetNextSelectedItem(pos);
+		int nItem = o_ListConfiguredActions.GetNextSelectedItem(pos);
 		if (nItem > -1)
 		{
 			LTConfig::CustomAction* pCustomAction = 
-				(LTConfig::CustomAction*)o_ListConfiguredUploads.GetItemData(nItem);
+				(LTConfig::CustomAction*)o_ListConfiguredActions.GetItemData(nItem);
 
-			o_ListConfiguredUploads.DeleteItem(nItem);
+			o_ListConfiguredActions.DeleteItem(nItem);
 			LTConfig::o_Inst.RemoveCustomAction(pCustomAction);
 		}
 	}
+}
+
+void LTDlg::OnLvnItemchangedListConfiguredUploadCommand(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	if ((pNMLV->uChanged & LVIF_STATE) 
+		&& (pNMLV->uNewState & LVNI_SELECTED))
+	{
+		o_ButtonCfgActionEdit.EnableWindow(TRUE);
+		o_ButtonCfgActionDelete.EnableWindow(TRUE);
+	}
+}
+
+void LTDlg::OnNMKillfocusListConfiguredUploadCommand(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	//o_ButtonCfgActionEdit.EnableWindow(FALSE);
+	//o_ButtonCfgActionDelete.EnableWindow(FALSE);
+	*pResult = 0;
+}
+
+void LTDlg::OnNMKillfocusListEnv(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	//o_ButtonEnvDelete.EnableWindow(FALSE);
+	//o_ButtonEnvEdit.EnableWindow(FALSE);
+	//o_ButtonEnvRefresh.EnableWindow(FALSE);
+	*pResult = 0;
+}
+
+LTDlg::~LTDlg()
+{
+	for (UINT ui = 0; ui < LTEnv::vec_Env.size(); ui++)
+	{
+		LTEnv* pEnv = LTEnv::vec_Env[ui];
+		delete pEnv;
+	}
+	LTEnv::vec_Env.clear();
+}
+
+void LTDlg::GetCustomActionsList(LST_CA &lstActions )
+{
+	int i = -1;
+	do
+	{
+		i = o_ListConfiguredActions.GetNextItem(i, LVNI_ALL);
+		if  (i == -1)
+			break;
+
+		if (o_ListConfiguredActions.GetCheck(i) )
+		{
+			LTConfig::CustomAction* pAction = 
+				(LTConfig::CustomAction*)o_ListConfiguredActions.GetItemData(i);
+			lstActions.push_back(pAction);
+		}
+	} while(true);
+}
+
+LTHTTPResponse::LTHTTPResponse()
+{
+	i_ReturnCode = -1;
+}
+
+LTHTTPResponse::~LTHTTPResponse()
+{
+
+}
+
+LTHTTPResponse* LTHTTPResponse::Create(const char* zHeader)
+{
+	LTHTTPResponse* pRes = new LTHTTPResponse;
+
+	int iResponseLen = strlen(zHeader) + 1;
+	char* zResponse = new char[iResponseLen];
+	strcpy_s(zResponse, iResponseLen, zHeader);
+	char* zNextLine = NULL;
+	char* zNextToken = NULL;
+	int iLine = 0;
+	for (char* zLine = strtok_s(zResponse, "\n", &zNextLine);
+			zLine; zLine = strtok_s(NULL, "\n", &zNextLine))
+	{
+		int iLineLen = strlen(zLine);
+		if (zLine[iLineLen-1] == '\r')
+			zLine[(iLineLen--) - 1] = 0;
+
+		if (iLineLen == 0)
+		{
+			iLine = 0;
+			continue;
+		}
+
+		if (iLine == 0)
+		{
+			pRes->map_Attributes.clear();
+			int iToken = 0;
+			for (char* zToken = strtok_s(zLine, "\r :", &zNextToken);
+				zToken; zToken = strtok_s(NULL, "\r :", &zNextToken))
+			{
+
+				if (iToken == 0)
+					pRes->s_Protocol = zToken;
+				else if (iToken == 1)
+					pRes->i_ReturnCode = atoi(zToken);
+				else if (iToken == 2)
+					pRes->s_Msg = zToken;
+
+				iToken++;
+			}
+		}
+		else
+		{
+			CString sAttr = "";
+			CString sAttrVal = "";
+			int iToken = 0;
+			for (char* zToken = strtok_s(zLine, ":", &zNextToken);
+				zToken; zToken = strtok_s(NULL, ":", &zNextToken))
+			{
+				if (iToken == 0)
+					sAttr = zToken;
+				else if (iToken == 1)
+				{
+					sAttrVal = zToken;
+					sAttrVal.Trim();
+					pRes->map_Attributes[sAttr] = sAttrVal;
+				}
+				iToken++;
+			}
+		}
+
+		iLine++;
+	}
+
+	return pRes;
+}
+
+LTHTTPResponse::ReturnCodeType LTHTTPResponse::GetReturnCodeType()
+{
+	int iType = i_ReturnCode / 100;
+	return (ReturnCodeType)iType;
+}
+
+CString LTHTTPResponse::GetAttribute( const char* zKey )
+{
+	std::map<CString, CString>::iterator itr = map_Attributes.find(zKey);
+	if (itr == map_Attributes.end())
+		return "";
+
+	return itr->second;
 }

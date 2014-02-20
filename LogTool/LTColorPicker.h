@@ -18,6 +18,7 @@ public:
 	virtual ~LTColorPicker();
 
 	void	SetCallback(LTColorPickerCallback* pCB) { p_CB = pCB;};
+	void	SetColor(COLORREF cr);
 
 	COLORREF	cr_Val;
 	LTColorPickerCallback* p_CB;

@@ -23,6 +23,7 @@ public:
 	static bool DecodePathStringEx(const char* zConnStr, CString& sEnvName, CString& sPath);
 	static CString GetVersionInfo(HMODULE hLib, CString csEntry);
 	static CString FormatVersion(CString cs);
+	static CString GetTempPath();
 
 
 	static CString GetProductVersionX();

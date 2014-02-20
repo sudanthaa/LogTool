@@ -83,15 +83,18 @@ IDI_ICON_SMALL_CLOSE_PRESSED ICON                    "res\\close-pressed.ico"
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+IDD_ABOUTBOX DIALOGEX 0, 0, 230, 67
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About LogTool"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
-    LTEXT           "LogTool, Version 1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
-    LTEXT           "Copyright (C) 2013",IDC_STATIC,42,26,114,8
-    DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
+    LTEXT           "LogTool, Version 1.0",IDC_STATIC,42,10,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2013. Millennium Information Technologies",IDC_STATIC,41,21,186,8
+    DEFPUSHBUTTON   "OK",IDOK,173,46,50,14,WS_GROUP
+    LTEXT           "Author: A.H. Sudantha Athauda",IDC_STATIC,42,32,139,8
+    CONTROL         "<a href=""mailto:sudantha@millenniumit.com"">sudantha@millenniumit.com</a>",IDC_SYSLINK1,
+                    "SysLink",WS_TABSTOP,42,42,91,11
 END
 
 IDD_LOGTOOL DIALOGEX 0, 0, 575, 322
@@ -194,9 +197,11 @@ BEGIN
     EDITTEXT        IDC_EDIT_SCREENSHOT_EDIT_NAME,536,31,61,12,ES_AUTOHSCROLL
     LTEXT           "ToolBarArea",IDC_STATIC_DRAW_TOOLBAR,536,47,61,20,NOT WS_VISIBLE | WS_BORDER
     GROUPBOX        "Settings",IDC_STATIC_SCREENSHOT_EDIT_SETTINGS,536,70,61,40
-    EDITTEXT        IDC_EDIT2,565,82,19,12,ES_AUTOHSCROLL
     RTEXT           "Width:",IDC_STATIC_PEN_WIDTH,539,83,24,8
-    LTEXT           "",IDC_STATIC_COLOR_FRAME,566,96,18,10,NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "",IDC_STATIC_COLOR_FRAME,567,96,21,10,NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "1",IDC_STATIC_PEN_WIDTH_EX,567,83,8,8
+    CONTROL         "",IDC_SPIN_PEN_WIDTH,"msctls_updown32",UDS_ARROWKEYS,575,81,13,12
+    RTEXT           "Color:",IDC_STATIC_PEN_COLOR,539,97,24,8
 END
 
 IDD_SCREEN_CAPTURE DIALOGEX 0, 0, 299, 164
@@ -260,7 +265,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Author: Sudantha Athauda (sudantha@millenniumit.com)"
             VALUE "CompanyName", "Millenniumt Information Technologies"
-            VALUE "FileDescription", "LogTool"
+            VALUE "FileDescription", "LogTool. Author: Sudantha Athauda (sudantha@millenniumit.com)"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "LogTool.exe"
             VALUE "LegalCopyright", "(c) 2013. Millenniumt Information Technologies.  All rights reserved."
@@ -287,9 +292,9 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 163
+        RIGHTMARGIN, 223
         TOPMARGIN, 7
-        BOTTOMMARGIN, 55
+        BOTTOMMARGIN, 60
     END
 
     IDD_LOGTOOL, DIALOG

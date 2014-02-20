@@ -73,6 +73,21 @@ public:
 	LTScreenshot*	DetachScreenshot();
 	int		DoModalEx(LTScreenshot* pScreenshot);
 
+	enum Tool
+	{
+		TOOL_PEN,
+		TOOL_RECT,
+		TOOL_ARROW,
+		TOOL_NONE
+	};
+
+	int		i_PenWidth;
+	int		i_RectWidth;
+	int		i_ArrowWidth;
+	COLORREF cr_Pen;
+	COLORREF cr_Rect;
+	COLORREF cr_Arrow;
+	Tool e_Tool;
 
 	LTColorPicker o_ColorPicker;
 	LTScreenshotEditCtrl o_ScreenshotEditCtrl;
@@ -114,6 +129,8 @@ public:
 	afx_msg void OnBnClickedButtonScreenshotEditPen();
 	afx_msg void OnBnClickedButtonScreenshotEditRect();
 	CEdit o_EditName;
+	afx_msg void OnDeltaposSpinPenWidth(NMHDR *pNMHDR, LRESULT *pResult);
+	CStatic o_StaticPenWidth;
 };
 
 

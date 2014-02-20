@@ -16,6 +16,14 @@ LTScreenshotEditDlg::LTScreenshotEditDlg(CWnd* pParent /*=NULL*/)
 	p_OutputScreenshot = NULL;
 	p_DrawToolbar = NULL;
 	p_PreLoadScreenshot = NULL;
+
+	i_PenWidth = 1;
+	i_RectWidth = 1;
+	i_ArrowWidth = 2;
+	cr_Pen = RGB(255, 0, 0);
+	cr_Rect = RGB(255, 0, 0);
+	cr_Arrow = RGB(255, 0, 0);
+	e_Tool = TOOL_NONE;
 }
 
 LTScreenshotEditDlg::~LTScreenshotEditDlg()
@@ -33,6 +41,7 @@ void LTScreenshotEditDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDCANCEL, o_BtnCancel);
 	DDX_Control(pDX, IDC_BUTTON_TAKE, o_BtnTake);
 	DDX_Control(pDX, IDC_EDIT_SCREENSHOT_EDIT_NAME, o_EditName);
+	DDX_Control(pDX, IDC_STATIC_PEN_WIDTH_EX, o_StaticPenWidth);
 }
 
 
@@ -48,6 +57,7 @@ BEGIN_MESSAGE_MAP(LTScreenshotEditDlg, CDialog)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_PEN, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen)
 	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_RECT, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect)
+	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_PEN_WIDTH, &LTScreenshotEditDlg::OnDeltaposSpinPenWidth)
 END_MESSAGE_MAP()
 
 
@@ -62,7 +72,7 @@ void LTScreenshotEditDlg::OnBnClickedOk()
 	o_EditName.GetWindowText(sName);
 	p_OutputScreenshot->SetName(sName);
 
-	p_OutputScreenshot->Save("test.jpg");
+	//p_OutputScreenshot->Save("test.jpg");
 
 	EndDialog(IDOK);
 	//OnOK();
@@ -232,7 +242,9 @@ void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen()
 {
 	// TODO: Add your control notification handler code here
 
+
 	o_ScreenshotEditCtrl.PenStart();
+
 }
 
 void LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect()
@@ -250,16 +262,56 @@ LTScreenshot* LTScreenshotEditDlg::DetachScreenshot()
 
 void LTScreenshotEditDlg::OnToolPen( bool bPress )
 {
+	if(bPress)
+	{
+		CString sWidth;
+		sWidth.Format("%d", i_PenWidth);
+		o_StaticPenWidth.SetWindowText(sWidth);
+		o_ScreenshotEditCtrl.SetWidth(i_PenWidth);
+		o_ScreenshotEditCtrl.SetColor(cr_Pen);
+		o_ColorPicker.SetColor(cr_Pen);
+
+		e_Tool = TOOL_PEN;
+	}
+	else
+		e_Tool =  TOOL_NONE;
+
 	o_ScreenshotEditCtrl.PenStart();
 }
 
 void LTScreenshotEditDlg::OnToolRect( bool bPress )
 {
+	if (bPress)
+	{
+		CString sWidth;
+		sWidth.Format("%d", i_RectWidth);
+		o_StaticPenWidth.SetWindowText(sWidth);
+		o_ScreenshotEditCtrl.SetWidth(i_RectWidth);
+		o_ScreenshotEditCtrl.SetColor(cr_Rect);
+		o_ColorPicker.SetColor(cr_Rect);
+		e_Tool = TOOL_RECT;
+	}
+	else
+		e_Tool =  TOOL_NONE;
+
 	o_ScreenshotEditCtrl.RectStart();
 }
 
 void LTScreenshotEditDlg::OnToolArrow( bool bPress )
 {
+	if (bPress)
+	{
+		CString sWidth;
+		sWidth.Format("%d", i_ArrowWidth);
+		o_StaticPenWidth.SetWindowText(sWidth);
+		o_ScreenshotEditCtrl.SetWidth(i_ArrowWidth);
+		o_ScreenshotEditCtrl.SetColor(cr_Arrow);
+		o_ColorPicker.SetColor(cr_Arrow);
+		e_Tool = TOOL_ARROW;
+	}
+	else
+		e_Tool =  TOOL_NONE;
+
 	o_ScreenshotEditCtrl.ArrowStart();
 }
 
@@ -275,6 +327,13 @@ int LTScreenshotEditDlg::DoModalEx( LTScreenshot* pScreenshot )
 void LTScreenshotEditDlg::OnColorChange( COLORREF cr )
 {
 	o_ScreenshotEditCtrl.SetColor(cr);
+
+	if (e_Tool == TOOL_ARROW)
+		cr_Arrow = cr;
+	else if (e_Tool == TOOL_PEN)
+		cr_Pen = cr;
+	else if (e_Tool == TOOL_RECT)
+		cr_Rect = cr;
 }
 
 // LTDrawToolBar
@@ -514,4 +573,38 @@ BOOL LTDrawToolBar::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 		return TRUE;
 
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
+}
+
+void LTScreenshotEditDlg::OnDeltaposSpinPenWidth(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	*pResult = 0;
+
+	CString sVal;
+	o_StaticPenWidth.GetWindowText(sVal);
+	int iVal = atoi(sVal);
+
+	if (pNMUpDown->iDelta > 0)
+	{
+		iVal--;
+		iVal = max(iVal, 1);
+	} 
+	else if (pNMUpDown->iDelta < 0)
+	{
+		iVal++;
+		iVal = min(iVal, 4);
+	}
+
+	sVal.Format("%d", iVal);
+	o_StaticPenWidth.SetWindowText(sVal);
+	o_ScreenshotEditCtrl.SetWidth(iVal);
+
+	if (e_Tool == TOOL_ARROW)
+		i_ArrowWidth = iVal;
+	else if (e_Tool == TOOL_PEN)
+		i_PenWidth = iVal;
+	else if (e_Tool == TOOL_RECT)
+		i_RectWidth = iVal;
+
 }

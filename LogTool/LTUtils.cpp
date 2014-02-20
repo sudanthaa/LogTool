@@ -48,17 +48,17 @@ CString LTUtils::GetVersionInfo(HMODULE hLib, CString csEntry)
 
 				static char fileEntry[256];
 
-				sprintf(fileEntry,"\\VarFileInfo\\Translation");
+				sprintf_s(fileEntry, 256,"\\VarFileInfo\\Translation");
 				retVal = VerQueryValue(versionInfo,fileEntry,&retbuf,(UINT *)&vLen);
 				if (retVal && vLen==4) 
 				{
 					memcpy(&langD,retbuf,4);            
-					sprintf(fileEntry, "\\StringFileInfo\\%02X%02X%02X%02X\\%s",
+					sprintf_s(fileEntry, 256, "\\StringFileInfo\\%02X%02X%02X%02X\\%s",
 						(langD & 0xff00)>>8,langD & 0xff,(langD & 0xff000000)>>24, 
 						(langD & 0xff0000)>>16, csEntry);            
 				}
 				else 
-					sprintf(fileEntry, "\\StringFileInfo\\%04X04B0\\%s", 
+					sprintf_s(fileEntry, 256, "\\StringFileInfo\\%04X04B0\\%s", 
 					GetUserDefaultLangID(), csEntry);
 
 				if (VerQueryValue(versionInfo,fileEntry,&retbuf,(UINT *)&vLen)) 
@@ -194,4 +194,14 @@ bool LTUtils::DecodePathStringEx( const char* zConnStr, CString& sEnvName, CStri
 	}
 
 	return true;
+}
+
+CString LTUtils::GetTempPath()
+{
+	char zBuff[300];
+	char zBuffEx[300];
+	::GetTempPath(300, zBuff);
+	::GetLongPathName(zBuff, zBuffEx, 300);
+
+	return zBuffEx;
 }

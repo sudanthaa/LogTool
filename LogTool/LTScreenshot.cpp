@@ -3,6 +3,16 @@
 #include "LTBitmapBuffer.h"
 #include "LTUtils.h"
 
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+//#include <opencv/cv.h>
+//#include <opencv/highgui.h>
+//using namespace cv;
+
+#include "jpge.h"
+
 #include <math.h>
 
 LTScreenshot::LTScreenshot(void)
@@ -93,7 +103,79 @@ int GetEncoderClsid(const char* format, CLSID* pClsid)
 	return -1;  // Failure
 }
 
-bool LTScreenshot::Save( const char* zFileName, int iQuality)
+bool LTScreenshot::Save(const char* zFileName, int iQuality /* = 90 */)
+{
+	return SaveWithGJpeg(zFileName, iQuality);
+}
+
+bool LTScreenshot::SaveWithGJpeg( const char* zFileName, int iQuality /*= 90*/ )
+{
+	CBitmap* pBitmap = GetBuffer()->GetBitmap();
+	BITMAP bm;
+	pBitmap->GetBitmap(&bm);
+
+	int iBytesPerPixel = (bm.bmBitsPixel / 8);
+	DWORD dwSize = bm.bmHeight * bm.bmWidth * iBytesPerPixel;
+	char* pData = new char[dwSize];
+	pBitmap->GetBitmapBits(dwSize, pData);
+
+	if (iBytesPerPixel == 4) // ARGB
+	{
+		for (int i = 0; i < bm.bmHeight * bm.bmWidth; i++)
+		{
+			int iIdxBlue = i * 4 + 0;
+			int iIdxRed = i * 4 + 2;
+			char iBlue = pData[iIdxBlue];
+			char iRed = pData[iIdxRed];
+			pData[iIdxRed] = iBlue;
+			pData[iIdxBlue] = iRed;
+		}
+	}
+
+	jpge::params oparam;
+	oparam.m_quality = iQuality;
+	oparam.m_subsampling = jpge::H1V1;
+
+	return jpge::compress_image_to_jpeg_file(zFileName, bm.bmWidth, bm.bmHeight, iBytesPerPixel, 
+		(const jpge::uint8*)pData, oparam);
+
+	delete [] pData;
+}
+
+bool LTScreenshot::SaveWithOpenCV(const char* zFileName, int iQuality /* = 90 */)
+{
+
+
+	//DIBSECTION ds;
+	//CBitmap* pBitmap = GetBuffer()->GetBitmap();
+	//BITMAP bm;
+	//pBitmap->GetObject(sizeof(ds),&ds);
+	//pBitmap->GetBitmap(&bm);
+	//
+	//IplImage *pImage = cvCreateImage(cvSize(ds.dsBm.bmWidth,ds.dsBm.bmHeight),IPL_DEPTH_8U, 4);
+
+	//DWORD dwSize = pImage->imageSize;
+	//char* pData = new char[dwSize];
+	//pBitmap->GetBitmapBits(dwSize, pData);
+
+	//memcpy(pImage->imageData,pData,dwSize);
+	//Mat matImg(pImage);
+
+	//try {
+	//	vector<int> param;
+	//	param.push_back(CV_IMWRITE_JPEG_QUALITY);
+	//	param.push_back(100);
+	//	cv::imwrite(zFileName, matImg, param);
+	//}
+	//catch (runtime_error& ex) {
+	//	fprintf(stderr, "Exception converting image to PNG format: %s\n", ex.what());
+	//	return false;
+	//}
+
+	return true;
+}
+
+bool LTScreenshot::SaveWithGDI( const char* zFileName, int iQuality)
 {
 	CLSID             encoderClsid;
 	Gdiplus::EncoderParameters encoderParameters;
@@ -131,6 +213,8 @@ bool LTScreenshot::Save( const char* zFileName, int iQuality)
 
 	return (stat == Gdiplus::Ok);
 }
+
+
 
 void LTRectMarking::DrawRect( CDC* pDC, CRect& rRect )
 {

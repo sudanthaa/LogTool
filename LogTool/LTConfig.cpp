@@ -1,6 +1,7 @@
 #include "LTPch.h"
 #include "LTConfig.h"
 #include "LTUtils.h"
+#include "LTEnv.h"
 
 LTConfig LTConfig::o_Inst;
 

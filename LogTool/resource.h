@@ -54,7 +54,6 @@
 #define IDC_EDIT_JIRA_USER_ID           1037
 #define IDC_BUTTON_LOGMAC_DELETE        1038
 #define IDC_EDIT_JIRA_PASSWORD          1039
-#define IDC_BUTTON_LOGMAC_DELETE2       1039
 #define IDC_BUTTON_CFGACTION_DELETE     1039
 #define IDC_STATIC_ADD_ENV_IP           1040
 #define IDC_BUTTON_SCREENSHOT_NEW       1040
@@ -106,6 +105,7 @@
 #define IDC_STATIC_PEN_WIDTH            1071
 #define IDC_STATIC_COLOR_FRAME          1072
 #define IDC_BUTTON_JIRA_CREDENTIALS     1073
+#define IDC_STATIC_PEN_COLOR            1073
 #define IDC_BUTTON3                     1074
 #define IDC_BUTTON_JIRA_TICKE_INFO      1074
 #define IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD 1075
@@ -115,6 +115,9 @@
 #define IDC_STATIC_CONFIGURED_COMMAND   1079
 #define IDC_RICHEDIT2_CFGCOMMAND_DESC   1080
 #define IDC_STATIC_CONFIGURED_COMMAND_NAME 1081
+#define IDC_SPIN_PEN_WIDTH              1081
+#define IDC_STATIC_PEN_WIDTH_EX         1082
+#define IDC_SYSLINK1                    1083
 
 // Next default values for new objects
 // 
@@ -122,7 +125,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        141
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1081
+#define _APS_NEXT_CONTROL_VALUE         1084
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

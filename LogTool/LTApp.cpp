@@ -8,6 +8,7 @@
 #include <libssh2.h>
 #include <curl/curl.h>
 #include <GdiPlus.h>
+#include <time.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -34,7 +35,7 @@ LTApp::LTApp()
 
 LTApp theApp;
 
-
+char* strptime(const char *s, const char *format, struct tm *tm);
 // LTApp initialization
 
 BOOL LTApp::InitInstance()
@@ -104,3 +105,4 @@ BOOL LTApp::InitInstance()
 	//  application, rather than start the application's message pump.
 	return FALSE;
 }
+

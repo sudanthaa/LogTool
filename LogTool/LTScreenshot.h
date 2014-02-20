@@ -91,7 +91,10 @@ public:
 	void	Add(LTScreenshotMarking* pMarking);
 	void	SetName(const char* zName)	{	s_Name = zName; };
 	const char*		GetName() {	return s_Name; };
-	bool	Save(const char* zFileName, int iQuality = 90);
+	bool	Save(const char* zFileName, int iQuality = 95);
+	bool	SaveWithGDI(const char* zFileName, int iQuality = 95);
+	bool	SaveWithOpenCV(const char* zFileName, int iQuality = 95);
+	bool	SaveWithGJpeg(const char* zFileName, int iQuality = 95);
 
 protected:
 	CString		s_Name;

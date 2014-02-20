@@ -3,6 +3,8 @@
 
 #pragma once
 #include <vector>
+#include <map>
+#include <list>
 #include "afxcmn.h"
 #include "afxwin.h"
 #include "LTFieldListener.h"
@@ -15,12 +17,15 @@
 class LTSshSession;
 class LTJiraCredentials;
 
+typedef std::list<LTConfig::CustomAction*>    LST_CA;
+
 // LTDlg dialog
 class LTDlg : public CDialog, public LTFieldListener, public LTThumbnailsCtrlListener
 {
 // Construction
 public:
 	LTDlg(CWnd* pParent = NULL);	// standard constructor
+	~LTDlg();
 	void	AddEnv(const char* zName, const char* zUser, const char* zIP, const char* zPassword);
 	void	EditEnv(LTEnv* pEnv);
 	void	AddLogEnv(const char* zEnvName, const char* zBaseLocation = "");
@@ -70,6 +75,8 @@ public:
 				bool bWithID = true);
 	bool	ProvideWinJiraCred(const char* zURL, CString& sUser, CString& sPassword, bool bUpdateAnyway = false);
 	bool	UploadLogs(CString& sErr);
+
+	void	GetCustomActionsList(LST_CA &lstActions );
 	void	AddCustomAction(const char* zName, const char* zCommand);
 	void	UpdateCustomAction(LTConfig::CustomAction* pAction);
 
@@ -154,11 +161,45 @@ public:
 	CButton o_ButtonJiraTicketInfo;
 
 	CStatic o_StaticFrmConfiguredFileUpload;
-	CListCtrl o_ListConfiguredUploads;
+	CListCtrl o_ListConfiguredActions;
 	afx_msg void OnBnClickedButtonAttachAlone();
 	afx_msg void OnBnClickedButtonCfgactionNew();
 	afx_msg void OnBnClickedButtonCfgactionEdit();
 	afx_msg void OnBnClickedButtonCfgactionDelete();
+	afx_msg void OnLvnItemchangedListConfiguredUploadCommand(NMHDR *pNMHDR, LRESULT *pResult);
+	CButton o_ButtonCfgActionNew;
+	CButton o_ButtonCfgActionEdit;
+	CButton o_ButtonCfgActionDelete;
+	afx_msg void OnNMKillfocusListConfiguredUploadCommand(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMKillfocusListEnv(NMHDR *pNMHDR, LRESULT *pResult);
+	CButton o_ButtonSceenshotAttach;
+};
+
+
+
+class LTHTTPResponse
+{
+public:
+	LTHTTPResponse();
+	~LTHTTPResponse();
+
+	static LTHTTPResponse* Create(const char* zHeader);
+
+	enum ReturnCodeType
+	{
+		RCT_CONTINUE = 1,
+		RCT_OK = 2,
+		RCT_ERROR = 4
+	};
+
+	ReturnCodeType	GetReturnCodeType();
+	CString		GetAttribute(const char* zKey);
+
+	int i_ReturnCode;
+	CString s_Protocol;
+	CString s_Msg;
+
+	std::map<CString,CString> map_Attributes;
 };
 
 
@@ -179,6 +220,8 @@ public:
 		p_Data = NULL;
 	}
 
+
+	const char* GetFullOutput() { return p_Data; };
 	bool	GetTicketID(CString& sOut);
 	void	Append(int iLen, char* pData);
 	bool	HasMoreSpace(int iLen);
