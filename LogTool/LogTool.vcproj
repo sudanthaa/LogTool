@@ -238,11 +238,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTIndefProgressBar.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTJiraCredentials.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\LTNewJIRADlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LTOutputStringQueue.cpp"
 				>
 			</File>
 			<File
@@ -264,6 +272,10 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LTProgressDlg.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\LTResizeMan.cpp"
@@ -356,6 +368,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTIndefProgressBar.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LTJiraCredentials.h"
 				>
 			</File>
@@ -364,7 +380,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTOutputStringQueue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LTPch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTProgressDlg.h"
 				>
 			</File>
 			<File

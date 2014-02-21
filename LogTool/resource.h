@@ -21,6 +21,7 @@
 #define IDD_SCREEN_CAPTURE              138
 #define IDD_NEW_JIRA                    139
 #define IDD_ADD_CONFIGURED_ACTION       140
+#define IDD_PROGRESS                    141
 #define IDC_LIST_SELECTION              1001
 #define IDC_BUTTON_ENV_ADD              1003
 #define IDC_BUTTON_ENV_EDIT             1004
@@ -118,14 +119,15 @@
 #define IDC_SPIN_PEN_WIDTH              1081
 #define IDC_STATIC_PEN_WIDTH_EX         1082
 #define IDC_SYSLINK1                    1083
+#define IDC_STATIC_PROGRESS_FRAME       1084
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        141
+#define _APS_NEXT_RESOURCE_VALUE        142
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1084
+#define _APS_NEXT_CONTROL_VALUE         1085
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -14,6 +14,7 @@
 #include "LTJiraCredentials.h"
 #include "LTNewJIRADlg.h"
 #include "LTConfigActionDlg.h"
+#include "LTProgressDlg.h"
 
 #include <WinCred.h>
 
@@ -1831,7 +1832,9 @@ void LTDlg::OnBnClickedButtonJiraTickeInfo()
 {
 	// TODO: Add your control notification handler code here
 
-	SpawnNewJiraDlg();
+	LTProgressDlg oDlg;
+	oDlg.DoModal();
+	//SpawnNewJiraDlg();
 
 }
 
