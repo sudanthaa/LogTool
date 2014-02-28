@@ -1,6 +1,7 @@
 #include "LTPch.h"
 #include "LTSshSession.h"
 #include "LTEnv.h"
+#include "LTOutputStringQueue.h"
 
 #define  DEFAULT_SSH_PORT   22
 
@@ -260,7 +261,7 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CS
             {
                 int i;
                 bytecount += rc;
-                TRACE( "We read:\n");
+               // TRACE( "We read:\n");
                 for (i = 0; i < rc; ++i )
 				{
 					char c = buffer[i];
@@ -270,13 +271,16 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CS
 						buffer[i] = 0;
 						CString sVal = buffer + istart;
 						if (plstOut)
+						{
 							plstOut->push_back(sVal);
+							
+						}
+						LTOutputStringQueue::PushString(sVal);
 						buffer[i] = c;
-						TRACE( "%s - %d\n" , sVal, istart);
+						//TRACE( "%s - %d\n" , sVal, istart);
 						istart = i + 1;
 					}
 				}
-                TRACE( "\n");
             }
             else {
                 if ( rc != LIBSSH2_ERROR_EAGAIN )
@@ -311,9 +315,9 @@ bool LTSshSession::Execute(const char* zCommand, std::list<CString>* plstOut, CS
     }
  
     if (exitsignal)
-        TRACE( "\nGot signal: %s\n", exitsignal);
+        TRACE( "Got signal: %s\n", exitsignal);
     else
-		TRACE( "\nEXIT: %d bytecount: %d  command:%s\n", exitcode, bytecount, zCommand);
+		TRACE( "EXIT: %d bytecount: %d  command:%s\n", exitcode, bytecount, zCommand);
 
 	libssh2_channel_free(pChannel);
 	pChannel = NULL;

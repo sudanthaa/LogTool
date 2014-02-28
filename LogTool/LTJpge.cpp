@@ -9,7 +9,7 @@
 //                       Code review revealed method load_block_16_8_8() (used for the non-default H2V1 sampling mode to downsample chroma) somehow didn't get the rounding factor fix from v1.02.
 
 #include <LTPch.h>
-#include "jpge.h"
+#include "LTJpge.h"
 
 #include <stdlib.h>
 #include <string.h>

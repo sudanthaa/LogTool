@@ -194,10 +194,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\jpge.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\LTAddEnvDlg.cpp"
 				>
 			</File>
@@ -246,6 +242,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTJpge.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTNewJIRADlg.cpp"
 				>
 			</File>
@@ -272,6 +272,10 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LTProcThread.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\LTProgressDlg.cpp"
@@ -306,6 +310,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTUploadTask.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LTUtils.cpp"
 				>
 			</File>
@@ -319,10 +327,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\jpge.h"
-				>
-			</File>
 			<File
 				RelativePath=".\LTAddEnvDlg.h"
 				>
@@ -376,6 +380,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LTJpge.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LTNewJIRADlg.h"
 				>
 			</File>
@@ -385,6 +393,10 @@
 			</File>
 			<File
 				RelativePath=".\LTPch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTProcThread.h"
 				>
 			</File>
 			<File
@@ -417,6 +429,10 @@
 			</File>
 			<File
 				RelativePath=".\LTThumbnailsCtrl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LTUploadTask.h"
 				>
 			</File>
 			<File

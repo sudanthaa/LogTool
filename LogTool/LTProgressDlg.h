@@ -3,6 +3,9 @@
 #include <resource.h>
 #include "LTIndefProgressBar.h"
 
+#define  WM_TERMINATE_THREAD     WM_USER  +  1
+
+class LTProcThread;
 // LTProgressDlg dialog
 
 class LTProgressDlg : public CDialog
@@ -14,7 +17,13 @@ public:
 	virtual ~LTProgressDlg();
 
 	LTIndefProgressBar o_Bar;
+	LTProcThread* p_Thread;
+	int i_Seq;
 
+	void	SetThread(LTProcThread* pThread){ p_Thread = pThread; }
+	
+
+	CStatic o_StaticLog;
 // Dialog Data
 	enum { IDD = IDD_PROGRESS };
 
@@ -25,4 +34,6 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg LRESULT OnTermRequest(WPARAM, LPARAM);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

@@ -15,14 +15,19 @@
 #include "LTNewJIRADlg.h"
 #include "LTConfigActionDlg.h"
 #include "LTProgressDlg.h"
+#include "LTProcThread.h"
+#include "LTUploadTask.h"
 
 #include <WinCred.h>
 
 #include <libssh2.h>
 #include <curl/curl.h>
 
-#define LOGIN_ERR_MSG  "If Login is failed once due to authentication failure, jira may have temporarily halted the REST-API connection for your account. \n" \
-						"Login once to jira via web will revert this. Check whether you have entered the correct username/password in LogTool before continuing"
+#define LOGIN_ERR_MSG  "If Login is failed once due to authentication failure, " \
+	"jira may have temporarily halted the REST-API connection for your account. \n" \
+	"Login once to jira via web will revert this. " \
+	"Check whether you have entered the correct username/password in LogTool before continuing"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -116,6 +121,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_CFGACTION_EDIT, o_ButtonCfgActionEdit);
 	DDX_Control(pDX, IDC_BUTTON_CFGACTION_DELETE, o_ButtonCfgActionDelete);
 	DDX_Control(pDX, IDC_BUTTON_ATTACH_ALONE, o_ButtonSceenshotAttach);
+	DDX_Control(pDX, IDC_COMBO_SELECTION, o_ComboSelection);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -603,18 +609,31 @@ BOOL LTDlg::PreTranslateMessage(MSG* pMsg)
 	if ( pMsg->message == WM_KEYDOWN && 
 			pMsg->wParam == VK_RETURN ) 
 	{   // verify ENTER key is pressed
-
-		UINT id = ::GetDlgCtrlID(pMsg->hwnd);
-		UINT iid = o_ComboJiraProject.GetDlgCtrlID();
-		OnPressEnterKey();
+		CWnd* pWnd = GetFocus();	
+		if (pWnd)
+			OnPressEnterKey(pWnd);
 	}
 	return __super::PreTranslateMessage(pMsg);
 }
 
 //**************************************************************************************************
-void LTDlg::OnPressEnterKey()
+void LTDlg::OnPressEnterKey(CWnd* pWnd )
 {
-	
+	if (pWnd == &o_ComboIncludeFilters ||
+		pWnd->GetParent() == &o_ComboIncludeFilters)
+	{
+
+	}
+	else if (pWnd == &o_ComboExcludeFilters || 
+			pWnd->GetParent() == &o_ComboExcludeFilters)
+	{
+
+	}
+	else if (pWnd == &o_ComboSelection || 
+		pWnd->GetParent() == &o_ComboSelection)
+	{
+
+	}
 }
 
 //**************************************************************************************************
@@ -831,6 +850,8 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 {
 	// TODO: Add your control notification handler code here
 
+	o_ListSelection.DeleteAllItems();
+
 	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
 	if (pos)
 	{
@@ -846,38 +867,29 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 					p_ConnectedSession = NULL;
 				}
 
-				LTSshSession* pSession = p_ConnectedSession;
-				
-				if (!pSession)
+				LTUploadTask oTask;
+				oTask.e_TaskType = LTUploadTask::TT_FILE_QUERY;
+				oTask.p_Env = pEnv;
+				oTask.p_EnvSession = &p_ConnectedSession;
+
+				LTProcThread* pThread = new LTProcThread;
+				LTProgressDlg oDlg;
+				oDlg.SetThread(pThread);
+				pThread->DoTask(&oTask);
+				oDlg.DoModal();
+
+				if (oTask.b_Success)
 				{
-					pSession = new LTSshSession;
-					CString sErr = "";
-					if (pSession->Connect(pEnv, sErr))
+					std::list<CString>::iterator itr = oTask.lst_Output.begin();
+					for (; itr != oTask.lst_Output.end(); itr++)
 					{
-						p_ConnectedSession = pSession;
-					}
-					else
-					{
-						AfxMessageBox(sErr);
-						delete pSession;
-						pSession = NULL;
+						o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, 
+							*itr, 0, LVIS_SELECTED, 0, 0);
 					}
 				}
-
-				if (pSession)
+				else
 				{
-					std::list<CString> lst;
-
-					if (pSession->Execute("ls -1 logs/*:*:* corefiles/*", &lst))
-					{
-						TRACE("===========================\n");
-						std::list<CString>::iterator itr = lst.begin();
-						for (; itr != lst.end(); itr++)
-						{
-							o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, 
-								*itr, 0, LVIS_SELECTED, 0, 0);
-						}
-					}
+					AfxMessageBox(oTask.s_Error, MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -926,40 +938,23 @@ void LTDlg::OnBnClickedButtonUpload()
 //**************************************************************************************************
 bool LTDlg::UploadLogs(CString& sErr)
 {
+	LTUploadTask* pTask = new LTUploadTask;
+
 	LTEnv* pEnv = GetSelectedEnv();
 	if (!pEnv)
 	{
 		sErr = "No environment selected" ;
 		return false;
 	}
+	pTask->p_Env = pEnv;
 
-	LTSshSession* pSessionEnv = p_ConnectedSession;
-
-	if (!pSessionEnv)
+	if (!p_ConnectedSession)
 	{
 		sErr = "No connected sessions. Click refresh.";
 		return false;
 	}
 
-
-	// Taking the public key from environment
-	//////////////////////////////////////////////////////////////////////////
-	std::list<CString> lst;
-	if (!pSessionEnv->Execute("cat .ssh/id_rsa.pub", &lst, &sErr))
-	{
-		delete p_ConnectedSession;
-		p_ConnectedSession = NULL;
-		return false;
-	}
-
-	if (lst.size() == 0)
-	{
-		sErr = "Public key not found in environment";
-		return false;
-	}
-
-	CString sKey = lst.front();
-
+	pTask->p_EnvSession = &p_ConnectedSession;
 
 	// Putting the public key of environment in authorized list of log-machine
 	//////////////////////////////////////////////////////////////////////////
@@ -967,7 +962,7 @@ bool LTDlg::UploadLogs(CString& sErr)
 	CString sEnvPath;
 	CString sConnStr;
 	o_ComboLogMachines.GetLBText(o_ComboLogMachines.GetCurSel(), sConnStr);
-	
+
 	if (!LTUtils::DecodePathStringEx(sConnStr, sEnvName, sEnvPath))
 	{
 		sErr.Format("Log env string decode failed. %s", sConnStr);
@@ -981,36 +976,8 @@ bool LTDlg::UploadLogs(CString& sErr)
 		return false;
 	}
 
-	LTSshSession* pSession = new LTSshSession;
+	pTask->p_LogEnv = pLogEnv;
 
-	if (!pSession->Connect(pLogEnv, sErr))
-	{
-		delete pSession;
-		return false;
-	}
-
-	// Putting your environments public key as a trusted public key in log environment
-	//////////////////////////////////////////////////////////////////////////
-	CString sCmd;
-	sCmd.Format("cur_key=`grep \"%s\" .ssh/authorized_keys ` ; if [ -z \"$cur_key\"  ]; then echo adding key to authorized list; mkdir -p .ssh; echo \"%s\" >> .ssh/authorized_keys; else echo key already found authorized; fi"
-		, sKey, sKey);
-
-	std::list<CString> lstOut;
-	pSession->Execute(sCmd, &lstOut);
-
-	
-
-
-	// Collecting logs
-	//////////////////////////////////////////////////////////////////////////
-	CString sTempDir;
-	sTempDir.Format("/tmp/%I64u", time(NULL));
-
-	CString sMkTmpDir;
-	sMkTmpDir.Format("mkdir -p %s", sTempDir);
-
-	lstOut.clear();
-	pSessionEnv->Execute(sMkTmpDir, &lstOut);
 
 	CString sFileList = "";
 
@@ -1026,119 +993,71 @@ bool LTDlg::UploadLogs(CString& sErr)
 		if (o_ListSelection.GetCheck(i) )
 		{
 			CString sSel = o_ListSelection.GetItemText(i, 0);
-			CString sZipCmd;
-			CString sFile;
-			int iLO =  sSel.ReverseFind('/');
-			CString sRelFileName = iLO > -1 ? sSel.Right(sSel.GetLength() - iLO - 1) : sSel; 
-			sFile.Format("%s/%s.gz",  sTempDir, sRelFileName);
-			
-			sZipCmd.Format("gzip -c %s > %s", sSel, sFile);
-
-			sFileList += " ";
-			sFileList += sFile;
-
-			pSessionEnv->Execute(sZipCmd, &lstOut);
+			pTask->lst_UploadFiles.push_back(sSel);	
 		}
 	}
 	while(true);
 
+	
+
 	LTJiraCredentials* pJiraCred = NULL;
 
-	// Creating JiraID, create jira ticket if necessary
-	if (LTConfig::o_Inst.b_JiraCreateNew)
+	if (LTConfig::o_Inst.b_JiraCreateNew || 
+		LTConfig::o_Inst.b_JiraDoComment)
 	{
-		SpawnNewJiraDlg();
 		pJiraCred = new LTJiraCredentials;
 		if (!ProvideJiraCred(pJiraCred, sErr, false))
 		{
 			delete pJiraCred;
 			return false;
 		}
+	}
+
+	if (LTConfig::o_Inst.b_JiraDoComment)
+	{
+		pTask->b_DoJiraComment = true;
+		for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
+			pTask->lst_Screenshots.push_back(o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot);
+	}
+
+	pTask->p_JiraCred = pJiraCred;
+
+	// Creating JiraID, create jira ticket if necessary
+	if (LTConfig::o_Inst.b_JiraCreateNew)
+	{
+		pTask->b_CreateNew = true;
+		SpawnNewJiraDlg();
 
 		CString sProject;
 		o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
-		CString sNewJiraTicketID;
-		if (!CreateJiraTicket(sProject, s_JiraIssueType, sNewJiraTicketID,
-			sErr, pJiraCred, s_JiraSummary, s_JiraDescription))
-			return false;
 
-		o_EditJiraTicket.SetWindowText(sNewJiraTicketID);
+		pTask->s_JiraIssueDescription = s_JiraDescription;
+		pTask->s_JiraIssueSummary = s_JiraSummary;
+		pTask->s_JiraProject = sProject;
+		pTask->s_JiraIssueType = s_JiraIssueType;
 	}
 
 	CString sJiraTicketID;
 	GetJiraTicketID(sJiraTicketID);
-
-
-	// Make log location
-	//////////////////////////////////////////////////////////////////////////
-	CString sTicketPath;
-	if (sEnvPath.GetLength() > 0)
-		sTicketPath.Format("%s/%s", sEnvPath, sJiraTicketID);
-	else
-		sTicketPath = sJiraTicketID;
-
-	CString sTicketDirMkCmd;
-	sTicketDirMkCmd.Format("mkdir -p %s", sTicketPath);
-
-	pSession->Execute(sTicketDirMkCmd);
-
-
-	delete pSession;
-	pSession = NULL;
-
-
-	// Copy logs
-	//////////////////////////////////////////////////////////////////////////
-	CString sCopyCmd;
-	sCopyCmd.Format("scp %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath);
-
-	pSessionEnv->Execute(sCopyCmd);
-
-	// Delete temp directory
-	//////////////////////////////////////////////////////////////////////////
-	CString sCleanDirCmd;
-	sCleanDirCmd.Format("rm -rf %s", sTempDir);
-	lstOut.clear();
-
-	pSessionEnv->Execute(sCleanDirCmd);
+	pTask->s_JiratFullTicketID = sJiraTicketID;
+	pTask->s_EnvPath = sEnvPath;
 
 
 	// Execute custom commands.
 	//////////////////////////////////////////////////////////////////////////
-	LST_CA lstActions;
-	GetCustomActionsList(lstActions);
+	GetCustomActionsList(pTask->lst_CustomActions);
 
-	CString sSSHConnStr;
-	sSSHConnStr.Format("%s@%s", pLogEnv->s_EnvUser, pLogEnv->s_IP);
+	//pTask->b_Success = LTUploadTask::UploadLogs(pTask);
+	//sErr = pTask->s_Error;
 
-	for (LST_CA::iterator itr = lstActions.begin(); itr != lstActions.end(); itr++)
-	{
-		LTConfig::CustomAction* pAction = *itr;
-		CString sFullCommand;
-		sFullCommand.Format("logenvuser=%s;"
-							"logenvip=%s;"
-							"logenvpath=%s;"
-							"logenvsshcon=%s;"
-							"%s", pLogEnv->s_EnvUser, pLogEnv->s_IP,
-							sTicketPath, sSSHConnStr, pAction->s_Command);
+	LTProcThread* pThread = new LTProcThread;
+	LTProgressDlg oDlg;
+	oDlg.SetThread(pThread);
+	pThread->DoTask(pTask);
+	oDlg.DoModal();
 
-		std::list<CString> lst;
-		CString sErr;
-		pSessionEnv->Execute(sFullCommand,  &lst, &sErr);
-	}
-
-
-
-
-	// Add Comment on jira
-	//////////////////////////////////////////////////////////////////////////
-	if (LTConfig::o_Inst.b_JiraDoComment)
-	{
-		if (!PutJiraComment(sJiraTicketID, pEnv, pLogEnv, sJiraTicketID, sErr, pJiraCred))
-			return false;
-	}
-
-	return true;
+	sErr = pTask->s_Error;
+	return pTask->b_Success;
 }
 
 //**************************************************************************************************
@@ -1832,10 +1751,9 @@ void LTDlg::OnBnClickedButtonJiraTickeInfo()
 {
 	// TODO: Add your control notification handler code here
 
-	LTProgressDlg oDlg;
-	oDlg.DoModal();
-	//SpawnNewJiraDlg();
-
+	//LTProgressDlg oDlg;
+	//oDlg.DoModal();
+	SpawnNewJiraDlg();
 }
 
 void LTDlg::GetJiraTicketID( CString &sJiraTicketID )

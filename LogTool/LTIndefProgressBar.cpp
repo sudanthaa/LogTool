@@ -7,6 +7,9 @@
 
 #define  PROGRESS_TIMER  101010
 
+#define  SLOT_WIDTH  120
+#define  SLOT_ADVANCE 3
+
 // LTIndefProgressBar
 
 IMPLEMENT_DYNAMIC(LTIndefProgressBar, CWnd)
@@ -15,6 +18,7 @@ LTIndefProgressBar::LTIndefProgressBar()
 {
 	p_BarBack = NULL;
 	p_BarSlot = NULL;
+	i_Progress = 0;
 }
 
 LTIndefProgressBar::~LTIndefProgressBar()
@@ -44,8 +48,7 @@ void LTIndefProgressBar::OnPaint()
 	DrawProgress(&dc, true);
 }
 
-#define  SLOT_WIDTH  120
-#define  SLOT_ADVANCE 4
+
 
 void LTIndefProgressBar::OnTimer(UINT_PTR nIDEvent)
 {
@@ -136,6 +139,6 @@ void LTIndefProgressBar::VerifyBuffers( CDC* pDC )
 		rSlot.right = rSlot.left + SLOT_WIDTH;
 
 		p_BarSlot = LTBitmapBuffer::Create(pDC, rSlot.Width(), rClientEx.Height());
-		DrawThemeBackground(h_ThemeBar, p_BarSlot->GetDC()->m_hDC, PP_FILL, PBFS_NORMAL, rSlot, rSlot);
+		DrawThemeBackground(h_ThemeBar, p_BarSlot->GetDC()->m_hDC, PP_FILL, PBFS_PARTIAL, rSlot, rSlot);
 	}
 }

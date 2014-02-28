@@ -14,6 +14,8 @@
 #include "LTResizeMan.h"
 #include "LTThumbnailsCtrl.h"
 
+#include "resource.h"
+
 class LTSshSession;
 class LTJiraCredentials;
 
@@ -67,7 +69,7 @@ public:
 				const char* zSummary = "", const char* zDescription = "");
 	bool	PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEnv, const char* zTicketPath,
 				CString& sErr, LTJiraCredentials* pCred = NULL);
-	void	OnPressEnterKey();
+	void	OnPressEnterKey(CWnd* pWnd);
 	void	InitResizes();
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
 	void	PopulateComboFromCfg(CComboBox* pCombo, LTConfig::StringSet* pStrSet);
@@ -173,6 +175,7 @@ public:
 	afx_msg void OnNMKillfocusListConfiguredUploadCommand(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMKillfocusListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	CButton o_ButtonSceenshotAttach;
+	CComboBox o_ComboSelection;
 };
 
 

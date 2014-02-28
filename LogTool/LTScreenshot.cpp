@@ -11,7 +11,7 @@ using namespace std;
 //#include <opencv/highgui.h>
 //using namespace cv;
 
-#include "jpge.h"
+#include "LTJpge.h"
 
 #include <math.h>
 
