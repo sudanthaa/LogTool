@@ -20,6 +20,7 @@ public:
 	void	Layout(CRect rClient);
 	void	PaintCtrl(CDC* pDC);
 	void	AddScreenshot(LTScreenshot* pScreenshot);
+	void	ClearAllScreenShots();
 
 	// LTVirtualButtonOwner overrides
 	CWnd*	GetCWnd();

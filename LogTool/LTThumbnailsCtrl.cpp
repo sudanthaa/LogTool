@@ -498,3 +498,18 @@ BOOL LTThumbnailsCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRES
 		return TRUE;
 	return __super::OnWndMsg(message, wParam, lParam, pResult);
 }
+
+void LTThumbnailsCtrl::ClearAllScreenShots()
+{
+	for (int ui = 0; ui < (int)a_ScreenShots.size(); ui++)
+	{
+		Screenshot* pScreeshot = a_ScreenShots[ui];
+		delete pScreeshot;
+	}
+	a_ScreenShots.clear();
+
+	CRect rClient;
+	GetClientRect(rClient);
+	Layout(rClient);
+	Invalidate();
+}

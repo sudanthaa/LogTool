@@ -228,7 +228,7 @@ bool LTUploadTask::DoUploadTask( LTUploadTask* pTask )
 	//////////////////////////////////////////////////////////////////////////
 	if (pTask->b_DoJiraComment)
 	{
-		if (!PutJiraComment(sJiraTicketID, pTask->p_Env, pLogEnv, sJiraTicketID,
+		if (!PutJiraComment(sJiraTicketID, pTask->p_Env, pLogEnv, sTicketPath,
 			pTask->s_Error, pTask->p_JiraCred, pTask->lst_Screenshots))
 			return false;
 	}

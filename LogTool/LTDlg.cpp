@@ -166,6 +166,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, &LTDlg::OnLvnItemchangedListConfiguredUploadCommand)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, &LTDlg::OnNMKillfocusListConfiguredUploadCommand)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_ENV, &LTDlg::OnNMKillfocusListEnv)
+	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_CLEAR, &LTDlg::OnBnClickedButtonScreenshotClear)
 END_MESSAGE_MAP()
 
 
@@ -1061,147 +1062,6 @@ bool LTDlg::UploadLogs(CString& sErr)
 }
 
 //**************************************************************************************************
-bool LTDlg::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEnv, 
-							const char* zTicketPath,CString& sErr, LTJiraCredentials* pCred)
-{
-	LTJiraCredentials* pLocalCred = NULL;
-	if (pCred == NULL)
-	{
-		pLocalCred = new LTJiraCredentials; 
-		pCred = pLocalCred;
-		if (!ProvideJiraCred(pCred, sErr))
-		{
-			delete pLocalCred;
-			pLocalCred = NULL;
-			return false;
-		}
-	}
-
-	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s/comment",  pCred->s_URL, zTiceketID);
-
-	CString sAuth;
-	pCred->GetAuthCode(sAuth);
-
-	CString sXShellFile;
-	sXShellFile.Format("%s_logs.xsh", zTiceketID);
-	CString sVersion = LTUtils::GetProductVersionX();
-
-	bool bSuccess = false;
-
-	CURL* pCurlComment = NULL;
-	pCurlComment = curl_easy_init();
-	LTCurlRetunBuffer oBuff;
-	LTCurlRetunBuffer oHeaderBuff;
-
-	if (pCurlComment) 
-	{ 
-		struct curl_slist *chunk = NULL;
-		chunk = curl_slist_append(chunk, "Content-Type: application/json");
-
-		CString sComment;
-		sComment.Format("{ \"body\" : \"Logs uploaded to below location.\\r\\n"
-			"\\r\\n"
-			" _Location_: %s@%s:%s \\r\\n"
-			" _Password_: %s \\r\\n"
-			" _XShell-Link_: [^%s] \\r\\n"
-			" _Uploaded from_: %s@%s\\r\\n"
-			" {color:gray}~_Uploaded via LogTool v%s_~{color} \"\n }",
-			pLogEnv->s_EnvUser, pLogEnv->s_IP, zTicketPath,
-			pLogEnv->s_Password,
-			sXShellFile,
-			pDevEnv->s_EnvUser, pDevEnv->s_IP,
-			sVersion);
-
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_USERPWD, sAuth.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDS, sComment.GetBuffer());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POSTFIELDSIZE, sComment.GetLength());
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HTTPHEADER, chunk);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEDATA, &oBuff);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_WRITEFUNCTION, LTCurlRetunBuffer::_WritFunc);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERDATA,  &oHeaderBuff);
-		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_HEADERFUNCTION, LTCurlRetunBuffer::_WritFunc);
-
-		CURLcode res = curl_easy_perform(pCurlComment);
-		/* Check for errors */ 
-		if (res == CURLE_OK)
-		{
-			bSuccess = true;
-
-			LTHTTPResponse* pResponse = LTHTTPResponse::Create(oHeaderBuff.GetFullOutput());
-			if (pResponse)
-			{
-				LTHTTPResponse::ReturnCodeType eCode = pResponse->GetReturnCodeType();
-				if (eCode != LTHTTPResponse::RCT_OK)
-				{
-					bSuccess = false;
-					if (eCode == LTHTTPResponse::RCT_ERROR)
-					{
-						CString sLoginReason = pResponse->GetAttribute("X-Seraph-LoginReason");
-						CString sLoginDeniedReason  = pResponse->GetAttribute("X-Authentication-Denied-Reason");
-						sErr.Format("%s:%d: %s:%s\n%s", pResponse->s_Msg, pResponse->i_ReturnCode, 
-							sLoginReason, sLoginDeniedReason, LOGIN_ERR_MSG);
-					}
-				}
-			}
-		}
-		else
-		{
-			sErr.Format("[%s:%d] curl_easy_perform() failed: %s",
-				SI , curl_easy_strerror(res));
-		}
-
-		curl_easy_cleanup(pCurlComment);
-		curl_slist_free_all(chunk);
-	}
-
-	CString sXShell;
-	const char* zXShellFmt = 
-		"[CONNECTION]\n"
-		"Protocol=SSH\n"
-		"Host=%s\n"
-		"[CONNECTION:AUTHENTICATION]\n"
-		"TelnetLoginPrompt=ogin:\n"
-		"TelnetPasswordPrompt=assword:\n"
-		"UserName=%s\n"
-		//"Method=2\n"
-		"Method=1\n"
-		"UserKey=survlog_trustkey\n"
-		"UseExpectSend=1\n"
-		"ExpectSend_Count=1\n"
-		"ExpectSend_Send_0=cd %s\n"
-		"ExpectSend_Expect_0=>\n"
-		"ExpectSend_Hide_0=0\n"
-		"[TERMINAL:WINDOW]\n"
-		"FontSize=9\n"
-		"FontFace=Consolas\n";
-
-	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, zTicketPath);
-	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile, pCred, sErr);
-
-	for (unsigned int ui = 0; ui < o_ThumbnailsCtrl.a_ScreenShots.size(); ui++)
-	{
-		LTScreenshot* pScreenshot = o_ThumbnailsCtrl.a_ScreenShots[ui]->p_Screenshot;
-		CString sTmpFileName;
-		sTmpFileName.Format("%s\\ss_%lu.jpg", LTUtils::GetTempPath(), time(NULL));
-
-		CString sFileName;
-		sFileName.Format("%s.jpg", pScreenshot->GetName());
-
-		pScreenshot->Save(sTmpFileName);
-		AttachFileToJira(sTmpFileName, sFileName, pCred, sErr);
-	}
-
-	delete pLocalCred;
-	pLocalCred = NULL;
-
-	return bSuccess;
-}
-
-//**************************************************************************************************
 LTEnv* LTDlg::GetSelectedEnv()
 {
 	POSITION pos = o_ListEnv.GetFirstSelectedItemPosition();
@@ -2032,4 +1892,11 @@ CString LTHTTPResponse::GetAttribute( const char* zKey )
 		return "";
 
 	return itr->second;
+}
+
+void LTDlg::OnBnClickedButtonScreenshotClear()
+{
+	// TODO: Add your control notification handler code here
+
+	o_ThumbnailsCtrl.ClearAllScreenShots();
 }

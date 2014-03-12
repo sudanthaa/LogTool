@@ -67,8 +67,6 @@ public:
 	bool	CreateJiraTicket(const char* zProject, const char* zIssueType, CString& sID, 
 				CString& sErr, LTJiraCredentials* pCred,
 				const char* zSummary = "", const char* zDescription = "");
-	bool	PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv* pLogEnv, const char* zTicketPath,
-				CString& sErr, LTJiraCredentials* pCred = NULL);
 	void	OnPressEnterKey(CWnd* pWnd);
 	void	InitResizes();
 	void	GetAllFiles( CString sXShellSessionFolder, CString sSubFolder, VEC_ENV& rvecEvs);
@@ -176,6 +174,7 @@ public:
 	afx_msg void OnNMKillfocusListEnv(NMHDR *pNMHDR, LRESULT *pResult);
 	CButton o_ButtonSceenshotAttach;
 	CComboBox o_ComboSelection;
+	afx_msg void OnBnClickedButtonScreenshotClear();
 };
 
 
