@@ -131,6 +131,7 @@ public:
 	CEdit o_EditName;
 	afx_msg void OnDeltaposSpinPenWidth(NMHDR *pNMHDR, LRESULT *pResult);
 	CStatic o_StaticPenWidth;
+	afx_msg void OnBnClickedButtonCopyToClipboard();
 };
 
 

@@ -58,6 +58,7 @@ BEGIN_MESSAGE_MAP(LTScreenshotEditDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_PEN, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditPen)
 	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_EDIT_RECT, &LTScreenshotEditDlg::OnBnClickedButtonScreenshotEditRect)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPIN_PEN_WIDTH, &LTScreenshotEditDlg::OnDeltaposSpinPenWidth)
+	ON_BN_CLICKED(IDC_BUTTON_COPY_TO_CLIPBOARD, &LTScreenshotEditDlg::OnBnClickedButtonCopyToClipboard)
 END_MESSAGE_MAP()
 
 
@@ -607,4 +608,20 @@ void LTScreenshotEditDlg::OnDeltaposSpinPenWidth(NMHDR *pNMHDR, LRESULT *pResult
 	else if (e_Tool == TOOL_RECT)
 		i_RectWidth = iVal;
 
+}
+
+void LTScreenshotEditDlg::OnBnClickedButtonCopyToClipboard()
+{
+	// TODO: Add your control notification handler code here
+	LTScreenshot* pSS = o_ScreenshotEditCtrl.GetScreenshot();
+	CBitmap* pbmpCopy = pSS->GetBuffer()->GetBitmapCopy();
+
+	::OpenClipboard(this->GetSafeHwnd());
+	::EmptyClipboard() ;
+// 	if( pPal )
+// 		::SetClipboardData (CF_PALETTE, pPal->GetSafeHandle() ) ;
+	::SetClipboardData (CF_BITMAP, pbmpCopy->GetSafeHandle() ) ;
+	::CloseClipboard () ;
+	pbmpCopy->Detach(); // Ownership move to clipboard
+	delete pbmpCopy;
 }

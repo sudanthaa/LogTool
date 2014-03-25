@@ -862,35 +862,46 @@ void LTDlg::OnBnClickedButtonEnvRefresh()
 			LTEnv* pEnv = (LTEnv*)o_ListEnv.GetItemData(nItem);
 			if (pEnv)
 			{
-				if (p_ConnectedSession && !p_ConnectedSession->GetEnv()->IsSame(pEnv))
+
+				if (!pEnv->IsPasswordSet())
 				{
-					delete p_ConnectedSession;
-					p_ConnectedSession = NULL;
-				}
-
-				LTUploadTask oTask;
-				oTask.e_TaskType = LTUploadTask::TT_FILE_QUERY;
-				oTask.p_Env = pEnv;
-				oTask.p_EnvSession = &p_ConnectedSession;
-
-				LTProcThread* pThread = new LTProcThread;
-				LTProgressDlg oDlg;
-				oDlg.SetThread(pThread);
-				pThread->DoTask(&oTask);
-				oDlg.DoModal();
-
-				if (oTask.b_Success)
-				{
-					std::list<CString>::iterator itr = oTask.lst_Output.begin();
-					for (; itr != oTask.lst_Output.end(); itr++)
-					{
-						o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, 
-							*itr, 0, LVIS_SELECTED, 0, 0);
-					}
+					CString s;
+					s.Format("Password empty for %s", pEnv->s_Name);
+					AfxMessageBox(s, MB_OK|MB_ICONEXCLAMATION);
 				}
 				else
 				{
-					AfxMessageBox(oTask.s_Error, MB_OK|MB_ICONEXCLAMATION);
+					if (p_ConnectedSession && !p_ConnectedSession->GetEnv()->IsSame(pEnv))
+					{
+						delete p_ConnectedSession;
+						p_ConnectedSession = NULL;
+					}
+
+
+					LTUploadTask oTask;
+					oTask.e_TaskType = LTUploadTask::TT_FILE_QUERY;
+					oTask.p_Env = pEnv;
+					oTask.p_EnvSession = &p_ConnectedSession;
+
+					LTProcThread* pThread = new LTProcThread;
+					LTProgressDlg oDlg;
+					oDlg.SetThread(pThread);
+					pThread->DoTask(&oTask);
+					oDlg.DoModal();
+
+					if (oTask.b_Success)
+					{
+						std::list<CString>::iterator itr = oTask.lst_Output.begin();
+						for (; itr != oTask.lst_Output.end(); itr++)
+						{
+							o_ListSelection.InsertItem(LVIF_TEXT | LVIF_STATE, 0, 
+								*itr, 0, LVIS_SELECTED, 0, 0);
+						}
+					}
+					else
+					{
+						AfxMessageBox(oTask.s_Error, MB_OK|MB_ICONEXCLAMATION);
+					}
 				}
 			}
 		}

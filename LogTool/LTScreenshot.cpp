@@ -84,11 +84,9 @@ int GetEncoderClsid(const char* format, CLSID* pClsid)
 
 	wchar_t* wcstring = AnsiCharToWChar(format);
 
-	for(UINT j = 0; j < num; ++j)
+	for (UINT j = 0; j < num; ++j)
 	{
 		size_t convertedChars = 0;
-
-
 		if (wcscmp(pImageCodecInfo[j].MimeType, wcstring) == 0 )
 		{
 			*pClsid = pImageCodecInfo[j].Clsid;

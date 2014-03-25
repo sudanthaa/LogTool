@@ -2,7 +2,6 @@
 //
 
 #include "LTPch.h"
-
 #include "LTScreenshotEditCtrl.h"
 
 // LTScreenshotEditCtrl
@@ -402,7 +401,6 @@ void LTScreenshotEditCtrl::SetClipForSmall( CDC* pDC )
 	{
 		rClient.right = min(rClient.right, p_Screenshot->Width());
 		rClient.bottom = min(rClient.bottom, p_Screenshot->Height());
-
 
 		CRgn rgn;
 		rgn.CreateRectRgnIndirect(rClient);

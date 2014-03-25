@@ -16,6 +16,7 @@ public:
 	CSize	 GetSize()	{	return sz_Size; };
 	int		Width()	{	return sz_Size.cx; };
 	int		Height(){	return sz_Size.cy; };
+	CBitmap*	GetBitmapCopy();
 
 protected:
 	CSize	sz_Size;
