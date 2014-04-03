@@ -206,6 +206,8 @@ BOOL LTDlg::OnInitDialog()
 	o_ComboJiraProject.AddString("LMEXSURV");
 	o_ComboJiraProject.AddString("BMESSURV");
 	o_ComboJiraProject.AddString("SURVRD");
+	o_ComboJiraProject.AddString("MTECH");
+
 	int iIndex = o_ComboJiraProject.FindString(-1, LTConfig::o_Inst.GetJiraProjectSet()->Get());
 	if (iIndex < 0)
 		iIndex = 0;
