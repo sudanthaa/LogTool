@@ -15,5 +15,5 @@ public:
 	CString s_URL;
 	CString s_Project;
 	CString s_Password;
-	CString s_ID;
+	CString s_TicketID;
 };

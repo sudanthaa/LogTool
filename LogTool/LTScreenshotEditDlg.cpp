@@ -42,6 +42,11 @@ void LTScreenshotEditDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_TAKE, o_BtnTake);
 	DDX_Control(pDX, IDC_EDIT_SCREENSHOT_EDIT_NAME, o_EditName);
 	DDX_Control(pDX, IDC_STATIC_PEN_WIDTH_EX, o_StaticPenWidth);
+	DDX_Control(pDX, IDC_BUTTON_COPY_TO_CLIPBOARD, o_ButtonCopy);
+	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_EDIT_SETTINGS, o_StaticSettingsFrame);
+	DDX_Control(pDX, IDC_STATIC_PEN_WIDTH, o_StaticWidthLabel);
+	DDX_Control(pDX, IDC_STATIC_PEN_COLOR, o_StaticColorLabel);
+	DDX_Control(pDX, IDC_SPIN_PEN_WIDTH, o_SpinPenWidth);
 }
 
 
@@ -108,8 +113,14 @@ BOOL LTScreenshotEditDlg::OnInitDialog()
 	o_Resizer.Attach(&o_BtnCancel, LT_RM_ALL);
 	o_Resizer.Attach(&o_BtnTake, LT_RM_HORIZONTAL);
 	o_Resizer.Attach(&o_EditName, LT_RM_HORIZONTAL);
-	o_Resizer.Attach(p_DrawToolbar, LT_RM_ALL);
-	o_Resizer.Attach(&o_ColorPicker, LT_RM_ALL);
+	o_Resizer.Attach(p_DrawToolbar, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_ColorPicker, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_ButtonCopy, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_StaticColorLabel, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_StaticWidthLabel, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_StaticSettingsFrame, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_StaticPenWidth, LT_RM_HORIZONTAL);
+	o_Resizer.Attach(&o_SpinPenWidth, LT_RM_HORIZONTAL);
 	o_Resizer.Originate(this);
 
 

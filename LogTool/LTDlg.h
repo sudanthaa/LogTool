@@ -150,7 +150,6 @@ public:
 	CButton o_ButtonCancel;
 	CStatic o_StaticJiraURL;
 	CStatic o_StaticJiraTicket;
-	CStatic o_StaticJiraTicketSep;
 	CStatic o_StaticScreenshotBoundary;
 	CStatic o_StaticFrmScreenshots;
 	CButton o_ButtonEnvRefresh;

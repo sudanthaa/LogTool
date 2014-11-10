@@ -19,7 +19,8 @@ CString LTJiraCredentials::GetFullTicketID()
 
 void LTJiraCredentials::GetFullTicketID( CString& sOut )
 {
-	sOut.Format("%s-%s", s_Project, s_ID);
+	//sOut.Format("%s-%s", s_Project, s_TicketID);
+	sOut = s_TicketID;
 }
 
 CString LTJiraCredentials::GetAuthCode()

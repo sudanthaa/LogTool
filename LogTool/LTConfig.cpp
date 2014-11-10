@@ -48,7 +48,7 @@ void LTConfig::Save()
 	o_LogMacs.Save(sIniFile);
 
 	WritePrivateProfileString("MAIN","JIRA-URL", s_JiraURL, sIniFile);
-	WritePrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicket, sIniFile);
+	WritePrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicketID, sIniFile);
 	_SaveBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew , sIniFile);
 	_SaveBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 
@@ -66,7 +66,7 @@ void LTConfig::Load()
 
 	char zBuff[100];
 	GetPrivateProfileString("MAIN","JIRA-URL", s_JiraURL, zBuff, 100, sIniFile); s_JiraURL = zBuff;
-	GetPrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicket, zBuff, 100, sIniFile); s_JiraTicket = zBuff;
+	GetPrivateProfileString("MAIN","JIRA-TICKET", s_JiraTicketID, zBuff, 100, sIniFile); s_JiraTicketID = zBuff;
 	_LoadBool("MAIN","JIRA-NEW-TICKET", b_JiraCreateNew, sIniFile);
 	_LoadBool("MAIN","JIRA-COMMENT", b_JiraDoComment, sIniFile);
 	

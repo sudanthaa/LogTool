@@ -511,7 +511,7 @@ bool LTUploadTask::AttachFileToJira(char* zBuffer, int iBufferSize, const char* 
 	}
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", pCred->s_URL, pCred->s_Project, pCred->s_ID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/attachments", pCred->s_URL, /*pCred->s_Project,*/ pCred->s_TicketID);
 
 	CString sAuth;
 	pCred->GetAuthCode(sAuth);

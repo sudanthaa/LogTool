@@ -106,7 +106,6 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDCANCEL, o_ButtonCancel);
 	DDX_Control(pDX, IDC_STATIC_JIRA_URL, o_StaticJiraURL);
 	DDX_Control(pDX, IDC_STATIC_JIRA_PROJECT, o_StaticJiraTicket);
-	DDX_Control(pDX, IDC_STATIC_JIRA_ID_DEVIDER, o_StaticJiraTicketSep);
 	DDX_Control(pDX, IDC_STATIC_SCREENSHOT_AREA, o_StaticScreenshotBoundary);
 	DDX_Control(pDX, IDC_STATIC_FRM_SCREENSHOTS, o_StaticFrmScreenshots);
 	DDX_Control(pDX, IDC_BUTTON_ENV_REFRESH, o_ButtonEnvRefresh);
@@ -204,7 +203,7 @@ BOOL LTDlg::OnInitDialog()
 	o_ComboJiraProject.AddString("SURV");
 	o_ComboJiraProject.AddString("JSESURV");
 	o_ComboJiraProject.AddString("LMEXSURV");
-	o_ComboJiraProject.AddString("BMESSURV");
+	o_ComboJiraProject.AddString("BMSESURV");
 	o_ComboJiraProject.AddString("SURVRD");
 	o_ComboJiraProject.AddString("MTECH");
 
@@ -239,7 +238,7 @@ BOOL LTDlg::OnInitDialog()
 	}
 
 	o_EditJiraURL.SetWindowText(LTConfig::o_Inst.s_JiraURL);
-	o_EditJiraTicket.SetWindowText(LTConfig::o_Inst.s_JiraTicket);
+	o_EditJiraTicket.SetWindowText(LTConfig::o_Inst.s_JiraTicketID);
 
 	o_CheckJiraCreateNew.SetCheck(LTConfig::o_Inst.b_JiraCreateNew);
 	o_CheckJiraComment.SetCheck(LTConfig::o_Inst.b_JiraDoComment);
@@ -273,7 +272,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_EditJiraTicket, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ComboJiraProject, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_StaticJiraTicket, LT_RM_VIRTICAL);
-	o_Resizer.Attach(&o_StaticJiraTicketSep, LT_RM_VIRTICAL);
+	
 	o_Resizer.Attach(&o_StaticJiraURL, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonJiraCredentials, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonJiraTicketInfo, LT_RM_VIRTICAL);
@@ -1143,7 +1142,7 @@ bool LTDlg::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileNa
 	}
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s-%s/attachments", pCred->s_URL, pCred->s_Project, pCred->s_ID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/attachments", pCred->s_URL,/* pCred->s_Project, */pCred->s_TicketID);
 
 	CString sAuth;
 	pCred->GetAuthCode(sAuth);
@@ -1344,7 +1343,7 @@ bool LTDlg::CreateJiraTicket( const char* zProject, const char* zIssueType, CStr
 bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWithID)
 {
 	o_EditJiraURL.GetWindowText(pJiCred->s_URL);
-	o_EditJiraTicket.GetWindowText(pJiCred->s_ID);
+	o_EditJiraTicket.GetWindowText(pJiCred->s_TicketID);
 
 	if (!ProvideWinJiraCred(pJiCred->s_URL, pJiCred->s_User, pJiCred->s_Password))
 	{
@@ -1387,7 +1386,7 @@ bool LTDlg::ProvideJiraCred(LTJiraCredentials* pJiCred, CString& sErr, bool bWit
 
 	if (bWithID)
 	{
-		if (pJiCred->s_ID.IsEmpty())
+		if (pJiCred->s_TicketID.IsEmpty())
 		{
 			sErr = "JIRA project/ticket-id is not specified";
 			return false;
@@ -1438,7 +1437,7 @@ void LTDlg::OnEnChangeEditTicketId()
 	CString sTicketID;
 	o_EditJiraTicket.GetWindowText(sTicketID);
 
-	LTConfig::o_Inst.s_JiraTicket = sTicketID;
+	LTConfig::o_Inst.s_JiraTicketID = sTicketID;
 
 	if (b_ChangeSkip)
 	{
@@ -1460,8 +1459,8 @@ void LTDlg::OnEnChangeEditTicketId()
 			LTConfig::o_Inst.GetJiraProjectSet()->Set(sProj);
 		}
 
-		b_ChangeSkip = true;
-		o_EditJiraTicket.SetWindowText(sID);
+		//b_ChangeSkip = true;
+		//o_EditJiraTicket.SetWindowText(sID);
 	}
 	else
 	{
@@ -1631,11 +1630,11 @@ void LTDlg::OnBnClickedButtonJiraTickeInfo()
 
 void LTDlg::GetJiraTicketID( CString &sJiraTicketID )
 {
-	CString sProject;
-	o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
-	CString sJiraNo;
-	o_EditJiraTicket.GetWindowText(sJiraNo);
-	sJiraTicketID.Format("%s-%s", sProject, sJiraNo);
+	//CString sProject;
+	//o_ComboJiraProject.GetLBText(o_ComboJiraProject.GetCurSel(), sProject);
+	//CString sJiraNo;
+	o_EditJiraTicket.GetWindowText(sJiraTicketID);
+	//sJiraTicketID.Format("%s-%s", sProject, sJiraNo);
 }
 
 void LTDlg::SpawnNewJiraDlg()

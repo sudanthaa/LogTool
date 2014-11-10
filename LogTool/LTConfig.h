@@ -63,7 +63,7 @@ public:
 	static LTConfig	o_Inst;
 
 	CString	 s_JiraURL;
-	CString	 s_JiraTicket;
+	CString	 s_JiraTicketID;
 
 	bool	b_JiraDoComment;
 	bool	b_JiraCreateNew;

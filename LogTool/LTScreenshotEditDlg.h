@@ -6,6 +6,7 @@
 #include "LTVirtualButton.h"
 #include "LTColorPicker.h"
 #include "afxwin.h"
+#include "afxcmn.h"
 
 class LTDrawToolBarListener
 {
@@ -132,6 +133,11 @@ public:
 	afx_msg void OnDeltaposSpinPenWidth(NMHDR *pNMHDR, LRESULT *pResult);
 	CStatic o_StaticPenWidth;
 	afx_msg void OnBnClickedButtonCopyToClipboard();
+	CButton o_ButtonCopy;
+	CStatic o_StaticSettingsFrame;
+	CStatic o_StaticWidthLabel;
+	CStatic o_StaticColorLabel;
+	CSpinButtonCtrl o_SpinPenWidth;
 };
 
 
