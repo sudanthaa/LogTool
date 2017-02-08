@@ -1,6 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
+#include "..\LogTool\resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -8,7 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #ifndef APSTUDIO_INVOKED
-#include "targetver.h"
+#include "..\LogTool\targetver.h"
 #endif
 #include "afxres.h"
 
@@ -70,13 +70,13 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "res\\LogTool.ico"
-IDI_ICON_SMALL_EDIT_HOT ICON                    "res\\edit-hot.ico"
-IDI_ICON_SMALL_EDIT_NORMAL ICON                    "res\\edit-normal.ico"
-IDI_ICON_SMALL_EDIT_PRESSED ICON                    "res\\edit-pressed.ico"
-IDI_ICON_SMALL_CLOSE_HOT ICON                    "res\\close-hot.ico"
-IDI_ICON_SMALL_CLOSE_NORMAL ICON                    "res\\close-normal.ico"
-IDI_ICON_SMALL_CLOSE_PRESSED ICON                    "res\\close-pressed.ico"
+IDR_MAINFRAME           ICON                    "..\\LogTool\\res\\LogTool.ico"
+IDI_ICON_SMALL_EDIT_HOT ICON                    "..\\LogTool\\res\\edit-hot.ico"
+IDI_ICON_SMALL_EDIT_NORMAL ICON                    "..\\LogTool\\res\\edit-normal.ico"
+IDI_ICON_SMALL_EDIT_PRESSED ICON                    "..\\LogTool\\res\\edit-pressed.ico"
+IDI_ICON_SMALL_CLOSE_HOT ICON                    "..\\LogTool\\res\\close-hot.ico"
+IDI_ICON_SMALL_CLOSE_NORMAL ICON                    "..\\LogTool\\res\\close-normal.ico"
+IDI_ICON_SMALL_CLOSE_PRESSED ICON                    "..\\LogTool\\res\\close-pressed.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -395,7 +395,7 @@ END
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE 9, 1
 #pragma code_page(1252)
-#include "res\LogTool.rc2"  // non-Microsoft Visual C++ edited resources
+#include "..\LogTool\res\LogTool.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"     // Standard components
 #endif
 

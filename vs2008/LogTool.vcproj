@@ -45,12 +45,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;D:\tplibs\libssh2\include"
+				AdditionalIncludeDirectories="..\LogTool;D:\tplibs\libssh2\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="LTPch.h"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories=".;D:\tplibs\libssh2\include"
+				AdditionalIncludeDirectories="..\LogTool;D:\tplibs\libssh2\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
 				MinimalRebuild="false"
 				RuntimeLibrary="2"
@@ -194,67 +194,67 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\LTAddEnvDlg.cpp"
+				RelativePath="..\LogTool\LTAddEnvDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTAddLogEnvDlg.cpp"
+				RelativePath="..\LogTool\LTAddLogEnvDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTApp.cpp"
+				RelativePath="..\LogTool\LTApp.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTBitmapBuffer.cpp"
+				RelativePath="..\LogTool\LTBitmapBuffer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTColorPicker.cpp"
+				RelativePath="..\LogTool\LTColorPicker.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTComboBox.cpp"
+				RelativePath="..\LogTool\LTComboBox.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTConfig.cpp"
+				RelativePath="..\LogTool\LTConfig.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTConfigActionDlg.cpp"
+				RelativePath="..\LogTool\LTConfigActionDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTDlg.cpp"
+				RelativePath="..\LogTool\LTDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTEnv.cpp"
+				RelativePath="..\LogTool\LTEnv.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTIndefProgressBar.cpp"
+				RelativePath="..\LogTool\LTIndefProgressBar.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTJiraCredentials.cpp"
+				RelativePath="..\LogTool\LTJiraCredentials.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTJpge.cpp"
+				RelativePath="..\LogTool\LTJpge.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTNewJIRADlg.cpp"
+				RelativePath="..\LogTool\LTNewJIRADlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTOutputStringQueue.cpp"
+				RelativePath="..\LogTool\LTOutputStringQueue.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTPch.cpp"
+				RelativePath="..\LogTool\LTPch.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -274,51 +274,51 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\LTProcThread.cpp"
+				RelativePath="..\LogTool\LTProcThread.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTProgressDlg.cpp"
+				RelativePath="..\LogTool\LTProgressDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTResizeMan.cpp"
+				RelativePath="..\LogTool\LTResizeMan.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenCaptureDlg.cpp"
+				RelativePath="..\LogTool\LTScreenCaptureDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshot.cpp"
+				RelativePath="..\LogTool\LTScreenshot.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotEditCtrl.cpp"
+				RelativePath="..\LogTool\LTScreenshotEditCtrl.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotEditDlg.cpp"
+				RelativePath="..\LogTool\LTScreenshotEditDlg.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTSshSession.cpp"
+				RelativePath="..\LogTool\LTSshSession.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTThumbnailsCtrl.cpp"
+				RelativePath="..\LogTool\LTThumbnailsCtrl.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTUploadTask.cpp"
+				RelativePath="..\LogTool\LTUploadTask.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTUtils.cpp"
+				RelativePath="..\LogTool\LTUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\LTVirtualButton.cpp"
+				RelativePath="..\LogTool\LTVirtualButton.cpp"
 				>
 			</File>
 		</Filter>
@@ -328,127 +328,127 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\LTAddEnvDlg.h"
+				RelativePath="..\LogTool\LTAddEnvDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTAddLogEnvDlg.h"
+				RelativePath="..\LogTool\LTAddLogEnvDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTApp.h"
+				RelativePath="..\LogTool\LTApp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTBitmapBuffer.h"
+				RelativePath="..\LogTool\LTBitmapBuffer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTColorPicker.h"
+				RelativePath="..\LogTool\LTColorPicker.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTComboBox.h"
+				RelativePath="..\LogTool\LTComboBox.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTConfig.h"
+				RelativePath="..\LogTool\LTConfig.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTConfigActionDlg.h"
+				RelativePath="..\LogTool\LTConfigActionDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTDlg.h"
+				RelativePath="..\LogTool\LTDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTEnv.h"
+				RelativePath="..\LogTool\LTEnv.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTFieldListener.h"
+				RelativePath="..\LogTool\LTFieldListener.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTIndefProgressBar.h"
+				RelativePath="..\LogTool\LTIndefProgressBar.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTJiraCredentials.h"
+				RelativePath="..\LogTool\LTJiraCredentials.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTJpge.h"
+				RelativePath="..\LogTool\LTJpge.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTNewJIRADlg.h"
+				RelativePath="..\LogTool\LTNewJIRADlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTOutputStringQueue.h"
+				RelativePath="..\LogTool\LTOutputStringQueue.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTPch.h"
+				RelativePath="..\LogTool\LTPch.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTProcThread.h"
+				RelativePath="..\LogTool\LTProcThread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTProgressDlg.h"
+				RelativePath="..\LogTool\LTProgressDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTResizeMan.h"
+				RelativePath="..\LogTool\LTResizeMan.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenCaptureDlg.h"
+				RelativePath="..\LogTool\LTScreenCaptureDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshot.h"
+				RelativePath="..\LogTool\LTScreenshot.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotEditCtrl.h"
+				RelativePath="..\LogTool\LTScreenshotEditCtrl.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTScreenshotEditDlg.h"
+				RelativePath="..\LogTool\LTScreenshotEditDlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTSshSession.h"
+				RelativePath="..\LogTool\LTSshSession.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTThumbnailsCtrl.h"
+				RelativePath="..\LogTool\LTThumbnailsCtrl.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTUploadTask.h"
+				RelativePath="..\LogTool\LTUploadTask.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTUtils.h"
+				RelativePath="..\LogTool\LTUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\LTVirtualButton.h"
+				RelativePath="..\LogTool\LTVirtualButton.h"
 				>
 			</File>
 			<File
-				RelativePath=".\resource.h"
+				RelativePath="..\LogTool\resource.h"
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath="..\LogTool\stdafx.h"
 				>
 			</File>
 		</Filter>
@@ -458,31 +458,31 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath=".\res\close-hot.ico"
+				RelativePath="..\LogTool\res\close-hot.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\close-normal.ico"
+				RelativePath="..\LogTool\res\close-normal.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\close-pressed.ico"
+				RelativePath="..\LogTool\res\close-pressed.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\edit-hot.ico"
+				RelativePath="..\LogTool\res\edit-hot.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\edit-normal.ico"
+				RelativePath="..\LogTool\res\edit-normal.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\edit-pressed.ico"
+				RelativePath="..\LogTool\res\edit-pressed.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\LogTool.ico"
+				RelativePath="..\LogTool\res\LogTool.ico"
 				>
 			</File>
 			<File
@@ -490,7 +490,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\LogTool.rc2"
+				RelativePath="..\LogTool\res\LogTool.rc2"
 				>
 			</File>
 		</Filter>

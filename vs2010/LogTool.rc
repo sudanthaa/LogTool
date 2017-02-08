@@ -1,0 +1,404 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\LogTool\resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "..\LogTool\targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\LogTool.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "..\\LogTool\\res\\LogTool.ico"
+IDI_ICON_SMALL_EDIT_HOT ICON                    "..\\LogTool\\res\\edit-hot.ico"
+IDI_ICON_SMALL_EDIT_NORMAL ICON                    "..\\LogTool\\res\\edit-normal.ico"
+IDI_ICON_SMALL_EDIT_PRESSED ICON                    "..\\LogTool\\res\\edit-pressed.ico"
+IDI_ICON_SMALL_CLOSE_HOT ICON                    "..\\LogTool\\res\\close-hot.ico"
+IDI_ICON_SMALL_CLOSE_NORMAL ICON                    "..\\LogTool\\res\\close-normal.ico"
+IDI_ICON_SMALL_CLOSE_PRESSED ICON                    "..\\LogTool\\res\\close-pressed.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 230, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About LogTool"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "LogTool, Version 1.0",IDC_STATIC,42,10,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2013. Millennium Information Technologies",IDC_STATIC,41,21,186,8
+    DEFPUSHBUTTON   "OK",IDOK,173,46,50,14,WS_GROUP
+    LTEXT           "Author: A.H. Sudantha Athauda",IDC_STATIC,42,32,139,8
+    CONTROL         "<a href=""mailto:sudantha@millenniumit.com"">sudantha@millenniumit.com</a>",IDC_SYSLINK1,
+                    "SysLink",WS_TABSTOP,42,42,91,11
+END
+
+IDD_LOGTOOL DIALOGEX 0, 0, 575, 322
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "LogTool"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Environment",IDC_STATIC_FRAME_ENVIRONMENT,3,2,166,203
+    GROUPBOX        "Log Location",IDC_STATIC_FRAME_LOG_MACHINE,3,207,166,43
+    GROUPBOX        "JIRA",IDC_STATIC_FRM_JIRA,174,245,336,73,0,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_LIST_ENV,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,13,158,171
+    PUSHBUTTON      "New",IDC_BUTTON_ENV_ADD,7,188,34,13
+    PUSHBUTTON      "Edit",IDC_BUTTON_ENV_EDIT,41,188,34,13
+    PUSHBUTTON      "Delete",IDC_BUTTON_ENV_DELETE,75,188,34,13
+    COMBOBOX        IDC_COMBO_LOG_MACHINES,7,218,158,22,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "New",IDC_BUTTON_LOGMAC_NEW,7,233,34,13
+    PUSHBUTTON      "Edit",IDC_BUTTON_LOGMAC_EDIT,41,233,34,13
+    PUSHBUTTON      " Delete",IDC_BUTTON_LOGMAC_DELETE,75,233,34,13
+    CONTROL         "Comment on JIRA ticket",IDC_CHECK_COMMENT_ON_JIRA,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,179,254,133,12
+    EDITTEXT        IDC_EDIT_JIRA_URL,200,270,132,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO_JIRA_PROJECT,279,284,53,12,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | CBS_SORT | CBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "New",IDC_CHECK_JIRA_CREATE_TICKET,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,284,301,24,11
+    COMBOBOX        IDC_COMBO_INCLUDE_FILTER,216,22,140,12,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_EXCLUDE_FILTER,216,38,140,12,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_SELECTION,403,38,156,12,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_LIST_SELECTION,"SysListView32",LVS_LIST | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,178,59,386,174
+    DEFPUSHBUTTON   "OK",IDOK,520,254,50,14,NOT WS_VISIBLE
+    PUSHBUTTON      "Cancel",IDCANCEL,520,303,50,14
+    GROUPBOX        "Files",IDC_STATIC_FRAME_FILE_LIST,174,2,395,238
+    GROUPBOX        "Display Filters",IDC_STATIC_FRAME_FILTERS,177,10,182,45
+    RTEXT           "Include:",IDC_STATIC_INCLUDE_FILTER,184,24,28,11
+    RTEXT           "Exclude:",IDC_STATIC_EXCLUDE_FILTER,184,40,28,11
+    LTEXT           "URL :",IDC_STATIC_JIRA_URL,180,270,18,10
+    LTEXT           "Ticket :",IDC_STATIC_JIRA_PROJECT,176,286,23,10
+    EDITTEXT        IDC_EDIT_TICKET_ID,200,284,75,12,ES_AUTOHSCROLL
+    GROUPBOX        "Selection",IDC_STATIC_FRAME_SELECTION,362,10,202,44
+    CONTROL         "Select All on Display Filter Change",IDC_CHECK_FILTER_SELECT_ALL,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,440,23,120,10
+    PUSHBUTTON      "All",IDC_BUTTON_FILE_SELECTION_ALL,366,22,34,12,WS_DISABLED
+    PUSHBUTTON      "Clear",IDC_BUTTON_FILE_SELECTION_CLEAR,400,22,34,12,WS_DISABLED
+    LTEXT           "Selection :",IDC_STATIC_FILE_SELECTION_SELECTION,368,41,34,9
+    GROUPBOX        "Screenshots",IDC_STATIC_FRM_SCREENSHOTS,339,251,167,64
+    LTEXT           " Screenshot Ctrl Container Area. Adjust this in design View",IDC_STATIC_SCREENSHOT_AREA,342,261,162,35,NOT WS_VISIBLE | WS_BORDER
+    PUSHBUTTON      "New",IDC_BUTTON_SCREENSHOT_NEW,343,299,34,13
+    PUSHBUTTON      "Refresh",IDC_BUTTON_ENV_REFRESH,127,188,38,13
+    PUSHBUTTON      "Upload",IDC_BUTTON_UPLOAD,520,272,50,29
+    PUSHBUTTON      "Clear",IDC_BUTTON_SCREENSHOT_CLEAR,377,299,34,13
+    PUSHBUTTON      "UserName / Password",IDC_BUTTON_JIRA_CREDENTIALS,192,300,83,13
+    PUSHBUTTON      "...",IDC_BUTTON_JIRA_TICKE_INFO,313,302,19,9
+    GROUPBOX        "Configured Actions",IDC_STATIC_FRM_CONFIGURED_FILE_UPLOAD,3,252,166,66
+    CONTROL         "",IDC_LIST_CONFIGURED_UPLOAD_COMMAND,"SysListView32",LVS_LIST | LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,8,262,155,37
+    PUSHBUTTON      "Attach Alone",IDC_BUTTON_ATTACH_ALONE,444,299,59,13
+    PUSHBUTTON      "New",IDC_BUTTON_CFGACTION_NEW,7,302,34,13
+    PUSHBUTTON      "Edit",IDC_BUTTON_CFGACTION_EDIT,41,302,34,13
+    PUSHBUTTON      " Delete",IDC_BUTTON_CFGACTION_DELETE,75,302,34,13
+    PUSHBUTTON      "Run Alone",IDC_BUTTON_CFGACTION_RUN_ALONE,119,302,46,13
+END
+
+IDD_ADD_ENV DIALOGEX 0, 0, 136, 91
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add Environment"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,56,70,36,14
+    PUSHBUTTON      "Cancel",IDCANCEL,93,70,36,14
+    RTEXT           "IP :",IDC_STATIC_ADD_ENV_IP,21,39,23,10
+    RTEXT           "User :",IDC_STATIC_ADD_ENV_USER,21,22,23,10
+    CONTROL         "",IDC_IPADDRESS_ADD_ENV_IP,"SysIPAddress32",WS_TABSTOP,46,37,83,13
+    EDITTEXT        IDC_EDIT_ADD_ENV_USER,46,22,83,12,ES_AUTOHSCROLL
+    RTEXT           "Password :",IDC_STATIC_ADD_ENV_PASSWORD,6,54,38,10
+    EDITTEXT        IDC_EDIT_ADD_ENV_PASSWORD,46,52,83,12,ES_PASSWORD | ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_ADD_ENV_NAME,46,7,83,13,ES_AUTOHSCROLL
+    RTEXT           "Name :",IDC_STATIC_ADD_ENV_NAME,21,8,23,10
+END
+
+IDD_ADD_LOG_ENV DIALOGEX 0, 0, 131, 63
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Add Log Environment"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,39,42,42,14
+    PUSHBUTTON      "Cancel",IDCANCEL,82,42,42,14
+    RTEXT           "User :",IDC_STATIC_ADD_LOG_ENV_USER,17,8,23,10
+    EDITTEXT        IDC_EDIT_ADD_LOG_ENV_BASE,41,23,83,13,ES_AUTOHSCROLL
+    RTEXT           "Location :",IDC_STATIC_ADD_LOG_ENV_BASE_LOCATION,6,24,34,10
+    COMBOBOX        IDC_ADD_LOG_ENV_ENV,41,6,83,12,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_SCREENSHOT_EDIT DIALOGEX 0, 0, 604, 323
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Screenshot"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,547,302,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,547,286,50,14
+    PUSHBUTTON      "Take",IDC_BUTTON_TAKE,535,7,62,21
+    LTEXT           "Area for the screenshot edit ctrl. Resize this to in design view to position ScreeenshotEditCtrl",IDC_STATIC_SCREENSHOT_EDIT_CTRL,7,7,523,309,NOT WS_VISIBLE | WS_BORDER
+    EDITTEXT        IDC_EDIT_SCREENSHOT_EDIT_NAME,536,31,61,12,ES_AUTOHSCROLL
+    LTEXT           "ToolBarArea",IDC_STATIC_DRAW_TOOLBAR,536,47,61,20,NOT WS_VISIBLE | WS_BORDER
+    GROUPBOX        "Settings",IDC_STATIC_SCREENSHOT_EDIT_SETTINGS,536,70,61,40
+    RTEXT           "Width:",IDC_STATIC_PEN_WIDTH,539,83,24,8
+    LTEXT           "",IDC_STATIC_COLOR_FRAME,567,96,21,10,NOT WS_VISIBLE | WS_BORDER
+    LTEXT           "1",IDC_STATIC_PEN_WIDTH_EX,567,83,8,8
+    CONTROL         "",IDC_SPIN_PEN_WIDTH,"msctls_updown32",UDS_ARROWKEYS,575,81,13,12
+    RTEXT           "Color:",IDC_STATIC_PEN_COLOR,539,97,24,8
+    PUSHBUTTON      "Copy",IDC_BUTTON_COPY_TO_CLIPBOARD,536,115,61,12
+END
+
+IDD_SCREEN_CAPTURE DIALOGEX 0, 0, 299, 164
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_NEW_JIRA DIALOGEX 0, 0, 358, 119
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create JIRA Ticket"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,301,98,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,249,98,50,14
+    EDITTEXT        IDC_EDIT_NEW_JIRA_SUMMARY,45,7,306,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_NEW_JIRA_DESCRIPTION,7,33,344,60,ES_MULTILINE | ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO_NEW_JIRA_TICKET_TYPE,30,100,51,12,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Type:",IDC_STATIC_NEW_JIRA_TICKET_TYPE,7,102,21,10
+    RTEXT           "Summary:",IDC_STATIC_NEW_JIRA_TICKET_SUMMARY,7,8,35,10
+    RTEXT           "Description:",IDC_STATIC_NEW_JIRA_TICKET_DESCRIPTION,7,22,42,10
+END
+
+IDD_ADD_CONFIGURED_ACTION DIALOGEX 0, 0, 316, 78
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configured Action"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "",IDC_STATIC,3,0,309,44
+    DEFPUSHBUTTON   "OK",IDOK,262,61,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,210,61,50,14
+    EDITTEXT        IDC_EDIT_CONFIGURED_ACTION,38,47,273,12,ES_AUTOHSCROLL
+    RTEXT           "Command:",IDC_STATIC_CONFIGURED_COMMAND,3,48,34,8
+    CONTROL         "",IDC_RICHEDIT2_CFGCOMMAND_DESC,"RichEdit20A",ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | ES_WANTRETURN | WS_VSCROLL | WS_TABSTOP,7,6,302,35
+    RTEXT           "Name:",IDC_STATIC_CONFIGURED_COMMAND_NAME,6,63,31,8
+    EDITTEXT        IDC_EDIT_CONFIGURED_ACTION_NAME,38,62,87,12,ES_AUTOHSCROLL
+END
+
+IDD_PROGRESS DIALOGEX 0, 0, 316, 59
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "",IDC_STATIC_PROGRESS_FRAME,7,6,302,5,NOT WS_VISIBLE | WS_BORDER
+    CONTROL         "",IDC_STATIC_LOG,"Static",SS_LEFTNOWORDWRAP | WS_BORDER | WS_GROUP,7,18,302,34
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "Comments", "Author: Sudantha Athauda (sudantha@millenniumit.com)"
+            VALUE "CompanyName", "Millenniumt Information Technologies"
+            VALUE "FileDescription", "LogTool. Author: Sudantha Athauda (sudantha@millenniumit.com)"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "LogTool.exe"
+            VALUE "LegalCopyright", "(c) 2013. Millenniumt Information Technologies.  All rights reserved."
+            VALUE "OriginalFilename", "LogTool.exe"
+            VALUE "ProductName", "LogTool"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 223
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
+    END
+
+    IDD_LOGTOOL, DIALOG
+    BEGIN
+        LEFTMARGIN, 3
+        RIGHTMARGIN, 570
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 318
+    END
+
+    IDD_ADD_ENV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 129
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 84
+    END
+
+    IDD_ADD_LOG_ENV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 124
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 56
+    END
+
+    IDD_SCREENSHOT_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 597
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 316
+    END
+
+    IDD_SCREEN_CAPTURE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 289
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 157
+    END
+
+    IDD_NEW_JIRA, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 351
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 112
+    END
+
+    IDD_PROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 52
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "&About LogTool..."
+    IDP_SOCKETS_INIT_FAILED "Windows sockets initialization failed."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "..\LogTool\res\LogTool.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

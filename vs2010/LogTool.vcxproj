@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|Win32">
+      <Configuration>Template</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{41772F08-B380-4167-B0F5-0E4AC45EBB8C}</ProjectGuid>
+    <RootNamespace>LogTool</RootNamespace>
+    <Keyword>MFCProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\LogTool;D:\tplibs\libssh2\include;D:\work\libs\curl-7.33.0-win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>LTPch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>libssh2.lib;uxtheme.lib;GdiPlus.lib;Credui.lib;libcurl.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\work\libs\curl-7.33.0-win32\lib;D:\tplibs\libssh2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <ValidateAllParameters>true</ValidateAllParameters>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\LogTool;D:\tplibs\libssh2\include;D:\work\libs\curl-7.33.0-win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>LTPch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>libssh2.lib;uxtheme.lib;GdiPlus.lib;Credui.lib;libcurl.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\work\libs\curl-7.33.0-win32\lib;D:\tplibs\libssh2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\LogTool\LTAddEnvDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTAddLogEnvDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTApp.cpp" />
+    <ClCompile Include="..\LogTool\LTBitmapBuffer.cpp" />
+    <ClCompile Include="..\LogTool\LTColorPicker.cpp" />
+    <ClCompile Include="..\LogTool\LTComboBox.cpp" />
+    <ClCompile Include="..\LogTool\LTConfig.cpp" />
+    <ClCompile Include="..\LogTool\LTConfigActionDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTEnv.cpp" />
+    <ClCompile Include="..\LogTool\LTIndefProgressBar.cpp" />
+    <ClCompile Include="..\LogTool\LTJiraCredentials.cpp" />
+    <ClCompile Include="..\LogTool\LTJpge.cpp" />
+    <ClCompile Include="..\LogTool\LTNewJIRADlg.cpp" />
+    <ClCompile Include="..\LogTool\LTOutputStringQueue.cpp" />
+    <ClCompile Include="..\LogTool\LTPch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\LogTool\LTProcThread.cpp" />
+    <ClCompile Include="..\LogTool\LTProgressDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTResizeMan.cpp" />
+    <ClCompile Include="..\LogTool\LTScreenCaptureDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTScreenshot.cpp" />
+    <ClCompile Include="..\LogTool\LTScreenshotEditCtrl.cpp" />
+    <ClCompile Include="..\LogTool\LTScreenshotEditDlg.cpp" />
+    <ClCompile Include="..\LogTool\LTSshSession.cpp" />
+    <ClCompile Include="..\LogTool\LTThumbnailsCtrl.cpp" />
+    <ClCompile Include="..\LogTool\LTUploadTask.cpp" />
+    <ClCompile Include="..\LogTool\LTUtils.cpp" />
+    <ClCompile Include="..\LogTool\LTVirtualButton.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\LogTool\LTAddEnvDlg.h" />
+    <ClInclude Include="..\LogTool\LTAddLogEnvDlg.h" />
+    <ClInclude Include="..\LogTool\LTApp.h" />
+    <ClInclude Include="..\LogTool\LTBitmapBuffer.h" />
+    <ClInclude Include="..\LogTool\LTColorPicker.h" />
+    <ClInclude Include="..\LogTool\LTComboBox.h" />
+    <ClInclude Include="..\LogTool\LTConfig.h" />
+    <ClInclude Include="..\LogTool\LTConfigActionDlg.h" />
+    <ClInclude Include="..\LogTool\LTDlg.h" />
+    <ClInclude Include="..\LogTool\LTEnv.h" />
+    <ClInclude Include="..\LogTool\LTFieldListener.h" />
+    <ClInclude Include="..\LogTool\LTIndefProgressBar.h" />
+    <ClInclude Include="..\LogTool\LTJiraCredentials.h" />
+    <ClInclude Include="..\LogTool\LTJpge.h" />
+    <ClInclude Include="..\LogTool\LTNewJIRADlg.h" />
+    <ClInclude Include="..\LogTool\LTOutputStringQueue.h" />
+    <ClInclude Include="..\LogTool\LTPch.h" />
+    <ClInclude Include="..\LogTool\LTProcThread.h" />
+    <ClInclude Include="..\LogTool\LTProgressDlg.h" />
+    <ClInclude Include="..\LogTool\LTResizeMan.h" />
+    <ClInclude Include="..\LogTool\LTScreenCaptureDlg.h" />
+    <ClInclude Include="..\LogTool\LTScreenshot.h" />
+    <ClInclude Include="..\LogTool\LTScreenshotEditCtrl.h" />
+    <ClInclude Include="..\LogTool\LTScreenshotEditDlg.h" />
+    <ClInclude Include="..\LogTool\LTSshSession.h" />
+    <ClInclude Include="..\LogTool\LTThumbnailsCtrl.h" />
+    <ClInclude Include="..\LogTool\LTUploadTask.h" />
+    <ClInclude Include="..\LogTool\LTUtils.h" />
+    <ClInclude Include="..\LogTool\LTVirtualButton.h" />
+    <ClInclude Include="..\LogTool\resource.h" />
+    <ClInclude Include="..\LogTool\stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\LogTool\res\close-hot.ico" />
+    <None Include="..\LogTool\res\close-normal.ico" />
+    <None Include="..\LogTool\res\close-pressed.ico" />
+    <None Include="..\LogTool\res\edit-hot.ico" />
+    <None Include="..\LogTool\res\edit-normal.ico" />
+    <None Include="..\LogTool\res\edit-pressed.ico" />
+    <None Include="..\LogTool\res\LogTool.ico" />
+    <None Include="..\LogTool\res\LogTool.rc2" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LogTool.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="LogTool.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
