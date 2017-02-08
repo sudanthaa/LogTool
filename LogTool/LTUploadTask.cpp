@@ -68,8 +68,13 @@ bool LTUploadTask::DoFileQuery(LTUploadTask* pTask)
 
 	if (pSession)
 	{
+		CString sLogViewAction = "ls -1 logs/*:*:* corefiles/*";
+		LTConfig::CustomAction* pCustomAction = LTConfig::o_Inst.FindCustomAction("LogView");
+		if (pCustomAction)
+			sLogViewAction = pCustomAction->s_Command;
+
 		pTask->b_Success = 
-			pSession->Execute("ls -1 logs/*:*:* corefiles/*", &pTask->lst_Output, &pTask->s_Error);
+			pSession->Execute(sLogViewAction, &pTask->lst_Output, &pTask->s_Error);
 	}
 
 	return pTask->b_Success;
@@ -187,7 +192,7 @@ bool LTUploadTask::DoUploadTask( LTUploadTask* pTask )
 	// Copy logs
 	//////////////////////////////////////////////////////////////////////////
 	CString sCopyCmd;
-	sCopyCmd.Format("scp %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath);
+	sCopyCmd.Format("scp -oStrictHostKeyChecking=no %s %s@%s:%s", sFileList, pLogEnv->s_EnvUser, pLogEnv->s_IP, sTicketPath);
 
 	pSessionEnv->Execute(sCopyCmd);
 
@@ -350,7 +355,7 @@ bool LTUploadTask::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv*
 		"FontFace=Consolas\n";
 
 	sXShell.Format(zXShellFmt, pLogEnv->s_IP, pLogEnv->s_EnvUser, zTicketPath);
-	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile, pCred, sErr);
+	AttachFileToJira(sXShell.GetBuffer(), sXShell.GetLength(), sXShellFile, pCred, sErr, zTiceketID);
 
 	std::list<LTScreenshot*>::iterator itr = lstScreenshots.begin();
 	for (;itr != lstScreenshots.end(); itr++)
@@ -363,7 +368,7 @@ bool LTUploadTask::PutJiraComment(const char* zTiceketID, LTEnv* pDevEnv, LTEnv*
 		sFileName.Format("%s.jpg", pScreenshot->GetName());
 
 		pScreenshot->Save(sTmpFileName);
-		AttachFileToJira(sTmpFileName, sFileName, pCred, sErr);
+		AttachFileToJira(sTmpFileName, sFileName, pCred, sErr, zTiceketID);
 	}
 
 	return bSuccess;
@@ -399,6 +404,10 @@ bool LTUploadTask::CreateJiraTicket( const char* zProject, const char* zIssueTyp
 		struct curl_slist *chunk = NULL;
 		chunk = curl_slist_append(chunk, "Content-Type: application/json");
 
+		CString sEnvironment = "";
+		if (strcmp(zIssueType,"Fault-Bug") == 0 || strcmp(zIssueType,"Fault-Configuration") == 0)
+			sEnvironment =          ",\"customfield_14101\": {\"name\":\"Test\"}\n";
+		
 		CString sComment;
 		sComment.Format("{\n"
 			"  \"fields\": {\n"
@@ -409,10 +418,10 @@ bool LTUploadTask::CreateJiraTicket( const char* zProject, const char* zIssueTyp
 			"    \"description\": \"%s\",\n"
 			"    \"issuetype\": {\n"
 			"      \"name\": \"%s\"\n"
-			"    }\n"
+			"    }\n%s"
 			"  }\n"
 			"}\n"
-			,zProject, zSummary, zDescription, zIssueType);
+			,zProject, zSummary, zDescription, zIssueType,sEnvironment);
 
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_URL, sAttachmentURL.GetBuffer());
 		curl_easy_setopt_VA_fix_call(pCurlComment, CURLOPT_POST, 1);	
@@ -478,7 +487,7 @@ bool LTUploadTask::CreateJiraTicket( const char* zProject, const char* zIssueTyp
 
 //**************************************************************************************************
 bool LTUploadTask::AttachFileToJira( const char* zFile, const char* zFileName,
-							 LTJiraCredentials* pCred, CString& sErr)
+							 LTJiraCredentials* pCred, CString& sErr, const char* zTicketID)
 {
 	CFile oFile;
 	BOOL bRes = oFile.Open(zFile, CFile::modeRead);
@@ -489,7 +498,7 @@ bool LTUploadTask::AttachFileToJira( const char* zFile, const char* zFileName,
 		char* pBuff = new char[uiFileSize];
 
 		oFile.Read(pBuff, uiFileSize);
-		bSuccess = AttachFileToJira(pBuff, uiFileSize, zFileName, pCred, sErr);
+		bSuccess = AttachFileToJira(pBuff, uiFileSize, zFileName, pCred, sErr, zTicketID);
 		delete [] pBuff;
 	}
 	else
@@ -502,7 +511,7 @@ bool LTUploadTask::AttachFileToJira( const char* zFile, const char* zFileName,
 
 //**************************************************************************************************
 bool LTUploadTask::AttachFileToJira(char* zBuffer, int iBufferSize, const char* zFileName, 
-							 LTJiraCredentials* pCred, CString& sErr)
+							 LTJiraCredentials* pCred, CString& sErr, const char* zTicketID)
 {
 	if (!pCred)
 	{
@@ -511,7 +520,7 @@ bool LTUploadTask::AttachFileToJira(char* zBuffer, int iBufferSize, const char* 
 	}
 
 	CString sAttachmentURL;
-	sAttachmentURL.Format("%s/rest/api/2/issue/%s/attachments", pCred->s_URL, /*pCred->s_Project,*/ pCred->s_TicketID);
+	sAttachmentURL.Format("%s/rest/api/2/issue/%s/attachments", pCred->s_URL, /*pCred->s_Project,*/ zTicketID);
 
 	CString sAuth;
 	pCred->GetAuthCode(sAuth);

@@ -1,5 +1,6 @@
 #include "LTPch.h"
 #include "LTUtils.h"
+#include <Shlwapi.h>
 
 #define  LT_INI_FILE_NAME "LogTool.ini"
 
@@ -133,12 +134,28 @@ bool LTUtils::GetXShellSeesionFolder(CString& sFolder)
 	if (! SUCCEEDED( SHGetFolderPath( NULL, CSIDL_APPDATA, NULL, 0, szAppData ) ) )
 		return false;
 
-	//"NetSarang\Xshell\Sessions"
-	CString sGlobalIniFile;
-	sGlobalIniFile.Format("%s\\NetSarang\\Xshell\\Sessions", szAppData);
+	char szDocuments[MAX_PATH];
+	if (! SUCCEEDED( SHGetFolderPath( NULL, CSIDL_MYDOCUMENTS, NULL, 0, szDocuments ) ) )
+		return false;
 
-	sFolder = sGlobalIniFile;
-	return true;
+	CString xShellSessionsDir5;
+	xShellSessionsDir5.Format("%s\\NetSarang\\Xshell\\Sessions", szDocuments);
+	
+	if (PathIsDirectory(xShellSessionsDir5) != FALSE)
+	{
+		sFolder = xShellSessionsDir5;
+		return true;
+	}
+
+	CString xShellSessionsDir;
+	xShellSessionsDir.Format("%s\\NetSarang\\Xshell\\Sessions", szAppData);
+	if (PathIsDirectory(xShellSessionsDir) != FALSE)
+	{
+		sFolder = xShellSessionsDir;
+		return true;
+	}
+
+	return false;
 }
 
 bool LTUtils::GetUserAppFolder( CString& sFolder )

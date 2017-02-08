@@ -174,6 +174,8 @@ public:
 	CButton o_ButtonSceenshotAttach;
 	CComboBox o_ComboSelection;
 	afx_msg void OnBnClickedButtonScreenshotClear();
+	afx_msg void OnBnClickedButtonCfgactionRunAlone();
+	CButton o_ButtonCfgActionRunAlone;
 };
 
 

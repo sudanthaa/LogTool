@@ -26,6 +26,7 @@
 #include <afxdisp.h>        // MFC Automation classes
 
 #include <GdiPlus.h>
+#include <vector>
 
 
 #ifndef _AFX_NO_OLE_SUPPORT
@@ -37,7 +38,7 @@
 
 
 #include <afxsock.h>            // MFC socket extensions
-
+#include <libssh2.h>
 
 
 #ifdef _UNICODE

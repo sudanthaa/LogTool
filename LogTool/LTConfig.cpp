@@ -134,6 +134,18 @@ void LTConfig::RemoveCustomAction( CustomAction* pCustomAction )
 	}
 }
 
+LTConfig::CustomAction* LTConfig::FindCustomAction( const char* zCustomAction )
+{
+	for (std::vector<CustomAction*>::iterator itr = a_CustomActions.begin(); itr != a_CustomActions.end(); ++itr)
+	{
+		CustomAction* pCustomAction = *itr;
+		if (pCustomAction->s_Name == zCustomAction)
+			return pCustomAction;
+	}
+
+	return NULL;
+}
+
 void LTConfig::StringSet::Set( const char* zValue )
 {	
 	dq_Strings.push_back(zValue);

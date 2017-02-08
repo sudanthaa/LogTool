@@ -121,6 +121,7 @@ void LTDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_CFGACTION_DELETE, o_ButtonCfgActionDelete);
 	DDX_Control(pDX, IDC_BUTTON_ATTACH_ALONE, o_ButtonSceenshotAttach);
 	DDX_Control(pDX, IDC_COMBO_SELECTION, o_ComboSelection);
+	DDX_Control(pDX, IDC_BUTTON_CFGACTION_RUN_ALONE, o_ButtonCfgActionRunAlone);
 }
 
 BEGIN_MESSAGE_MAP(LTDlg, CDialog)
@@ -166,6 +167,7 @@ BEGIN_MESSAGE_MAP(LTDlg, CDialog)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_CONFIGURED_UPLOAD_COMMAND, &LTDlg::OnNMKillfocusListConfiguredUploadCommand)
 	ON_NOTIFY(NM_KILLFOCUS, IDC_LIST_ENV, &LTDlg::OnNMKillfocusListEnv)
 	ON_BN_CLICKED(IDC_BUTTON_SCREENSHOT_CLEAR, &LTDlg::OnBnClickedButtonScreenshotClear)
+	ON_BN_CLICKED(IDC_BUTTON_CFGACTION_RUN_ALONE, &LTDlg::OnBnClickedButtonCfgactionRunAlone)
 END_MESSAGE_MAP()
 
 
@@ -206,6 +208,8 @@ BOOL LTDlg::OnInitDialog()
 	o_ComboJiraProject.AddString("BMSESURV");
 	o_ComboJiraProject.AddString("SURVRD");
 	o_ComboJiraProject.AddString("MTECH");
+	o_ComboJiraProject.AddString("LSEMSS");
+	o_ComboJiraProject.AddString("LCH");
 
 	int iIndex = o_ComboJiraProject.FindString(-1, LTConfig::o_Inst.GetJiraProjectSet()->Get());
 	if (iIndex < 0)
@@ -297,6 +301,7 @@ BOOL LTDlg::OnInitDialog()
 	o_Resizer.Attach(&o_ButtonCfgActionNew, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonCfgActionEdit, LT_RM_VIRTICAL);
 	o_Resizer.Attach(&o_ButtonCfgActionDelete, LT_RM_VIRTICAL);
+	o_Resizer.Attach(&o_ButtonCfgActionRunAlone, LT_RM_VIRTICAL);
 
 	o_Resizer.Attach(&o_StaticFrmScreenshots, LT_RM_BOTTMRIGHT | LT_RM_TOP);
 	o_Resizer.Attach(&o_ThumbnailsCtrl, LT_RM_BOTTMRIGHT | LT_RM_TOP);
@@ -1559,13 +1564,15 @@ bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPass
 
 	// TODO: Add your control notification handler code here
 	PCREDENTIALW cr = {0};
-	bool bHas =  (0 != 	::CredReadW(wcURL, CRED_TYPE_GENERIC, 0, &cr));
-	if (bHas && !bUpdateAnyway)
+	bool bHas = (0 != ::CredReadW(wcURL, CRED_TYPE_GENERIC, 0, &cr));
+
+	if (bHas)
 	{
 		CredUnPackAuthenticationBufferW(0, cr->CredentialBlob, cr->CredentialBlobSize, 
 			zwUserName, &dwUser, zwDomain, &dwDomain, zwPassword, &dwPassword);
 	}
-	else 
+
+	if (!bHas || bUpdateAnyway)
 	{
 		CREDUI_INFOW ci = {0}; 
 		ULONG ulAuthPkg = 0; 
@@ -1587,26 +1594,37 @@ bool LTDlg::ProvideWinJiraCred( const char* zURL, CString& sUser, CString& sPass
 			pAuthBuff = cr->CredentialBlob;
 			cbAuthBuff = cr->CredentialBlobSize;
 		}
-
+		
 		DWORD dwErr = CredUIPromptForWindowsCredentialsW( 
 			&ci, 0, &ulAuthPkg, pAuthBuff, cbAuthBuff, 
 			&pOutAuthBuff, &cbOutAuthBuff, &fSave, dwFlags); 
 
-		CredUnPackAuthenticationBufferW(0, pOutAuthBuff, cbOutAuthBuff, 
-			zwUserName, &dwUser, zwDomain, &dwDomain, zwPassword, &dwPassword);
-
-		if (fSave)
+		if (dwErr == ERROR_CANCELLED)
 		{
-			CREDENTIALW cred = {0};
-			cred.Type = CRED_TYPE_GENERIC;
-			cred.TargetName = wcURL;
-			cred.CredentialBlobSize = cbOutAuthBuff;
-			cred.CredentialBlob = (LPBYTE) pOutAuthBuff;
-			cred.Persist = CRED_PERSIST_ENTERPRISE;
-			cred.UserName = zwUserName;
-			cred.TargetAlias = wcURL;
+			// Do nothing
+		}
+		else if (dwErr == ERROR_SUCCESS)
+		{
+			CredUnPackAuthenticationBufferW(0, pOutAuthBuff, cbOutAuthBuff, 
+				zwUserName, &dwUser, zwDomain, &dwDomain, zwPassword, &dwPassword);
 
-			BOOL ok = ::CredWriteW(&cred, 0);
+			if (fSave)
+			{
+				CREDENTIALW cred = {0};
+				cred.Type = CRED_TYPE_GENERIC;
+				cred.TargetName = wcURL;
+				cred.CredentialBlobSize = cbOutAuthBuff;
+				cred.CredentialBlob = (LPBYTE) pOutAuthBuff;
+				cred.Persist = CRED_PERSIST_ENTERPRISE;
+				cred.UserName = zwUserName;
+				cred.TargetAlias = wcURL;
+
+				BOOL ok = ::CredWriteW(&cred, 0);
+			}
+		}
+		else 
+		{
+			AfxMessageBox("Error handling credentials");
 		}
 	}
 
@@ -1911,4 +1929,9 @@ void LTDlg::OnBnClickedButtonScreenshotClear()
 	// TODO: Add your control notification handler code here
 
 	o_ThumbnailsCtrl.ClearAllScreenShots();
+}
+
+void LTDlg::OnBnClickedButtonCfgactionRunAlone()
+{
+	// TODO: Add your control notification handler code here
 }

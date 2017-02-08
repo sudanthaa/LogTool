@@ -45,7 +45,7 @@ void LTNewJIRADlg::OnClose()
 BOOL LTNewJIRADlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-
+	o_ComboIssyeType.AddString("Bug");
 	o_ComboIssyeType.AddString("CC-System");
 	o_ComboIssyeType.AddString("Delivery-CR");
 	o_ComboIssyeType.AddString("Delivery-ICR");
@@ -56,6 +56,18 @@ BOOL LTNewJIRADlg::OnInitDialog()
 	
 	o_EditDescription.SetWindowText(s_Description);
 	o_EditSummary.SetWindowText(s_Summary);
+
+
+	for (int i = 0; i < o_ComboIssyeType.GetCount(); i++)
+	{
+		CString s;
+		o_ComboIssyeType.GetLBText(i, s);
+		if (s == s_Type)
+		{
+			o_ComboIssyeType.SetCurSel(i);
+			break;
+		}
+	}
 
 	// TODO:  Add extra initialization here
 

@@ -59,6 +59,7 @@ public:
 	CustomAction*	GetCustomActionAt(UINT ui)	{ return a_CustomActions[ui]; };
 	void	AddCustomAction(CustomAction* pCustomAction);
 	void	RemoveCustomAction(CustomAction* pCustomAction);
+	CustomAction*	FindCustomAction(const char* zCustomAction);
 
 	static LTConfig	o_Inst;
 

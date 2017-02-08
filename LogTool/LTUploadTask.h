@@ -32,9 +32,9 @@ public:
 					CString& sTicket, CString& sErr, LTJiraCredentials* pCred, 
 					const char* zSummary, const char* zDescription);
 	static bool AttachFileToJira( const char* zFile, const char* zFileName, 
-					LTJiraCredentials* pCred, CString& sErr);
+					LTJiraCredentials* pCred, CString& sErr, const char* zTicketID);
 	static bool AttachFileToJira(char* zBuffer, int iBufferSize, 
-					const char* zFileName, LTJiraCredentials* pCred, CString& sErr);
+					const char* zFileName, LTJiraCredentials* pCred, CString& sErr, const char* zTicketID);
 
 	bool	b_CustomCommands;
 	bool	b_DoJiraComment;
